@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulário Ordem de Serviço</title>
+    <title>OS Digital - Agro</title>
     <style>
         :root {
             --bg-page: #09090b;
@@ -15,6 +15,7 @@
             --accent: #06b6d4;
             --accent-glow: rgba(6, 182, 212, 0.3);
             --danger: #ef4444;
+            --success: #10b981;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,404 +24,427 @@
             background-color: var(--bg-page);
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
-            padding: 2rem;
             display: flex;
             justify-content: center;
+            min-height: 100vh;
         }
 
+        /* LOGIN OVERLAY */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(9, 9, 11, 0.95); backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; transition: opacity 0.5s ease;
+        }
+        .login-box {
+            background: var(--bg-card); padding: 2.5rem; border-radius: 16px;
+            border: 1px solid var(--border-color); box-shadow: 0 0 30px var(--accent-glow);
+            width: 100%; max-width: 420px; text-align: center; position: relative;
+        }
+        .login-box h2 { color: var(--accent); margin-bottom: 1.5rem; }
+        .login-box button { margin-top: 1.5rem; width: 100%; padding: 1rem; background: var(--accent); color: #000; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .login-box button:hover { box-shadow: 0 0 15px var(--accent-glow); transform: translateY(-2px); }
+
+        .loader { border: 4px solid var(--border-color); border-top: 4px solid var(--accent); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* CONTAINER PRINCIPAL */
         .container {
             background-color: var(--bg-card);
-            max-width: 1200px;
-            width: 100%;
-            padding: 2.5rem;
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            max-width: 1200px; width: 100%; padding: 2rem;
+            border-radius: 16px; border: 1px solid var(--border-color);
+            margin: 2rem; display: none;
         }
 
         /* HEADER */
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--accent) 0%, #3b82f6 100%);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 1.5rem;
-            color: #fff;
-            box-shadow: 0 0 15px var(--accent-glow);
-        }
-
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--border-color); flex-wrap: wrap; gap: 1rem; }
+        .logo-container { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 48px; height: 48px; background: linear-gradient(135deg, var(--accent) 0%, #3b82f6 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.5rem; color: #fff; box-shadow: 0 0 15px var(--accent-glow); }
         .logo-text { font-weight: 700; font-size: 1.2rem; color: var(--text-main); }
         h1 { font-size: 1.5rem; color: var(--accent); text-align: right; }
 
-        /* SECTIONS & GRIDS */
         .section { margin-bottom: 2rem; }
-        .section-title {
-            font-size: 0.9rem; font-weight: 700; text-transform: uppercase;
-            color: var(--text-muted); margin-bottom: 1rem; padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
+        .section-title { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
         .grid { display: grid; gap: 1.2rem; }
         .grid-2 { grid-template-columns: repeat(2, 1fr); }
         .grid-3 { grid-template-columns: repeat(3, 1fr); }
         .grid-4 { grid-template-columns: repeat(4, 1fr); }
         
-        .flex-group { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
-
-        /* INPUTS */
         .form-group { display: flex; flex-direction: column; gap: 0.4rem; position: relative; }
         label { font-size: 0.85rem; font-weight: 500; color: var(--text-muted); }
         
         input[type="text"], input[type="number"], input[type="date"], textarea, select {
-            width: 100%;
-            background-color: var(--bg-input);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            outline: none;
+            width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-color);
+            color: var(--text-main); padding: 0.75rem; border-radius: 8px; outline: none; font-size: 0.95rem;
         }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        input[readonly] { opacity: 0.7; cursor: not-allowed; }
 
-        input:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-        input:disabled, input[readonly] { opacity: 0.8; cursor: not-allowed; background-color: #212124; }
+        .flex-group { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
+        .checkbox-label { display: flex; align-items: center; gap: 0.6rem; cursor: pointer; font-size: 0.85rem; }
+        input[type="radio"] { appearance: none; background-color: var(--bg-input); width: 1.25rem; height: 1.25rem; border: 1px solid var(--border-color); border-radius: 50%; display: grid; place-content: center; cursor: pointer; }
+        input[type="radio"]::before { content: ""; width: 0.65em; height: 0.65em; border-radius: 50%; transform: scale(0); background-color: var(--accent); transition: 120ms transform; }
+        input[type="radio"]:checked::before { transform: scale(1); }
+        input[type="radio"]:checked { border-color: var(--accent); }
 
-        /* AUTOCOMPLETE DROPDOWN */
+        /* AUTOCOMPLETE */
         .autocomplete-list {
-            position: absolute; top: 100%; left: 0; right: 0; z-index: 99;
-            background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 8px; max-height: 200px; overflow-y: auto; display: none;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            position: absolute; top: 100%; left: 0; right: 0; z-index: 99; background: var(--bg-card);
+            border: 1px solid var(--border-color); border-radius: 8px; max-height: 200px; overflow-y: auto; display: none;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
-        .autocomplete-item { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--bg-input); }
+        .autocomplete-item { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--bg-input); font-size: 0.85rem; }
         .autocomplete-item:hover { background-color: var(--bg-input); color: var(--accent); }
 
-        /* CHECKBOXES */
-        .checkbox-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.8rem; }
-        input[type="checkbox"], input[type="radio"] {
-            appearance: none; background-color: var(--bg-input); margin: 0;
-            width: 1.1rem; height: 1.1rem; border: 1px solid var(--border-color);
-            border-radius: 4px; display: grid; place-content: center; cursor: pointer;
-        }
-        input[type="radio"] { border-radius: 50%; }
-        input[type="checkbox"]::before, input[type="radio"]::before {
-            content: ""; width: 0.55em; height: 0.55em; transform: scale(0);
-            background-color: var(--accent); transition: 120ms transform;
-        }
-        input[type="checkbox"]::before { clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%); }
-        input[type="radio"]::before { border-radius: 50%; }
-        input[type="checkbox"]:checked::before, input[type="radio"]:checked::before { transform: scale(1); }
-        input[type="checkbox"]:checked, input[type="radio"]:checked { border-color: var(--accent); }
-
-        /* TALHOES CONTAINER */
-        .talhoes-container {
-            display: flex; flex-wrap: wrap; gap: 0.5rem;
-            padding: 1rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border-color);
-            min-height: 50px;
-        }
-        .talhao-chip {
-            background: var(--bg-card); border: 1px solid var(--accent); padding: 5px 10px;
-            border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; cursor: pointer;
-        }
+        /* TALHOES CHIPS */
+        .talhoes-container { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 1rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border-color); min-height: 50px; }
+        .talhao-chip { background: var(--bg-card); border: 1px solid var(--accent); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
         .talhao-chip.selected { background: var(--accent); color: #000; font-weight: bold; }
-        .talhao-chip input[type="number"] {
-            width: 60px; padding: 2px 5px; font-size: 0.75rem; border-radius: 4px;
-            background: var(--bg-input); color: #fff; border: 1px solid #fff; display: none;
-        }
+        .talhao-chip input[type="number"] { width: 65px; padding: 2px 4px; font-size: 0.75rem; border-radius: 4px; background: var(--bg-input); color: #fff; display: none; border: 1px solid #fff; }
         .talhao-chip.partial input[type="number"] { display: block; }
-        .btn-partial {
-            background: transparent; border: 1px solid #fff; color: inherit;
-            border-radius: 4px; padding: 2px 5px; font-size: 0.7rem; cursor: pointer;
-        }
-        .talhao-chip.selected .btn-partial { border-color: #000; }
+        .btn-partial { background: transparent; border: 1px solid #fff; color: inherit; border-radius: 4px; padding: 2px 5px; font-size: 0.7rem; cursor: pointer; }
 
-        /* TRATOS CULTURAIS */
-        .tratos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; background-color: var(--bg-input); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); }
-
-        /* TABLES */
+        /* TABELA DE INSUMOS */
         .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
-        th { background-color: var(--bg-input); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; padding: 1rem; text-align: left; border-bottom: 2px solid var(--border-color); }
-        td { padding: 0.5rem; border-bottom: 1px solid var(--border-color); position: relative; }
+        table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; min-width: 600px; }
+        th { background-color: var(--bg-input); color: var(--text-muted); font-size: 0.8rem; padding: 0.8rem; text-align: left; }
+        td { padding: 0.5rem; border-bottom: 1px solid var(--border-color); }
         td input { background-color: transparent !important; border: 1px solid transparent !important; }
         td input:focus { background-color: var(--bg-input) !important; border: 1px solid var(--accent) !important; }
         
-        .btn-add-row {
-            background: var(--bg-input); color: var(--accent); border: 1px dashed var(--accent);
-            padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; margin-top: 10px; font-weight: bold; transition: all 0.2s;
+        .btn-action { background: var(--accent); color: #000; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 1rem; }
+        .btn-action:hover { box-shadow: 0 0 15px var(--accent-glow); }
+        .btn-add-row { background: transparent; color: var(--accent); border: 1px dashed var(--accent); margin-top: 10px; }
+        .btn-remove-row { color: var(--danger); background: none; border: none; font-size: 1.2rem; cursor: pointer; }
+
+        /* MODAL COMPROVANTE */
+        #receipt-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(9, 9, 11, 0.95); display: none; justify-content: center; align-items: center; z-index: 2000;
         }
-        .btn-add-row:hover { background: rgba(6, 182, 212, 0.1); border-style: solid; }
-        .btn-remove-row { color: var(--danger); background: none; border: none; cursor: pointer; font-size: 1.2rem; }
+        .receipt-box { background: var(--bg-card); padding: 2rem; border-radius: 16px; border: 1px solid var(--accent); text-align: center; max-width: 450px; width: 90%; }
+        .receipt-box pre { text-align: left; background: var(--bg-input); padding: 1rem; border-radius: 8px; font-size: 0.85rem; overflow-x: auto; color: var(--success); margin: 1rem 0; white-space: pre-wrap; font-family: monospace; }
 
-        .signatures { margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-color); }
-        .sign-line { border-top: 1px solid var(--border-color); margin-top: 3rem; padding-top: 0.5rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; }
-
-        .disclaimer-box {
-            margin-top: 2rem; padding: 1rem; background: rgba(239, 68, 68, 0.05);
-            border-left: 4px solid var(--danger); border-radius: 4px; font-size: 0.75rem; 
-            color: #d4d4d8; line-height: 1.4;
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .container { margin: 0; border-radius: 0; padding: 1rem; }
+            h1 { text-align: left; margin-top: 1rem; }
         }
-
-        @media (max-width: 900px) { .grid-3, .grid-4, .tratos-grid { grid-template-columns: repeat(2, 1fr); } h1 { font-size: 1.2rem; } }
-        @media (max-width: 600px) { .grid-2, .grid-3, .grid-4, .tratos-grid { grid-template-columns: 1fr; } .header { flex-direction: column; align-items: flex-start; gap: 1rem; } h1 { margin-left: 0; text-align: left; } }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen">
+        <div class="login-box">
+            <div class="logo-icon" style="margin: 0 auto 1rem auto; width: 64px; height: 64px; font-size: 2rem;">A</div>
+            <h2>Acesso do Solicitante</h2>
+            <div class="form-group" style="text-align: left;">
+                <label>Selecione seu Nome/Crachá</label>
+                <input type="text" id="login-user" placeholder="Digite seu nome ou crachá..." autocomplete="off">
+                <div id="login-autocomplete" class="autocomplete-list"></div>
+            </div>
+            <button onclick="realizarLogin()">ENTRAR NO SISTEMA</button>
+            <div id="login-loader" class="loader" style="margin-top: 1rem;"></div>
+            <p id="login-error" style="color: var(--danger); margin-top: 1rem; display: none; font-size: 0.85rem;">Selecione um solicitante válido da lista.</p>
+        </div>
+    </div>
+
+    <!-- MODAL COMPROVANTE WHATSAPP -->
+    <div id="receipt-modal">
+        <div class="receipt-box">
+            <h2 style="color: var(--success);">OS Lançada no Sheets!</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">Resumo da Ordem de Serviço:</p>
+            <pre id="receipt-content"></pre>
+            <button class="btn-action" style="background: #25D366; color: white;" onclick="enviarWhatsApp()">
+                📱 Enviar pelo WhatsApp
+            </button>
+            <button class="btn-action" style="background: transparent; border: 1px solid var(--border-color); color: white; margin-top: 0.5rem;" onclick="location.reload()">
+                Nova Solicitação
+            </button>
+        </div>
+    </div>
+
+    <!-- FORMULÁRIO PRINCIPAL -->
+    <div class="container" id="main-app">
         <div class="header">
             <div class="logo-container">
-                <div class="logo-icon">C</div>
-                <div class="logo-text">CLEALCO<br><span style="font-size: 0.7rem; font-weight: normal;">AGRO SYSTEMS</span></div>
+                <div class="logo-icon">A</div>
+                <div class="logo-text">AGRO<br>SYSTEMS</div>
             </div>
-            <h1>Formulário Ordem de Serviço</h1>
+            <h1>Ordem de Serviço Agrícola</h1>
         </div>
 
-        <form>
-            <!-- SEÇÃO 1: DADOS GERAIS -->
+        <form id="os-form">
+            <!-- SEÇÃO 1: CABEÇALHO DA OS -->
             <div class="section">
-                
-                <div class="grid grid-3" style="margin-bottom: 1.2rem;">
+                <div class="grid grid-3">
                     <div class="form-group">
                         <label>Tipo de Solicitação</label>
-                        <div class="flex-group" style="padding-top: 0.5rem;">
-                            <label class="checkbox-label"><input type="radio" name="tipo_solicitacao" value="Abertura"> Abertura</label>
-                            <label class="checkbox-label"><input type="radio" name="tipo_solicitacao" value="Apontamento"> Apontamento</label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>FA / Descrição (Digite o Fundo para buscar)</label>
-                        <input type="text" id="fundo-input" placeholder="Ex: 501 ou St. Ines" autocomplete="off">
-                        <div id="fundo-autocomplete" class="autocomplete-list"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>Descrição Preenchida</label>
-                        <input type="text" id="descricao-input" readonly>
-                    </div>
-                </div>
-
-                <div class="grid grid-4" style="margin-bottom: 1.2rem;">
-                    <div class="form-group">
-                        <label>Data de Execução</label>
-                        <input type="date">
-                    </div>
-                    <div class="form-group">
-                        <label>Data Prev. de Encerramento</label>
-                        <input type="date">
-                    </div>
-                    <div class="form-group">
-                        <label>PEA</label>
-                        <input type="text" placeholder="Código PEA">
-                    </div>
-                    <div class="form-group">
-                        <label>Área (ha) Total Selecionada</label>
-                        <input type="number" id="area-total" step="0.01" readonly value="0.00" style="color: var(--accent); font-weight: bold;">
-                    </div>
-                </div>
-
-                <div class="grid grid-3" style="margin-bottom: 1.2rem;">
-                    <div class="form-group">
-                        <label>Tipo de Fazenda</label>
-                        <input type="text" id="tipo-fazenda-input" readonly placeholder="Preenchido via Fundo">
-                    </div>
-                    <div class="form-group">
-                        <label>Zona</label>
-                        <input type="text" id="zona-input" readonly>
+                        <select id="tipo-solicitacao">
+                            <option value="ABERTURA">ABERTURA</option>
+                            <option value="APONTAMENTO">APONTAMENTO</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Encerrar OS?</label>
-                        <div class="flex-group" style="padding-top: 0.5rem;">
-                            <label class="checkbox-label"><input type="radio" name="encerrar_os" value="Sim"> Sim</label>
-                            <label class="checkbox-label"><input type="radio" name="encerrar_os" value="Não"> Não</label>
-                        </div>
+                        <select id="encerrar-os">
+                            <option value="NÃO">NÃO</option>
+                            <option value="SIM">SIM</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Data de Execução</label>
+                        <input type="date" id="data-execucao" required>
                     </div>
                 </div>
-                
-                <div class="form-group" style="margin-bottom: 1.2rem;">
-                    <label>Talhões Realizados (Selecione ou clique em Parcial)</label>
-                    <div class="talhoes-container" id="talhoes-container">
-                        <span class="text-muted" style="font-size: 0.85rem; color: #a1a1aa;">Selecione uma FA / Fundo Agrícola primeiro.</span>
+            </div>
+
+            <!-- SEÇÃO 2: DADOS DA FAZENDA E TALHÕES -->
+            <div class="section">
+                <div class="section-title">Localização e Área (Aba TALHAO)</div>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label>Fazenda / Descrição (Digite o código ou nome)</label>
+                        <input type="text" id="fundo-input" placeholder="Ex: 100862 ou VALE FORMOSO" autocomplete="off">
+                        <div id="fundo-autocomplete" class="autocomplete-list"></div>
+                    </div>
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label>Zona</label>
+                            <input type="text" id="zona-input" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>PEA</label>
+                            <input type="text" id="pea-input" placeholder="Opcional">
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-3">
-                    <div class="form-group">
-                        <label>Equipamento</label>
-                        <div class="flex-group" style="padding-top: 0.5rem;">
-                            <label class="checkbox-label"><input type="radio" name="equipamento"> Equip. Terceiro</label>
-                            <label class="checkbox-label"><input type="radio" name="equipamento"> Equip. Próprio</label>
-                        </div>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label>Talhões Disponíveis (Clique para alternar / botão 'Parcial' para editar área)</label>
+                    <div class="talhoes-container" id="talhoes-container">
+                        <span class="text-muted" style="font-size: 0.85rem;">Selecione uma Fazenda acima primeiro.</span>
                     </div>
+                </div>
+
+                <div class="grid grid-2" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label>Área Total Selecionada (ha)</label>
+                        <input type="number" id="area-total" readonly value="0.00" style="font-weight: bold; color: var(--accent);">
+                    </div>
+                    <div class="form-group">
+                        <label>Data Previsão Encerramento</label>
+                        <input type="date" id="data-previsao">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEÇÃO 3: OPERAÇÃO E FROTA -->
+            <div class="section">
+                <div class="section-title">Centro de Custo e Equipamentos</div>
+                <div class="grid grid-2">
                     <div class="form-group">
                         <label>Centro de Custo</label>
+                        <select id="centro-custo">
+                            <option value="">Aguardando dados da planilha...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Operação Disponível</label>
+                        <select id="operacao">
+                            <option value="">Selecione o Centro de Custo primeiro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-2" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label>Equipamento / Frota (Aba EQUIPAMENTOS)</label>
+                        <input type="text" id="frota-input" placeholder="Digite o código ou nome do equipamento..." autocomplete="off">
+                        <div id="frota-autocomplete" class="autocomplete-list"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Propriedade do Equipamento</label>
                         <div class="flex-group" style="padding-top: 0.5rem;">
-                            <label class="checkbox-label"><input type="radio" name="centro_custo"> 260101-CANA SOCA</label>
-                            <label class="checkbox-label"><input type="radio" name="centro_custo"> 250301-CANA PLANTA</label>
-                            <label class="checkbox-label"><input type="radio" name="centro_custo"> 250101-PREPARO DE SOLO</label>
+                            <label class="checkbox-label"><input type="radio" name="equip_prop" value="TERCEIRO"> Terceiro</label>
+                            <label class="checkbox-label"><input type="radio" name="equip_prop" value="PRÓPRIO" id="prop-proprio" checked> Próprio</label>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Código de Frotas</label>
-                        <input type="text" placeholder="Digite a frota">
-                    </div>
                 </div>
             </div>
 
-            <!-- SEÇÃO 2: OPERAÇÃO (TRATOS) -->
+            <!-- SEÇÃO 4: PRODUTOS / INSUMOS -->
             <div class="section">
-                <div class="section-title">Operação</div>
-                <div class="tratos-grid">
-                    <div class="form-group">
-                        <label class="checkbox-label"><input type="checkbox"> 1046-1 APLIC MEC HERB PRE</label>
-                        <label class="checkbox-label"><input type="checkbox"> 1047-2 APLIC MEC HERB PRE</label>
-                        <label class="checkbox-label"><input type="checkbox"> 1001-1 APLIC DESSEC QUIMICA</label>
-                    </div>
-                    <div class="form-group">
-                        <label class="checkbox-label"><input type="checkbox"> 1049-1 APLIC MEC HERB BORD</label>
-                        <label class="checkbox-label"><input type="checkbox"> 1051-1 APLIC MEC HERB CARREAD</label>
-                        <label class="checkbox-label"><input type="checkbox"> 1002-2 APLIC DESSEC QUIMICA</label>
-                    </div>
-                    <div class="form-group">
-                        <label class="checkbox-label"><input type="checkbox"> 1067-1 APLIC MEC HERB CURVAS</label>
-                        <label class="checkbox-label"><input type="checkbox"> 1012-1 APLIC HERB PRE PLANTIO</label>
-                        <label class="checkbox-label"><input type="checkbox"> 1013-2 APLIC HERB PRE PLANTIO</label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SEÇÃO 3: PRODUTOS / TABELA -->
-            <div class="section">
-                <div class="section-title">Produtos Utilizados / A Utilizar (Cálculo Automático)</div>
+                <div class="section-title">Insumos Aplicados (Aba INSUMOS - Cálculo Automático)</div>
                 <div class="table-responsive">
                     <table id="produtos-table">
                         <thead>
                             <tr>
-                                <th style="width: 15%">Cód. Produto</th>
+                                <th style="width: 20%">Cód. Insumo</th>
                                 <th style="width: 35%">Descrição</th>
-                                <th style="width: 10%">UN.</th>
-                                <th style="width: 15%">Dosagem (ha)</th>
-                                <th style="width: 15%">Total Aplicado</th>
+                                <th style="width: 10%">UN</th>
+                                <th style="width: 15%">Dosagem / ha</th>
+                                <th style="width: 15%">Qtd. Total</th>
                                 <th style="width: 5%"></th>
                             </tr>
                         </thead>
                         <tbody id="produtos-tbody">
-                            <!-- Linhas inseridas por JS -->
                         </tbody>
                     </table>
                 </div>
-                <button type="button" class="btn-add-row" onclick="adicionarLinhaProduto()">+ Adicionar Produto</button>
+                <button type="button" class="btn-action btn-add-row" onclick="adicionarLinhaProduto()">+ Adicionar Insumo</button>
             </div>
 
-            <!-- SEÇÃO 4: OBSERVAÇÕES -->
+            <!-- SEÇÃO 5: OBSERVAÇÕES E SOLICITANTE -->
             <div class="section">
-                <div class="section-title">Observações</div>
-                <textarea rows="3" placeholder="Insira as observações aqui..."></textarea>
-            </div>
-
-            <!-- SEÇÃO 5: ASSINATURAS -->
-            <div class="signatures">
-                <div class="grid grid-2" style="margin-bottom: 1rem;">
-                    <div class="form-group">
-                        <input type="text" placeholder="Nome / Assinatura do Prestador">
-                        <div class="sign-line">Prestador</div>
-                    </div>
-                    <div class="form-group">
-                        <input type="text" placeholder="Nome / Assinatura do Carreador">
-                        <div class="sign-line">Carreador</div>
-                    </div>
-                </div>
-
-                <div class="section-title" style="text-align: center; border-bottom: none; margin-top: 2rem;">Solicitante</div>
+                <div class="section-title">Finalização</div>
                 <div class="grid grid-2">
                     <div class="form-group">
-                        <label>Crachá</label>
-                        <input type="text">
+                        <label>Observações</label>
+                        <textarea id="observacoes" rows="3" placeholder="Insira observações do campo..."></textarea>
                     </div>
-                    <div class="form-group">
-                        <label>Assinatura</label>
-                        <input type="text">
+                    <div class="form-group" style="justify-content: flex-end;">
+                        <label>Solicitante Logado</label>
+                        <input type="text" id="solicitante" readonly style="font-weight: bold;">
                     </div>
                 </div>
             </div>
 
-            <div class="disclaimer-box">
-                <strong>ATENÇÃO:</strong> PREENCHER INTEGRALMENTE OS FORMULÁRIOS (VALOR DO CARREADOR, FROTAS, CÓDIGO DOS INSUMOS E DOSAGENS). É OBRIGATÓRIO REGISTRAR DIARIAMENTE AS ÁREAS REALIZADAS E INSUMOS UTILIZADOS ATÉ AS 00H PARA GARANTIR A VISÃO D-1 (OPERAÇÕES DO DIA ANTERIOR LANÇADAS NO SISTEMA NO DIA SEGUINTE).
-            </div>
-
+            <button type="button" class="btn-action" onclick="enviarDados()" id="btn-submit">🚀 SALVAR EM 'DB - LANCAMENTO'</button>
+            <div id="submit-loader" class="loader" style="margin-top: 1rem;"></div>
         </form>
     </div>
 
-    <!-- SCRIPT DE LÓGICA DE DADOS MOCKADOS E CÁLCULOS -->
     <script>
-        // --- SIMULAÇÃO DE CSVs ---
-        
-        // CSV FAZENDAS (Mock)
-        const csvFazendas = [
-            { id: '501', descricao: 'St. Ines', zona: '1', tipo: 'F.A PRÓPRIA', 
-              talhoes: [
-                  { num: '10', area: 30.5 }, { num: '11', area: 25.0 }, { num: '12', area: 40.0 }, 
-                  { num: '13', area: 35.5 }, { num: '14', area: 20.0 }, { num: '15', area: 50.0 },
-                  { num: '16', area: 22.5 }, { num: '18', area: 15.0 }, { num: '19', area: 45.0 },
-                  { num: '20', area: 10.0 }, { num: '21', area: 30.0 }
-              ] 
-            },
-            { id: '502', descricao: 'Boa Esperança', zona: '2', tipo: 'F.A TERCEIRO', 
-              talhoes: [{ num: '01', area: 50.0 }, { num: '02', area: 60.0 }] 
+        const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQZWlJ8xGg-VqRLvWWPuowCQ2QUJg-CEXjW8oM_tEo7fqVsGOov2UZxU85snQtvyLp/exec';
+
+        let dbSolicitantes = [];
+        let dbFazendas = [];
+        let dbInsumos = [];
+        let dbEquipamentos = [];
+        let dbOperacoes = [];
+        let usuarioLogado = "";
+
+        // Inicialização
+        window.addEventListener('DOMContentLoaded', async () => {
+            await carregarDadosIniciais();
+            document.getElementById('data-execucao').valueAsDate = new Date();
+        });
+
+        async function carregarDadosIniciais() {
+            try {
+                const response = await fetch(`${APPSCRIPT_URL}?action=init`);
+                const res = await response.json();
+                
+                if (res.success) {
+                    dbSolicitantes = res.dados.solicitantes || [];
+                    dbFazendas = res.dados.fazendas || [];
+                    dbInsumos = res.dados.insumos || [];
+                    dbEquipamentos = res.dados.equipamentos || [];
+                    dbOperacoes = res.dados.operacoes || [];
+
+                    configurarLoginAutocomplete();
+                    popularCentrosDeCusto();
+                } else {
+                    alert('Erro ao carregar banco de dados da planilha.');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Erro de conexão com o Google Sheets.');
             }
-        ];
+        }
 
-        // CSV PRODUTOS (Mock)
-        const csvProdutos = [
-            { codigo: '2000138', descricao: 'Bifentrina', embalagem: 'L' },
-            { codigo: '2000509', descricao: 'Zinco', embalagem: 'L' },
-            { codigo: '2000551', descricao: 'Furadan', embalagem: 'L' },
-            { codigo: '3000100', descricao: 'Adubo NK', embalagem: 'KG' }
-        ];
+        // AUTOCOMPLETE LOGIN SOLICITANTE
+        function configurarLoginAutocomplete() {
+            const input = document.getElementById('login-user');
+            const list = document.getElementById('login-autocomplete');
 
-        // --- LÓGICA DE FUNDO AGRÍCOLA ---
-        const inputFundo = document.getElementById('fundo-input');
-        const listFundo = document.getElementById('fundo-autocomplete');
-        const inputDescricao = document.getElementById('descricao-input');
-        const inputZona = document.getElementById('zona-input');
-        const inputTipoFazenda = document.getElementById('tipo-fazenda-input');
-        const containerTalhoes = document.getElementById('talhoes-container');
-        const inputAreaTotal = document.getElementById('area-total');
+            input.addEventListener('input', function() {
+                const val = this.value.toLowerCase();
+                list.innerHTML = '';
+                if (!val) { list.style.display = 'none'; return; }
 
+                const filtrados = dbSolicitantes.filter(s => s.toLowerCase().includes(val));
+                if (filtrados.length > 0) {
+                    list.style.display = 'block';
+                    filtrados.forEach(s => {
+                        const div = document.createElement('div');
+                        div.className = 'autocomplete-item';
+                        div.innerText = s;
+                        div.addEventListener('click', () => {
+                            input.value = s;
+                            list.style.display = 'none';
+                        });
+                        list.appendChild(div);
+                    });
+                } else {
+                    list.style.display = 'none';
+                }
+            });
+        }
+
+        function realizarLogin() {
+            const user = document.getElementById('login-user').value.trim();
+            if (!user) {
+                document.getElementById('login-error').style.display = 'block';
+                return;
+            }
+
+            usuarioLogado = user;
+            document.getElementById('solicitante').value = user;
+            document.getElementById('login-screen').style.opacity = '0';
+            
+            setTimeout(() => {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+            }, 500);
+
+            adicionarLinhaProduto();
+        }
+
+        // CENTRO DE CUSTO -> OPERAÇÕES
+        function popularCentrosDeCusto() {
+            const selectCC = document.getElementById('centro-custo');
+            selectCC.innerHTML = '<option value="">Selecione o Centro de Custo...</option>';
+            
+            // Pega Centros de Custo Únicos
+            const ccs = [...new Set(dbOperacoes.map(o => o.centroCusto))].filter(Boolean);
+            ccs.forEach(cc => {
+                selectCC.innerHTML += `<option value="${cc}">${cc}</option>`;
+            });
+
+            selectCC.addEventListener('change', function() {
+                const opSelect = document.getElementById('operacao');
+                opSelect.innerHTML = '<option value="">Selecione a Operação...</option>';
+                
+                const opsFiltradas = dbOperacoes.filter(o => o.centroCusto === this.value);
+                const opsUnicas = [...new Set(opsFiltradas.map(o => o.operacao))].filter(Boolean);
+                
+                opsUnicas.forEach(op => {
+                    opSelect.innerHTML += `<option value="${op}">${op}</option>`;
+                });
+            });
+        }
+
+        // FAZENDAS E TALHÕES
         let fazendaSelecionada = null;
         let talhoesAtivos = [];
+
+        const inputFundo = document.getElementById('fundo-input');
+        const listFundo = document.getElementById('fundo-autocomplete');
 
         inputFundo.addEventListener('input', function() {
             const val = this.value.toLowerCase();
             listFundo.innerHTML = '';
-            if (!val) { listFundo.style.display = 'none'; limparCamposFazenda(); return; }
+            if (!val) { listFundo.style.display = 'none'; return; }
 
-            const filtrados = csvFazendas.filter(f => f.id.includes(val) || f.descricao.toLowerCase().includes(val));
-            
+            const filtrados = dbFazendas.filter(f => f.descricao.toLowerCase().includes(val));
             if (filtrados.length > 0) {
                 listFundo.style.display = 'block';
                 filtrados.forEach(f => {
                     const div = document.createElement('div');
                     div.className = 'autocomplete-item';
-                    div.innerHTML = `<strong>${f.id}</strong> - ${f.descricao}`;
+                    div.innerHTML = `<strong>${f.codigo}</strong> - ${f.nome}`;
                     div.addEventListener('click', () => selecionarFazenda(f));
                     listFundo.appendChild(div);
                 });
@@ -429,44 +453,33 @@
             }
         });
 
-        function selecionarFazenda(fazenda) {
-            fazendaSelecionada = fazenda;
-            inputFundo.value = fazenda.id;
-            inputDescricao.value = fazenda.descricao;
-            inputZona.value = fazenda.zona;
-            inputTipoFazenda.value = fazenda.tipo;
+        function selecionarFazenda(f) {
+            fazendaSelecionada = f;
+            inputFundo.value = f.descricao;
+            document.getElementById('zona-input').value = f.zona || "";
             listFundo.style.display = 'none';
             renderizarTalhoes();
         }
 
-        function limparCamposFazenda() {
-            fazendaSelecionada = null;
-            inputDescricao.value = '';
-            inputZona.value = '';
-            inputTipoFazenda.value = '';
-            containerTalhoes.innerHTML = '<span class="text-muted" style="font-size: 0.85rem; color: #a1a1aa;">Selecione uma FA / Fundo Agrícola primeiro.</span>';
-            calcularAreaTotal();
-        }
-
-        // --- LÓGICA DE TALHÕES ---
         function renderizarTalhoes() {
-            containerTalhoes.innerHTML = '';
+            const container = document.getElementById('talhoes-container');
+            container.innerHTML = '';
+            
             talhoesAtivos = fazendaSelecionada.talhoes.map(t => ({
-                num: t.num,
+                num: t.talhao,
                 areaOriginal: t.area,
                 areaParcial: t.area,
                 isParcial: false,
                 selected: true
             }));
 
-            talhoesAtivos.forEach((t, index) => {
+            talhoesAtivos.forEach(t => {
                 const chip = document.createElement('div');
-                chip.className = `talhao-chip ${t.selected ? 'selected' : ''}`;
-                
+                chip.className = `talhao-chip selected`;
                 chip.innerHTML = `
-                    <span class="talhao-num">T-${t.num}</span>
-                    <button type="button" class="btn-partial" title="Definir área parcial">Parcial</button>
-                    <input type="number" step="0.01" value="${t.areaParcial}" max="${t.areaOriginal}">
+                    <span class="talhao-num">Talhão ${t.num} (${t.areaOriginal}ha)</span>
+                    <button type="button" class="btn-partial">Parcial</button>
+                    <input type="number" step="0.01" value="${t.areaParcial}">
                 `;
 
                 chip.querySelector('.talhao-num').addEventListener('click', () => {
@@ -475,156 +488,214 @@
                     calcularAreaTotal();
                 });
 
-                const btnPartial = chip.querySelector('.btn-partial');
-                const inputParcial = chip.querySelector('input');
+                const btn = chip.querySelector('.btn-partial');
+                const inp = chip.querySelector('input');
 
-                btnPartial.addEventListener('click', (e) => {
+                btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     t.isParcial = !t.isParcial;
                     chip.classList.toggle('partial', t.isParcial);
-                    if (!t.selected) {
-                        t.selected = true;
-                        chip.classList.add('selected');
-                    }
-                    if(t.isParcial) { inputParcial.focus(); }
-                    else { t.areaParcial = t.areaOriginal; inputParcial.value = t.areaOriginal; calcularAreaTotal(); }
+                    if (!t.selected) { t.selected = true; chip.classList.add('selected'); }
+                    if (t.isParcial) { inp.focus(); } 
+                    else { t.areaParcial = t.areaOriginal; inp.value = t.areaOriginal; calcularAreaTotal(); }
                 });
 
-                inputParcial.addEventListener('input', (e) => {
-                    let val = parseFloat(e.target.value);
-                    if (isNaN(val) || val < 0) val = 0;
+                inp.addEventListener('input', (e) => {
+                    let val = parseFloat(e.target.value) || 0;
                     if (val > t.areaOriginal) val = t.areaOriginal;
                     t.areaParcial = val;
                     calcularAreaTotal();
                 });
 
-                containerTalhoes.appendChild(chip);
+                container.appendChild(chip);
             });
             calcularAreaTotal();
         }
 
         function calcularAreaTotal() {
-            if (!fazendaSelecionada) {
-                inputAreaTotal.value = "0.00";
-                recalcularProdutos();
-                return;
-            }
-            
             let total = 0;
-            talhoesAtivos.forEach(t => {
-                if (t.selected) {
-                    total += t.isParcial ? parseFloat(t.areaParcial) : parseFloat(t.areaOriginal);
-                }
-            });
-            inputAreaTotal.value = total.toFixed(2);
+            talhoesAtivos.forEach(t => { if (t.selected) total += parseFloat(t.areaParcial); });
+            document.getElementById('area-total').value = total.toFixed(2);
             recalcularProdutos();
         }
 
-        // --- LÓGICA DE PRODUTOS ---
+        // EQUIPAMENTOS
+        const inputFrota = document.getElementById('frota-input');
+        const listFrota = document.getElementById('frota-autocomplete');
+
+        inputFrota.addEventListener('input', function() {
+            const val = this.value.toLowerCase();
+            listFrota.innerHTML = '';
+            if (!val) { listFrota.style.display = 'none'; return; }
+
+            const filtrados = dbEquipamentos.filter(e => e.nome.toLowerCase().includes(val));
+            if (filtrados.length > 0) {
+                listFrota.style.display = 'block';
+                filtrados.forEach(e => {
+                    const div = document.createElement('div');
+                    div.className = 'autocomplete-item';
+                    div.innerHTML = `<strong>${e.nome}</strong> (${e.propriedade})`;
+                    div.addEventListener('click', () => {
+                        inputFrota.value = e.nome;
+                        const radios = document.getElementsByName('equip_prop');
+                        radios.forEach(r => r.checked = (r.value === e.propriedade));
+                        listFrota.style.display = 'none';
+                    });
+                    listFrota.appendChild(div);
+                });
+            } else {
+                listFrota.style.display = 'none';
+            }
+        });
+
+        // INSUMOS
         const tbodyProdutos = document.getElementById('produtos-tbody');
-        
-        function criarLinhaProduto() {
+
+        function adicionarLinhaProduto() {
             const tr = document.createElement('tr');
-            
             tr.innerHTML = `
                 <td>
-                    <input type="text" class="prod-codigo" placeholder="Cód..." autocomplete="off">
-                    <div class="autocomplete-list list-codigo"></div>
+                    <input type="text" class="prod-cod" placeholder="Digite cód ou nome..." autocomplete="off">
+                    <div class="autocomplete-list list-cod"></div>
                 </td>
-                <td>
-                    <input type="text" class="prod-desc" placeholder="Nome..." autocomplete="off">
-                    <div class="autocomplete-list list-desc"></div>
-                </td>
-                <td><input type="text" class="prod-emb" placeholder="UN"></td>
-                <td><input type="number" step="0.001" class="prod-dosagem" placeholder="0.0"></td>
+                <td><input type="text" class="prod-desc" readonly></td>
+                <td><input type="text" class="prod-un" readonly style="width: 50px;"></td>
+                <td><input type="number" step="0.001" class="prod-dose" placeholder="0.00"></td>
                 <td><input type="number" step="0.01" class="prod-total" readonly placeholder="0.00"></td>
                 <td style="text-align: center;"><button type="button" class="btn-remove-row">×</button></td>
             `;
 
-            const inCod = tr.querySelector('.prod-codigo');
-            const listCod = tr.querySelector('.list-codigo');
-            const inDesc = tr.querySelector('.prod-desc');
-            const listDesc = tr.querySelector('.list-desc');
-            const inEmb = tr.querySelector('.prod-emb');
-            const inDosagem = tr.querySelector('.prod-dosagem');
-            const inTotal = tr.querySelector('.prod-total');
-            const btnRemove = tr.querySelector('.btn-remove-row');
+            const inCod = tr.querySelector('.prod-cod');
+            const listCod = tr.querySelector('.list-cod');
+            const inDose = tr.querySelector('.prod-dose');
 
             inCod.addEventListener('input', function() {
-                const val = this.value;
+                const val = this.value.toLowerCase();
                 listCod.innerHTML = '';
                 if (!val) { listCod.style.display = 'none'; return; }
-                const filtrados = csvProdutos.filter(p => p.codigo.includes(val));
-                renderizarAutocompleteProdutos(filtrados, listCod, tr);
-            });
 
-            inDesc.addEventListener('input', function() {
-                const val = this.value.toLowerCase();
-                listDesc.innerHTML = '';
-                if (!val) { listDesc.style.display = 'none'; return; }
-                const filtrados = csvProdutos.filter(p => p.descricao.toLowerCase().includes(val));
-                renderizarAutocompleteProdutos(filtrados, listDesc, tr);
-            });
-
-            document.addEventListener('click', (e) => {
-                if(e.target !== inCod) listCod.style.display = 'none';
-                if(e.target !== inDesc) listDesc.style.display = 'none';
-            });
-
-            inDosagem.addEventListener('input', () => {
-                calcularTotalLinha(inDosagem, inTotal);
-            });
-
-            btnRemove.addEventListener('click', () => {
-                tr.remove();
-            });
-
-            return tr;
-        }
-
-        function renderizarAutocompleteProdutos(filtrados, listElement, trRow) {
-            if (filtrados.length > 0) {
-                listElement.style.display = 'block';
-                filtrados.forEach(p => {
-                    const div = document.createElement('div');
-                    div.className = 'autocomplete-item';
-                    div.innerHTML = `<strong>${p.codigo}</strong> - ${p.descricao}`;
-                    div.addEventListener('click', () => {
-                        trRow.querySelector('.prod-codigo').value = p.codigo;
-                        trRow.querySelector('.prod-desc').value = p.descricao;
-                        trRow.querySelector('.prod-emb').value = p.embalagem;
-                        listElement.style.display = 'none';
+                const filtrados = dbInsumos.filter(p => p.full.toLowerCase().includes(val));
+                if (filtrados.length > 0) {
+                    listCod.style.display = 'block';
+                    filtrados.forEach(p => {
+                        const div = document.createElement('div');
+                        div.className = 'autocomplete-item';
+                        div.innerHTML = `<strong>${p.cod}</strong> - ${p.desc} (${p.un})`;
+                        div.addEventListener('click', () => {
+                            tr.querySelector('.prod-cod').value = p.cod;
+                            tr.querySelector('.prod-desc').value = p.desc;
+                            tr.querySelector('.prod-un').value = p.un;
+                            listCod.style.display = 'none';
+                        });
+                        listCod.appendChild(div);
                     });
-                    listElement.appendChild(div);
-                });
-            } else {
-                listElement.style.display = 'none';
-            }
-        }
+                } else {
+                    listCod.style.display = 'none';
+                }
+            });
 
-        function adicionarLinhaProduto() {
-            tbodyProdutos.appendChild(criarLinhaProduto());
-        }
-
-        function calcularTotalLinha(inputDosagem, inputTotal) {
-            const dosagem = parseFloat(inputDosagem.value) || 0;
-            const area = parseFloat(inputAreaTotal.value) || 0;
-            inputTotal.value = (dosagem * area).toFixed(2);
+            inDose.addEventListener('input', recalcularProdutos);
+            tr.querySelector('.btn-remove-row').addEventListener('click', () => { tr.remove(); recalcularProdutos(); });
+            tbodyProdutos.appendChild(tr);
         }
 
         function recalcularProdutos() {
-            const linhas = tbodyProdutos.querySelectorAll('tr');
-            linhas.forEach(tr => {
-                const inDosagem = tr.querySelector('.prod-dosagem');
-                const inTotal = tr.querySelector('.prod-total');
-                if(inDosagem && inTotal) {
-                    calcularTotalLinha(inDosagem, inTotal);
-                }
+            const area = parseFloat(document.getElementById('area-total').value) || 0;
+            tbodyProdutos.querySelectorAll('tr').forEach(tr => {
+                const dose = parseFloat(tr.querySelector('.prod-dose').value) || 0;
+                tr.querySelector('.prod-total').value = (dose * area).toFixed(2);
             });
         }
 
-        for(let i=0; i<3; i++) adicionarLinhaProduto();
+        document.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('prod-cod')) document.querySelectorAll('.list-cod').forEach(el => el.style.display = 'none');
+            if (e.target !== inputFundo) listFundo.style.display = 'none';
+            if (e.target !== inputFrota) listFrota.style.display = 'none';
+            if (e.target !== document.getElementById('login-user')) document.getElementById('login-autocomplete').style.display = 'none';
+        });
 
+        // SALVAR DADOS
+        async function enviarDados() {
+            const btn = document.getElementById('btn-submit');
+            const loader = document.getElementById('submit-loader');
+
+            const payload = {
+                tipo_solicitacao: document.getElementById('tipo-solicitacao').value,
+                encerrar_os: document.getElementById('encerrar-os').value,
+                data_execucao: document.getElementById('data-execucao').value,
+                data_previsao: document.getElementById('data-previsao').value,
+                fazenda: document.getElementById('fundo-input').value,
+                pea: document.getElementById('pea-input').value,
+                zona: document.getElementById('zona-input').value,
+                area_total: document.getElementById('area-total').value,
+                centro_custo: document.getElementById('centro-custo').value,
+                operacao: document.getElementById('operacao').value,
+                frota: document.getElementById('frota-input').value,
+                tipo_equip: document.querySelector('input[name="equip_prop"]:checked').value,
+                observacoes: document.getElementById('observacoes').value,
+                solicitante: document.getElementById('solicitante').value,
+                talhoes: talhoesAtivos.filter(t => t.selected).map(t => `T${t.num}(${t.areaParcial}ha)`).join(', '),
+                produtos: []
+            };
+
+            tbodyProdutos.querySelectorAll('tr').forEach(tr => {
+                const cod = tr.querySelector('.prod-cod').value;
+                if (cod) {
+                    payload.produtos.push({
+                        cod: cod,
+                        desc: tr.querySelector('.prod-desc').value,
+                        un: tr.querySelector('.prod-un').value,
+                        dose: tr.querySelector('.prod-dose').value,
+                        total: tr.querySelector('.prod-total').value
+                    });
+                }
+            });
+
+            btn.style.display = 'none';
+            loader.style.display = 'block';
+
+            try {
+                await fetch(APPSCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                
+                gerarComprovanteWhatsApp(payload);
+            } catch (err) {
+                alert('Erro ao enviar dados para a planilha.');
+                btn.style.display = 'block';
+                loader.style.display = 'none';
+                console.error(err);
+            }
+        }
+
+        let linkWhatsApp = "";
+
+        function gerarComprovanteWhatsApp(p) {
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('receipt-modal').style.display = 'flex';
+
+            let texto = `*ORDEM DE SERVIÇO CONFIRMADA* 🚜\n\n`;
+            texto += `*Fazenda:* ${p.fazenda}\n`;
+            texto += `*Centro de Custo:* ${p.centro_custo}\n`;
+            texto += `*Operação:* ${p.operacao}\n`;
+            texto += `*Área Total:* ${p.area_total} ha\n`;
+            texto += `*Talhões:* ${p.talhoes}\n`;
+            texto += `*Equipamento:* ${p.frota} (${p.tipo_equip})\n\n`;
+            texto += `*🌱 INSUMOS APLICADOS:*\n`;
+            p.produtos.forEach(prod => {
+                texto += `▪ ${prod.desc}: *${prod.total} ${prod.un}*\n`;
+            });
+            texto += `\n*Solicitante:* ${p.solicitante}`;
+
+            document.getElementById('receipt-content').innerText = texto;
+            linkWhatsApp = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+        }
+
+        function enviarWhatsApp() {
+            window.open(linkWhatsApp, '_blank');
+        }
     </script>
 </body>
 </html>
