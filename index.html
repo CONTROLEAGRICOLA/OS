@@ -29,21 +29,25 @@
             min-height: 100vh;
         }
 
-        /* LOGIN OVERLAY */
-        #login-screen {
+        /* OVERLAY LOGIN E PROGRAMAÇÃO */
+        #login-screen, #prog-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(9, 9, 11, 0.95); backdrop-filter: blur(10px);
             display: flex; justify-content: center; align-items: center;
             z-index: 1000; transition: opacity 0.5s ease;
         }
-        .login-box {
+        .modal-box {
             background: var(--bg-card); padding: 2.5rem; border-radius: 16px;
             border: 1px solid var(--border-color); box-shadow: 0 0 30px var(--accent-glow);
-            width: 100%; max-width: 420px; text-align: center; position: relative;
+            width: 100%; max-width: 450px; text-align: center; position: relative;
         }
-        .login-box h2 { color: var(--accent); margin-bottom: 1.5rem; }
-        .login-box button { margin-top: 1.5rem; width: 100%; padding: 1rem; background: var(--accent); color: #000; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-        .login-box button:hover { box-shadow: 0 0 15px var(--accent-glow); transform: translateY(-2px); }
+        .modal-box h2 { color: var(--accent); margin-bottom: 1.5rem; }
+        .modal-box button { margin-top: 1rem; width: 100%; padding: 0.9rem; background: var(--accent); color: #000; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .modal-box button:hover { box-shadow: 0 0 15px var(--accent-glow); transform: translateY(-2px); }
+
+        .btn-group-prog { display: flex; gap: 1rem; margin-top: 1.5rem; }
+        .btn-prog-sim { background: var(--success) !important; color: #fff !important; }
+        .btn-prog-nao { background: var(--danger) !important; color: #fff !important; }
 
         .loader { border: 4px solid var(--border-color); border-top: 4px solid var(--accent); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -56,7 +60,6 @@
             margin: 2rem; display: none;
         }
 
-        /* HEADER */
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--border-color); flex-wrap: wrap; gap: 1rem; }
         .logo-container { display: flex; align-items: center; gap: 12px; }
         .logo-img { height: 50px; width: auto; object-fit: contain; }
@@ -87,7 +90,6 @@
         input[type="radio"]:checked::before { transform: scale(1); }
         input[type="radio"]:checked { border-color: var(--accent); }
 
-        /* AUTOCOMPLETE */
         .autocomplete-list {
             position: absolute; top: 100%; left: 0; right: 0; z-index: 99; background: var(--bg-card);
             border: 1px solid var(--border-color); border-radius: 8px; max-height: 200px; overflow-y: auto; display: none;
@@ -98,13 +100,12 @@
 
         /* TALHOES CHIPS */
         .talhoes-container { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 1rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border-color); min-height: 50px; }
-        .talhao-chip { background: var(--bg-card); border: 1px solid var(--accent); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
-        .talhao-chip.selected { background: var(--accent); color: #000; font-weight: bold; }
+        .talhao-chip { background: var(--bg-card); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; opacity: 0.6; }
+        .talhao-chip.selected { background: var(--accent); border-color: var(--accent); color: #000; font-weight: bold; opacity: 1; }
         .talhao-chip input[type="number"] { width: 65px; padding: 2px 4px; font-size: 0.75rem; border-radius: 4px; background: var(--bg-input); color: #fff; display: none; border: 1px solid #fff; }
         .talhao-chip.partial input[type="number"] { display: block; }
         .btn-partial { background: transparent; border: 1px solid #fff; color: inherit; border-radius: 4px; padding: 2px 5px; font-size: 0.7rem; cursor: pointer; }
 
-        /* TABELA DE INSUMOS */
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; min-width: 600px; }
         th { background-color: var(--bg-input); color: var(--text-muted); font-size: 0.8rem; padding: 0.8rem; text-align: left; }
@@ -117,7 +118,6 @@
         .btn-add-row { background: transparent; color: var(--accent); border: 1px dashed var(--accent); margin-top: 10px; }
         .btn-remove-row { color: var(--danger); background: none; border: none; font-size: 1.2rem; cursor: pointer; }
 
-        /* MODAL COMPROVANTE */
         #receipt-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(9, 9, 11, 0.95); display: none; justify-content: center; align-items: center; z-index: 2000;
@@ -134,9 +134,9 @@
 </head>
 <body>
 
-    <!-- TELA DE LOGIN -->
+    <!-- 1. TELA DE LOGIN -->
     <div id="login-screen">
-        <div class="login-box">
+        <div class="modal-box">
             <img src="logo.png" alt="Clealco" style="height: 64px; margin: 0 auto 1.5rem auto; display: block; object-fit: contain;">
             <h2>Acesso do Solicitante</h2>
             <div class="form-group" style="text-align: left;">
@@ -144,13 +144,34 @@
                 <input type="text" id="login-user" placeholder="Digite seu nome ou crachá..." autocomplete="off">
                 <div id="login-autocomplete" class="autocomplete-list"></div>
             </div>
-            <button onclick="realizarLogin()">ENTRAR NO SISTEMA</button>
+            <button onclick="validarLogin()">AVANÇAR</button>
             <div id="login-loader" class="loader" style="margin-top: 1rem;"></div>
             <p id="login-error" style="color: var(--danger); margin-top: 1rem; display: none; font-size: 0.85rem;">Selecione um solicitante válido da lista.</p>
         </div>
     </div>
 
-    <!-- MODAL COMPROVANTE WHATSAPP -->
+    <!-- 2. MODAL PROGRAMAÇÃO -->
+    <div id="prog-modal" style="display: none;">
+        <div class="modal-box">
+            <h2>Verificação de Programação</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Essa ordem está na programação?</p>
+            
+            <div class="btn-group-prog" id="prog-btns">
+                <button class="btn-prog-sim" onclick="respostaProgramacao('SIM')">SIM</button>
+                <button class="btn-prog-nao" onclick="mostrarJustificativa()">NÃO</button>
+            </div>
+
+            <div id="justificativa-box" style="display: none; margin-top: 1.5rem; text-align: left;">
+                <div class="form-group">
+                    <label>Informe a Justificativa / Carreador:</label>
+                    <textarea id="justificativa-texto" rows="3" placeholder="Escreva o motivo aqui..."></textarea>
+                </div>
+                <button onclick="respostaProgramacao('NÃO')">CONFIRMAR E ENTRAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MODAL COMPROVANTE -->
     <div id="receipt-modal">
         <div class="receipt-box">
             <h2 style="color: var(--success);">OS Lançada no Sheets!</h2>
@@ -165,7 +186,7 @@
         </div>
     </div>
 
-    <!-- FORMULÁRIO PRINCIPAL -->
+    <!-- 4. FORMULÁRIO PRINCIPAL -->
     <div class="container" id="main-app">
         <div class="header">
             <div class="logo-container">
@@ -176,91 +197,92 @@
         </div>
 
         <form id="os-form">
-            <!-- SEÇÃO 1: CABEÇALHO DA OS -->
             <div class="section">
-                <div class="grid grid-3">
+                <div class="grid grid-4">
                     <div class="form-group">
-                        <label>Tipo de Solicitação</label>
-                        <select id="tipo-solicitacao">
-                            <option value="ABERTURA">ABERTURA</option>
-                            <option value="APONTAMENTO">APONTAMENTO</option>
-                        </select>
+                        <label>Está na Programação?</label>
+                        <input type="text" id="prog-status" readonly style="font-weight: bold;">
                     </div>
                     <div class="form-group">
-                        <label>Encerrar OS?</label>
-                        <select id="encerrar-os">
-                            <option value="NÃO">NÃO</option>
-                            <option value="SIM">SIM</option>
-                        </select>
+                        <label>Justificativa / Carreador</label>
+                        <input type="text" id="carreador-val" readonly>
                     </div>
                     <div class="form-group">
-                        <label>Data de Execução</label>
-                        <input type="date" id="data-execucao" required>
+                        <label>Data Solicitação</label>
+                        <input type="date" id="data-solicitacao" required>
+                    </div>
+                    <div class="form-group">
+                        <label>PEA (Permissão Entrada)</label>
+                        <input type="text" id="pea-input" placeholder="Nº PEA">
                     </div>
                 </div>
             </div>
 
-            <!-- SEÇÃO 2: DADOS DA FAZENDA E TALHÕES -->
             <div class="section">
-                <div class="section-title">Localização e Área (Aba TALHAO)</div>
-                <div class="grid grid-2">
+                <div class="section-title">Localização e Talhões (Aba TALHAO)</div>
+                <div class="grid grid-3">
                     <div class="form-group">
-                        <label>Fazenda / Descrição (Digite o código ou nome)</label>
-                        <input type="text" id="fundo-input" placeholder="Ex: 100862 ou VALE FORMOSO" autocomplete="off">
+                        <label>Fazenda / Descrição (F.A)</label>
+                        <input type="text" id="fundo-input" placeholder="Digite o código ou nome..." autocomplete="off">
                         <div id="fundo-autocomplete" class="autocomplete-list"></div>
                     </div>
-                    <div class="grid grid-2">
-                        <div class="form-group">
-                            <label>Zona</label>
-                            <input type="text" id="zona-input" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label>PEA</label>
-                            <input type="text" id="pea-input" placeholder="Opcional">
-                        </div>
+                    <div class="form-group">
+                        <label>Tipo de Fazenda</label>
+                        <input type="text" id="tipo-fazenda" placeholder="Automático">
+                    </div>
+                    <div class="form-group">
+                        <label>Zona</label>
+                        <input type="text" id="zona-input" readonly>
                     </div>
                 </div>
 
                 <div class="form-group" style="margin-top: 1rem;">
-                    <label>Talhões Disponíveis (Clique para alternar / botão 'Parcial' para editar área)</label>
+                    <label>Talhões Disponíveis (Selecione manualmente os que farão parte da OS)</label>
                     <div class="talhoes-container" id="talhoes-container">
                         <span class="text-muted" style="font-size: 0.85rem;">Selecione uma Fazenda acima primeiro.</span>
                     </div>
                 </div>
 
-                <div class="grid grid-2" style="margin-top: 1rem;">
+                <div class="grid grid-3" style="margin-top: 1rem;">
                     <div class="form-group">
                         <label>Área Total Selecionada (ha)</label>
                         <input type="number" id="area-total" readonly value="0.00" style="font-weight: bold; color: var(--accent);">
                     </div>
                     <div class="form-group">
-                        <label>Data Previsão Encerramento</label>
-                        <input type="date" id="data-previsao">
+                        <label>Data Previsão Início</label>
+                        <input type="date" id="data-prev-inicio">
+                    </div>
+                    <div class="form-group">
+                        <label>Data Previsão Fim</label>
+                        <input type="date" id="data-prev-fim">
                     </div>
                 </div>
             </div>
 
-            <!-- SEÇÃO 3: OPERAÇÃO E FROTA -->
             <div class="section">
-                <div class="section-title">Centro de Custo e Equipamentos</div>
+                <div class="section-title">Centro de Custo, Operação e Vazão (Aba ATIVIDADES)</div>
                 <div class="grid grid-2">
                     <div class="form-group">
                         <label>Centro de Custo</label>
                         <select id="centro-custo">
-                            <option value="">Aguardando dados da planilha...</option>
+                            <option value="">Aguardando dados...</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Operação Disponível</label>
+                        <label>Operação</label>
                         <select id="operacao">
                             <option value="">Selecione o Centro de Custo primeiro</option>
                         </select>
                     </div>
                 </div>
-                <div class="grid grid-2" style="margin-top: 1rem;">
+                <div class="grid grid-3" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label>Vazão (L/ha)</label>
+                        <input type="number" step="0.1" id="vazao-input" placeholder="Ex: 200">
+                    </div>
                     <div class="form-group">
                         <label>Equipamento / Frota (Aba EQUIPAMENTOS)</label>
-                        <input type="text" id="frota-input" placeholder="Digite o código ou nome do equipamento..." autocomplete="off">
+                        <input type="text" id="frota-input" placeholder="Digite equipamento..." autocomplete="off">
                         <div id="frota-autocomplete" class="autocomplete-list"></div>
                     </div>
                     <div class="form-group">
@@ -273,7 +295,6 @@
                 </div>
             </div>
 
-            <!-- SEÇÃO 4: PRODUTOS / INSUMOS -->
             <div class="section">
                 <div class="section-title">Insumos Aplicados (Aba INSUMOS - Cálculo Automático)</div>
                 <div class="table-responsive">
@@ -295,17 +316,16 @@
                 <button type="button" class="btn-action btn-add-row" onclick="adicionarLinhaProduto()">+ Adicionar Insumo</button>
             </div>
 
-            <!-- SEÇÃO 5: OBSERVAÇÕES E SOLICITANTE -->
             <div class="section">
-                <div class="section-title">Finalização</div>
+                <div class="section-title">Observações e Solicitante</div>
                 <div class="grid grid-2">
                     <div class="form-group">
-                        <label>Observações</label>
-                        <textarea id="observacoes" rows="3" placeholder="Insira observações do campo..."></textarea>
+                        <label>Observação</label>
+                        <textarea id="observacao" rows="3" placeholder="Anotações gerais..."></textarea>
                     </div>
                     <div class="form-group" style="justify-content: flex-end;">
                         <label>Solicitante Logado</label>
-                        <input type="text" id="solicitante" readonly style="font-weight: bold;">
+                        <input type="text" id="solicitante-display" readonly style="font-weight: bold;">
                     </div>
                 </div>
             </div>
@@ -323,12 +343,16 @@
         let dbInsumos = [];
         let dbEquipamentos = [];
         let dbOperacoes = [];
-        let usuarioLogado = "";
 
-        // Inicialização
+        let solicitanteCracha = "";
+        let solicitanteNome = "";
+        let programacaoStatus = "SIM";
+        let carreadorTexto = "";
+
         window.addEventListener('DOMContentLoaded', async () => {
             await carregarDadosIniciais();
-            document.getElementById('data-execucao').valueAsDate = new Date();
+            document.getElementById('data-solicitacao').valueAsDate = new Date();
+            document.getElementById('data-prev-inicio').valueAsDate = new Date();
         });
 
         async function carregarDadosIniciais() {
@@ -346,15 +370,15 @@
                     configurarLoginAutocomplete();
                     popularCentrosDeCusto();
                 } else {
-                    alert('Erro ao carregar banco de dados da planilha.');
+                    alert('Erro ao carregar banco de dados.');
                 }
             } catch (e) {
                 console.error(e);
-                alert('Erro de conexão com o Google Sheets.');
+                alert('Erro de conexão com a planilha.');
             }
         }
 
-        // AUTOCOMPLETE LOGIN SOLICITANTE
+        // AUTOCOMPLETE SOLICITANTE
         function configurarLoginAutocomplete() {
             const input = document.getElementById('login-user');
             const list = document.getElementById('login-autocomplete');
@@ -383,26 +407,50 @@
             });
         }
 
-        function realizarLogin() {
-            const user = document.getElementById('login-user').value.trim();
-            if (!user) {
+        function validarLogin() {
+            const val = document.getElementById('login-user').value.trim();
+            if (!val) {
                 document.getElementById('login-error').style.display = 'block';
                 return;
             }
 
-            usuarioLogado = user;
-            document.getElementById('solicitante').value = user;
-            document.getElementById('login-screen').style.opacity = '0';
-            
-            setTimeout(() => {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-app').style.display = 'block';
-            }, 500);
+            if (val.includes('-')) {
+                const parts = val.split('-');
+                solicitanteCracha = parts[0].trim();
+                solicitanteNome = parts.slice(1).join('-').trim();
+            } else {
+                solicitanteCracha = val;
+                solicitanteNome = val;
+            }
+
+            document.getElementById('solicitante-display').value = `${solicitanteCracha} - ${solicitanteNome}`;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('prog-modal').style.display = 'flex';
+        }
+
+        function mostrarJustificativa() {
+            document.getElementById('prog-btns').style.display = 'none';
+            document.getElementById('justificativa-box').style.display = 'block';
+        }
+
+        function respostaProgramacao(resp) {
+            programacaoStatus = resp;
+            if (resp === 'NÃO') {
+                carreadorTexto = document.getElementById('justificativa-texto').value.trim();
+            } else {
+                carreadorTexto = "";
+            }
+
+            document.getElementById('prog-status').value = programacaoStatus;
+            document.getElementById('carreador-val').value = carreadorTexto || "-";
+
+            document.getElementById('prog-modal').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
 
             adicionarLinhaProduto();
         }
 
-        // CENTRO DE CUSTO -> OPERAÇÕES
+        // CENTRO DE CUSTO E OPERAÇÃO (Aba ATIVIDADES)
         function popularCentrosDeCusto() {
             const selectCC = document.getElementById('centro-custo');
             selectCC.innerHTML = '<option value="">Selecione o Centro de Custo...</option>';
@@ -425,7 +473,7 @@
             });
         }
 
-        // FAZENDAS E TALHÕES
+        // FAZENDAS E TALHÕES (ORDEM NUMÉRICA E DESMARCADOS)
         let fazendaSelecionada = null;
         let talhoesAtivos = [];
 
@@ -464,26 +512,30 @@
             const container = document.getElementById('talhoes-container');
             container.innerHTML = '';
             
+            // Ordenação numérica
+            fazendaSelecionada.talhoes.sort((a, b) => parseFloat(a.talhao) - parseFloat(b.talhao));
+
             talhoesAtivos = fazendaSelecionada.talhoes.map(t => ({
                 num: t.talhao,
-                areaOriginal: t.area,
-                areaParcial: t.area,
+                areaOriginal: parseFloat(t.area),
+                areaParcial: parseFloat(t.area),
                 isParcial: false,
-                selected: true
+                selected: false // Deixar pra selecionar manualmente!
             }));
 
             talhoesAtivos.forEach(t => {
                 const chip = document.createElement('div');
-                chip.className = `talhao-chip selected`;
+                chip.className = `talhao-chip`;
+                
                 chip.innerHTML = `
-                    <span class="talhao-num">Talhão ${t.num} (${t.areaOriginal}ha)</span>
+                    <span class="talhao-num">${t.num} (${t.areaOriginal.toFixed(2)} ha)</span>
                     <button type="button" class="btn-partial">Parcial</button>
-                    <input type="number" step="0.01" value="${t.areaParcial}">
+                    <input type="number" step="0.01" value="${t.areaParcial.toFixed(2)}">
                 `;
 
                 chip.querySelector('.talhao-num').addEventListener('click', () => {
                     t.selected = !t.selected;
-                    chip.classList.toggle('selected');
+                    chip.classList.toggle('selected', t.selected);
                     calcularAreaTotal();
                 });
 
@@ -496,7 +548,7 @@
                     chip.classList.toggle('partial', t.isParcial);
                     if (!t.selected) { t.selected = true; chip.classList.add('selected'); }
                     if (t.isParcial) { inp.focus(); } 
-                    else { t.areaParcial = t.areaOriginal; inp.value = t.areaOriginal; calcularAreaTotal(); }
+                    else { t.areaParcial = t.areaOriginal; inp.value = t.areaOriginal.toFixed(2); calcularAreaTotal(); }
                 });
 
                 inp.addEventListener('input', (e) => {
@@ -613,27 +665,34 @@
             if (e.target !== document.getElementById('login-user')) document.getElementById('login-autocomplete').style.display = 'none';
         });
 
-        // SALVAR DADOS
+        // SALVAR NO SHEETS
         async function enviarDados() {
             const btn = document.getElementById('btn-submit');
             const loader = document.getElementById('submit-loader');
 
+            const ccVal = document.getElementById('centro-custo').value;
+            const opVal = document.getElementById('operacao').value;
+            const ativObj = dbOperacoes.find(o => o.centroCusto === ccVal && o.operacao === opVal) || {};
+
             const payload = {
-                tipo_solicitacao: document.getElementById('tipo-solicitacao').value,
-                encerrar_os: document.getElementById('encerrar-os').value,
-                data_execucao: document.getElementById('data-execucao').value,
-                data_previsao: document.getElementById('data-previsao').value,
-                fazenda: document.getElementById('fundo-input').value,
+                programacao: programacaoStatus,
+                carreador: carreadorTexto,
+                data_solicitacao: document.getElementById('data-solicitacao').value,
+                solicitante_cracha: solicitanteCracha,
+                solicitante_nome: solicitanteNome,
+                tipo_fazenda: document.getElementById('tipo-fazenda').value,
+                fa_codigo: fazendaSelecionada ? fazendaSelecionada.codigo : "",
+                descricao_fazenda: fazendaSelecionada ? fazendaSelecionada.nome : document.getElementById('fundo-input').value,
+                tipo_atividade: ativObj.tipo || "",
+                centro_custo: ccVal,
+                grupo_atividades: ativObj.grupo || "",
+                operacao: opVal,
+                data_prevista_inicio: document.getElementById('data-prev-inicio').value,
+                data_prevista_fim: document.getElementById('data-prev-fim').value,
+                observacao: document.getElementById('observacao').value,
                 pea: document.getElementById('pea-input').value,
-                zona: document.getElementById('zona-input').value,
-                area_total: document.getElementById('area-total').value,
-                centro_custo: document.getElementById('centro-custo').value,
-                operacao: document.getElementById('operacao').value,
-                frota: document.getElementById('frota-input').value,
-                tipo_equip: document.querySelector('input[name="equip_prop"]:checked').value,
-                observacoes: document.getElementById('observacoes').value,
-                solicitante: document.getElementById('solicitante').value,
-                talhoes: talhoesAtivos.filter(t => t.selected).map(t => `T${t.num}(${t.areaParcial}ha)`).join(', '),
+                vazao: document.getElementById('vazao-input').value,
+                talhoes: talhoesAtivos.filter(t => t.selected).map(t => `${t.num}(${t.areaParcial.toFixed(2)}ha)`).join(', '),
                 produtos: []
             };
 
@@ -654,13 +713,14 @@
             loader.style.display = 'block';
 
             try {
-                await fetch(APPSCRIPT_URL, {
+                const res = await fetch(APPSCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify(payload),
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
                 
-                gerarComprovanteWhatsApp(payload);
+                const data = await res.json();
+                gerarComprovanteWhatsApp(payload, data.codigoOS || "OS-OK");
             } catch (err) {
                 alert('Erro ao enviar dados para a planilha.');
                 btn.style.display = 'block';
@@ -671,22 +731,25 @@
 
         let linkWhatsApp = "";
 
-        function gerarComprovanteWhatsApp(p) {
+        function gerarComprovanteWhatsApp(p, codOS) {
             document.getElementById('main-app').style.display = 'none';
             document.getElementById('receipt-modal').style.display = 'flex';
 
-            let texto = `*ORDEM DE SERVIÇO CONFIRMADA* 🚜\n\n`;
-            texto += `*Fazenda:* ${p.fazenda}\n`;
+            let texto = `*ORDEM DE SERVIÇO CONFIRMADA* 🚜\n`;
+            texto += `*Código OS:* ${codOS}\n`;
+            texto += `*Programação:* ${p.programacao}\n`;
+            if (p.carreador) texto += `*Justificativa/Carreador:* ${p.carreador}\n`;
+            texto += `*Fazenda:* ${p.fa_codigo} - ${p.descricao_fazenda}\n`;
             texto += `*Centro de Custo:* ${p.centro_custo}\n`;
             texto += `*Operação:* ${p.operacao}\n`;
+            texto += `*Vazão:* ${p.vazao} L/ha\n`;
             texto += `*Área Total:* ${p.area_total} ha\n`;
-            texto += `*Talhões:* ${p.talhoes}\n`;
-            texto += `*Equipamento:* ${p.frota} (${p.tipo_equip})\n\n`;
+            texto += `*Talhões:* ${p.talhoes}\n\n`;
             texto += `*🌱 INSUMOS APLICADOS:*\n`;
             p.produtos.forEach(prod => {
                 texto += `▪ ${prod.desc}: *${prod.total} ${prod.un}*\n`;
             });
-            texto += `\n*Solicitante:* ${p.solicitante}`;
+            texto += `\n*Solicitante:* ${p.solicitante_cracha} - ${p.solicitante_nome}`;
 
             document.getElementById('receipt-content').innerText = texto;
             linkWhatsApp = `https://wa.me/?text=${encodeURIComponent(texto)}`;
