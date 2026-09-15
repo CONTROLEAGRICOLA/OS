@@ -96,7 +96,6 @@
         .autocomplete-item { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--bg-input); font-size: 0.85rem; }
         .autocomplete-item:hover { background-color: var(--bg-input); color: var(--accent); }
 
-        /* TALHOES E EQUIPAMENTOS CHIPS */
         .talhoes-container { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.8rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border-color); min-height: 48px; }
         .talhao-chip { background: var(--bg-card); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; opacity: 0.6; }
         .talhao-chip.selected { background: var(--accent); border-color: var(--accent); color: #000; font-weight: bold; opacity: 1; }
@@ -379,7 +378,6 @@
             }
         }
 
-        // AUTOCOMPLETE SOLICITANTE
         function configurarLoginAutocomplete() {
             const input = document.getElementById('login-user');
             const list = document.getElementById('login-autocomplete');
@@ -451,7 +449,6 @@
             adicionarLinhaProduto();
         }
 
-        // CENTRO DE CUSTO E OPERAÇÃO
         function popularCentrosDeCusto() {
             const selectCC = document.getElementById('centro-custo');
             selectCC.innerHTML = '<option value="">Selecione o Centro de Custo...</option>';
@@ -474,7 +471,6 @@
             });
         }
 
-        // FAZENDAS E TALHÕES
         let fazendaSelecionada = null;
         let talhoesAtivos = [];
 
@@ -570,7 +566,6 @@
             recalcularProdutos();
         }
 
-        // EQUIPAMENTOS (MÚLTIPLA SELEÇÃO COM OPÇÃO DE RETIRAR)
         const inputFrota = document.getElementById('frota-input');
         const listFrota = document.getElementById('frota-autocomplete');
 
@@ -630,7 +625,6 @@
             });
         }
 
-        // INSUMOS (COM VALIDAÇÃO DE DOSAGEM MÍNIMA E MÁXIMA)
         const tbodyProdutos = document.getElementById('produtos-tbody');
 
         function adicionarLinhaProduto() {
@@ -713,7 +707,6 @@
             if (e.target !== document.getElementById('login-user')) document.getElementById('login-autocomplete').style.display = 'none';
         });
 
-        // SALVAR NO SHEETS
         async function enviarDados() {
             const btn = document.getElementById('btn-submit');
             const loader = document.getElementById('submit-loader');
@@ -745,7 +738,8 @@
                 data_prevista_fim: document.getElementById('data-prev-fim').value,
                 observacao: document.getElementById('observacao').value,
                 pea: document.getElementById('pea-input').value,
-                talhoes: talhoesSelecionados.map(t => `${t.num} (${t.areaParcial.toFixed(2)} ha)`).join(', '),
+                // ENVIA APENAS OS NÚMEROS DOS TALHÕES SEPARADOS POR VÍRGULA
+                talhoes: talhoesSelecionados.map(t => t.num).join(', '),
                 frota: equipamentosSelecionados.map(e => e.nome).join(', '),
                 produtos: []
             };
