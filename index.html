@@ -29,7 +29,6 @@
             min-height: 100vh;
         }
 
-        /* OVERLAY LOGIN E PROGRAMAÇÃO */
         #login-screen, #prog-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(9, 9, 11, 0.95); backdrop-filter: blur(10px);
@@ -52,7 +51,6 @@
         .loader { border: 4px solid var(--border-color); border-top: 4px solid var(--accent); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* CONTAINER PRINCIPAL */
         .container {
             background-color: var(--bg-card);
             max-width: 1200px; width: 100%; padding: 2rem;
@@ -98,13 +96,16 @@
         .autocomplete-item { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--bg-input); font-size: 0.85rem; }
         .autocomplete-item:hover { background-color: var(--bg-input); color: var(--accent); }
 
-        /* TALHOES CHIPS */
-        .talhoes-container { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 1rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border-color); min-height: 50px; }
+        /* TALHOES E EQUIPAMENTOS CHIPS */
+        .talhoes-container { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.8rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border-color); min-height: 48px; }
         .talhao-chip { background: var(--bg-card); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; opacity: 0.6; }
         .talhao-chip.selected { background: var(--accent); border-color: var(--accent); color: #000; font-weight: bold; opacity: 1; }
         .talhao-chip input[type="number"] { width: 65px; padding: 2px 4px; font-size: 0.75rem; border-radius: 4px; background: var(--bg-input); color: #fff; display: none; border: 1px solid #fff; }
         .talhao-chip.partial input[type="number"] { display: block; }
         .btn-partial { background: transparent; border: 1px solid #fff; color: inherit; border-radius: 4px; padding: 2px 5px; font-size: 0.7rem; cursor: pointer; }
+
+        .equip-chip { background: var(--accent); color: #000; font-weight: bold; padding: 4px 10px; border-radius: 16px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; }
+        .equip-chip button { background: none; border: none; color: #000; font-weight: bold; cursor: pointer; font-size: 1rem; line-height: 1; }
 
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; min-width: 600px; }
@@ -219,7 +220,7 @@
             </div>
 
             <div class="section">
-                <div class="section-title">Localização e Talhões (Aba TALHAO)</div>
+                <div class="section-title">Localização e Talhões</div>
                 <div class="grid grid-3">
                     <div class="form-group">
                         <label>Fazenda / Descrição (F.A)</label>
@@ -260,7 +261,7 @@
             </div>
 
             <div class="section">
-                <div class="section-title">Centro de Custo, Operação e Vazão (Aba ATIVIDADES)</div>
+                <div class="section-title">Centro de Custo e Equipamentos</div>
                 <div class="grid grid-2">
                     <div class="form-group">
                         <label>Centro de Custo</label>
@@ -275,15 +276,14 @@
                         </select>
                     </div>
                 </div>
-                <div class="grid grid-3" style="margin-top: 1rem;">
+                <div class="grid grid-2" style="margin-top: 1rem;">
                     <div class="form-group">
-                        <label>Vazão (L/ha)</label>
-                        <input type="number" step="0.1" id="vazao-input" placeholder="Ex: 200">
-                    </div>
-                    <div class="form-group">
-                        <label>Equipamento / Frota (Aba EQUIPAMENTOS)</label>
-                        <input type="text" id="frota-input" placeholder="Digite equipamento..." autocomplete="off">
+                        <label>Equipamentos / Frota (Selecione um ou mais)</label>
+                        <input type="text" id="frota-input" placeholder="Digite para buscar e adicionar..." autocomplete="off">
                         <div id="frota-autocomplete" class="autocomplete-list"></div>
+                        <div id="equipamentos-selecionados" class="talhoes-container" style="margin-top: 0.5rem; min-height: 42px;">
+                            <span class="text-muted" style="font-size: 0.8rem;">Nenhum equipamento selecionado.</span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Propriedade do Equipamento</label>
@@ -296,7 +296,7 @@
             </div>
 
             <div class="section">
-                <div class="section-title">Insumos Aplicados (Aba INSUMOS - Cálculo Automático)</div>
+                <div class="section-title">Insumos Aplicados</div>
                 <div class="table-responsive">
                     <table id="produtos-table">
                         <thead>
@@ -348,6 +348,7 @@
         let solicitanteNome = "";
         let programacaoStatus = "SIM";
         let carreadorTexto = "";
+        let equipamentosSelecionados = [];
 
         window.addEventListener('DOMContentLoaded', async () => {
             await carregarDadosIniciais();
@@ -450,7 +451,7 @@
             adicionarLinhaProduto();
         }
 
-        // CENTRO DE CUSTO E OPERAÇÃO (Aba ATIVIDADES)
+        // CENTRO DE CUSTO E OPERAÇÃO
         function popularCentrosDeCusto() {
             const selectCC = document.getElementById('centro-custo');
             selectCC.innerHTML = '<option value="">Selecione o Centro de Custo...</option>';
@@ -473,7 +474,7 @@
             });
         }
 
-        // FAZENDAS E TALHÕES (ORDEM NUMÉRICA E DESMARCADOS)
+        // FAZENDAS E TALHÕES
         let fazendaSelecionada = null;
         let talhoesAtivos = [];
 
@@ -512,7 +513,6 @@
             const container = document.getElementById('talhoes-container');
             container.innerHTML = '';
             
-            // Ordenação numérica
             fazendaSelecionada.talhoes.sort((a, b) => parseFloat(a.talhao) - parseFloat(b.talhao));
 
             talhoesAtivos = fazendaSelecionada.talhoes.map(t => ({
@@ -520,7 +520,7 @@
                 areaOriginal: parseFloat(t.area),
                 areaParcial: parseFloat(t.area),
                 isParcial: false,
-                selected: false // Deixar pra selecionar manualmente!
+                selected: false
             }));
 
             talhoesAtivos.forEach(t => {
@@ -570,7 +570,7 @@
             recalcularProdutos();
         }
 
-        // EQUIPAMENTOS
+        // EQUIPAMENTOS (MÚLTIPLA SELEÇÃO COM OPÇÃO DE RETIRAR)
         const inputFrota = document.getElementById('frota-input');
         const listFrota = document.getElementById('frota-autocomplete');
 
@@ -587,9 +587,8 @@
                     div.className = 'autocomplete-item';
                     div.innerHTML = `<strong>${e.nome}</strong> (${e.propriedade})`;
                     div.addEventListener('click', () => {
-                        inputFrota.value = e.nome;
-                        const radios = document.getElementsByName('equip_prop');
-                        radios.forEach(r => r.checked = (r.value === e.propriedade));
+                        adicionarEquipamento(e);
+                        inputFrota.value = '';
                         listFrota.style.display = 'none';
                     });
                     listFrota.appendChild(div);
@@ -599,7 +598,39 @@
             }
         });
 
-        // INSUMOS
+        function adicionarEquipamento(equip) {
+            if (!equipamentosSelecionados.some(e => e.nome === equip.nome)) {
+                equipamentosSelecionados.push(equip);
+                renderizarEquipamentos();
+            }
+        }
+
+        function removerEquipamento(index) {
+            equipamentosSelecionados.splice(index, 1);
+            renderizarEquipamentos();
+        }
+
+        function renderizarEquipamentos() {
+            const container = document.getElementById('equipamentos-selecionados');
+            container.innerHTML = '';
+
+            if (equipamentosSelecionados.length === 0) {
+                container.innerHTML = '<span class="text-muted" style="font-size: 0.8rem;">Nenhum equipamento selecionado.</span>';
+                return;
+            }
+
+            equipamentosSelecionados.forEach((e, idx) => {
+                const chip = document.createElement('div');
+                chip.className = 'equip-chip';
+                chip.innerHTML = `
+                    <span>${e.nome}</span>
+                    <button type="button" onclick="removerEquipamento(${idx})">×</button>
+                `;
+                container.appendChild(chip);
+            });
+        }
+
+        // INSUMOS (COM VALIDAÇÃO DE DOSAGEM MÍNIMA E MÁXIMA)
         const tbodyProdutos = document.getElementById('produtos-tbody');
 
         function adicionarLinhaProduto() {
@@ -636,12 +667,29 @@
                             tr.querySelector('.prod-cod').value = p.cod;
                             tr.querySelector('.prod-desc').value = p.desc;
                             tr.querySelector('.prod-un').value = p.un;
+                            tr.dataset.doseMin = p.min || 0;
+                            tr.dataset.doseMax = p.max || 0;
                             listCod.style.display = 'none';
                         });
                         listCod.appendChild(div);
                     });
                 } else {
                     listCod.style.display = 'none';
+                }
+            });
+
+            inDose.addEventListener('change', function() {
+                const doseVal = parseFloat(this.value) || 0;
+                const minVal = parseFloat(tr.dataset.doseMin) || 0;
+                const maxVal = parseFloat(tr.dataset.doseMax) || 0;
+                const descProd = tr.querySelector('.prod-desc').value || "Insumo";
+
+                if (doseVal > 0) {
+                    if (minVal > 0 && doseVal < minVal) {
+                        alert(`⚠️ ATENÇÃO DE DOSAGEM!\n\nA dosagem digitada (${doseVal}) está ABAIXO da dose mínima recomendada (${minVal}) para o produto:\n"${descProd}".`);
+                    } else if (maxVal > 0 && doseVal > maxVal) {
+                        alert(`⚠️ ATENÇÃO DE DOSAGEM!\n\nA dosagem digitada (${doseVal}) está ACIMA da dose máxima recomendada (${maxVal}) para o produto:\n"${descProd}".`);
+                    }
                 }
             });
 
@@ -674,6 +722,12 @@
             const opVal = document.getElementById('operacao').value;
             const ativObj = dbOperacoes.find(o => o.centroCusto === ccVal && o.operacao === opVal) || {};
 
+            const talhoesSelecionados = talhoesAtivos.filter(t => t.selected);
+            if (talhoesSelecionados.length === 0) {
+                alert("Por favor, selecione pelo menos um talhão antes de salvar!");
+                return;
+            }
+
             const payload = {
                 programacao: programacaoStatus,
                 carreador: carreadorTexto,
@@ -691,8 +745,8 @@
                 data_prevista_fim: document.getElementById('data-prev-fim').value,
                 observacao: document.getElementById('observacao').value,
                 pea: document.getElementById('pea-input').value,
-                vazao: document.getElementById('vazao-input').value,
-                talhoes: talhoesAtivos.filter(t => t.selected).map(t => `${t.num}(${t.areaParcial.toFixed(2)}ha)`).join(', '),
+                talhoes: talhoesSelecionados.map(t => `${t.num} (${t.areaParcial.toFixed(2)} ha)`).join(', '),
+                frota: equipamentosSelecionados.map(e => e.nome).join(', '),
                 produtos: []
             };
 
@@ -742,9 +796,9 @@
             texto += `*Fazenda:* ${p.fa_codigo} - ${p.descricao_fazenda}\n`;
             texto += `*Centro de Custo:* ${p.centro_custo}\n`;
             texto += `*Operação:* ${p.operacao}\n`;
-            texto += `*Vazão:* ${p.vazao} L/ha\n`;
             texto += `*Área Total:* ${p.area_total} ha\n`;
-            texto += `*Talhões:* ${p.talhoes}\n\n`;
+            texto += `*Talhões:* ${p.talhoes}\n`;
+            texto += `*Equipamento(s):* ${p.frota}\n\n`;
             texto += `*🌱 INSUMOS APLICADOS:*\n`;
             p.produtos.forEach(prod => {
                 texto += `▪ ${prod.desc}: *${prod.total} ${prod.un}*\n`;
