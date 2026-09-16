@@ -296,11 +296,17 @@
         </div>
     </div>
 
-    <!-- 3. CONFIGURAÇÕES / TEMA -->
+    <!-- 3. CONFIGURAÇÕES / TEMA / LOGIN ATIVO -->
     <div id="settings-modal" style="display: none;">
         <div class="modal-box">
             <h2>Configurações</h2>
-            <div style="display: flex; flex-direction: column; gap: 1rem; margin: 1.5rem 0;">
+
+            <div style="display: flex; flex-direction: column; gap: 0.8rem; margin: 1.5rem 0;">
+                <div style="background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px; text-align: left;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Login Ativo / Sessão</span>
+                    <div id="settings-user-display" style="font-weight: 700; color: var(--accent); font-size: 0.95rem; margin-top: 2px;"></div>
+                </div>
+
                 <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px;">
                     <span style="font-weight: 600; font-size: 0.9rem;">Aparência do Sistema</span>
                     <button class="btn btn-outline" onclick="alternarTema()" id="btn-toggle-theme">
@@ -334,6 +340,10 @@
                 </div>
                 <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="respostaProgramacao('NÃO')">CONFIRMAR E AVANÇAR</button>
             </div>
+
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem;" onclick="cancelarProgramacao()">
+                ❌ Cancelar Lançamento
+            </button>
         </div>
     </div>
 
@@ -409,7 +419,6 @@
             </div>
         </div>
 
-        <!-- BANNER INFORMATIVO SE ESTIVER EM MODO SOMENTE LEITURA -->
         <div id="view-mode-banner" class="read-only-banner" style="display: none;">
             <span>🔍 MODO VISUALIZAÇÃO DE OS: Esta OS foi gravada no banco e não pode ser alterada nesta tela.</span>
         </div>
@@ -532,7 +541,7 @@
                     </div>
                     <div class="form-group" style="justify-content: flex-end;">
                         <label>Solicitante Logado</label>
-                        <input type="text" id="solicitante-display" readonly style="font-weight: 700;">
+                        <input type="text" id="solicitante-display" readonly style="font-weight: 700; color: var(--accent);">
                     </div>
                 </div>
             </div>
@@ -564,6 +573,7 @@
 
         let solicitanteCracha = "";
         let solicitanteNome = "";
+        let solicitanteLimpoDisplay = "";
         let programacaoStatus = "SIM";
         let carreadorTexto = "";
         let equipamentosSelecionados = [];
@@ -601,6 +611,13 @@
 
         function abrirConfiguracoes() { document.getElementById('settings-modal').style.display = 'flex'; }
         function fecharConfiguracoes() { document.getElementById('settings-modal').style.display = 'none'; }
+
+        // FORMATADOR LIMPO DO NOME DO SOLICITANTE
+        function obterNomeSolicitanteLimpo(cracha, nome) {
+            if (!nome) return cracha || "";
+            let reg = new RegExp('^' + cracha + '\\s*-\\s*', 'i');
+            return nome.replace(reg, '').trim();
+        }
 
         function verificarSessaoSalva() {
             const passSalva = localStorage.getItem('saved_pass');
@@ -673,13 +690,16 @@
         function efetuarLoginSucesso(cracha, nome) {
             solicitanteCracha = cracha;
             solicitanteNome = nome;
+            solicitanteLimpoDisplay = obterNomeSolicitanteLimpo(cracha, nome);
 
             localStorage.setItem('logged_cracha', cracha);
             localStorage.setItem('logged_nome', nome);
 
-            document.getElementById('solicitante-display').value = `${solicitanteCracha} - ${solicitanteNome}`;
-            document.getElementById('menu-user-name').innerText = `Solicitante: ${solicitanteCracha} - ${solicitanteNome}`;
-            document.getElementById('gestao-user-title').innerText = `Solicitante: ${solicitanteCracha} - ${solicitanteNome}`;
+            // ATUALIZAÇÃO DOS CAMPOS DE SOLICITANTE NA TELA
+            document.getElementById('solicitante-display').value = solicitanteLimpoDisplay;
+            document.getElementById('menu-user-name').innerText = `Solicitante: ${solicitanteLimpoDisplay}`;
+            document.getElementById('settings-user-display').innerText = `${solicitanteCracha} - ${solicitanteLimpoDisplay}`;
+            document.getElementById('gestao-user-title').innerText = `Solicitante: ${solicitanteLimpoDisplay}`;
 
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('menu-screen').style.display = 'flex';
@@ -734,6 +754,11 @@
             document.getElementById('justificativa-texto').value = '';
         }
 
+        function cancelarProgramacao() {
+            document.getElementById('prog-modal').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'flex';
+        }
+
         function mostrarJustificativa() {
             document.getElementById('prog-btns').style.display = 'none';
             document.getElementById('justificativa-box').style.display = 'block';
@@ -759,6 +784,7 @@
             document.getElementById('main-app').style.display = 'block';
 
             document.getElementById('os-form').reset();
+            document.getElementById('solicitante-display').value = solicitanteLimpoDisplay;
             document.getElementById('data-solicitacao-display').value = dataHoraStr;
             document.getElementById('produtos-tbody').innerHTML = '';
             equipamentosSelecionados = [];
@@ -842,19 +868,16 @@
             });
         }
 
-        // CARREGA A OS NO MESMO LAYOUT MAS TRAVADA PARA LEITURA
         function visualizarOS(index) {
             const os = listaOSCache[index];
             if (!os) return;
 
-            // Se for do localStorage pendente, pega do payload
             const dataOS = os.payload ? os.payload : os;
 
             modoVisualizacao = true;
             document.getElementById('gestao-app').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
 
-            // ATUALIZA CABEÇALHO E BANNERS
             document.getElementById('main-app-title').innerText = `OS nº ${os.codigoOS || 'PENDENTE'}`;
             document.getElementById('view-mode-banner').style.display = 'flex';
             document.getElementById('box-actions-lancar').style.display = 'none';
@@ -863,7 +886,6 @@
             document.getElementById('th-action-col').style.display = 'none';
             document.getElementById('group-digitar-talhoes').style.display = 'none';
 
-            // PREENCHE OS CAMPOS
             document.getElementById('data-solicitacao-display').value = dataOS.data_solicitacao || os.data_solicitacao || "-";
 
             const badgeElem = document.getElementById('status-programacao-badge');
@@ -879,7 +901,6 @@
             document.getElementById('fundo-input').value = `${dataOS.fa_codigo || ''} - ${dataOS.descricao_fazenda || ''}`;
             document.getElementById('tipo-fazenda').value = dataOS.tipo_fazenda || "-";
 
-            // RENDERIZA TALHÕES SOMENTE LEITURA
             const containerTalhoes = document.getElementById('talhoes-container');
             containerTalhoes.innerHTML = '';
             const listTalhoesStr = dataOS.talhoes || "";
@@ -898,14 +919,12 @@
             document.getElementById('data-prev-inicio').value = dataOS.data_prevista_inicio || "";
             document.getElementById('data-prev-fim').value = dataOS.data_prevista_fim || "";
 
-            // CENTRO DE CUSTO E OPERAÇÃO
             const selectCC = document.getElementById('centro-custo');
             selectCC.innerHTML = `<option value="${dataOS.centro_custo}">${dataOS.centro_custo}</option>`;
 
             const selectOp = document.getElementById('operacao');
             selectOp.innerHTML = `<option value="${dataOS.operacao}">${dataOS.operacao}</option>`;
 
-            // EQUIPAMENTOS SOMENTE LEITURA
             const containerEquip = document.getElementById('equipamentos-selecionados');
             containerEquip.innerHTML = '';
             const listEquipStr = dataOS.frota || dataOS.equipamentos || "";
@@ -920,7 +939,6 @@
                 containerEquip.innerHTML = '<span class="text-muted" style="font-size: 0.8rem;">Nenhum equipamento registrado.</span>';
             }
 
-            // INSUMOS SOMENTE LEITURA
             const tbody = document.getElementById('produtos-tbody');
             tbody.innerHTML = '';
             const prods = dataOS.produtos || [];
@@ -941,9 +959,12 @@
             }
 
             document.getElementById('observacao').value = dataOS.observacao || "";
-            document.getElementById('solicitante-display').value = `${dataOS.solicitante_cracha || os.solicitante_cracha} - ${dataOS.solicitante_nome || os.solicitante_nome}`;
+            
+            // EXIBE O NOME LIMPO DO SOLICITANTE
+            const solNomeFinal = dataOS.solicitante_nome || os.solicitante_nome;
+            const solCrachaFinal = dataOS.solicitante_cracha || os.solicitante_cracha;
+            document.getElementById('solicitante-display').value = obterNomeSolicitanteLimpo(solCrachaFinal, solNomeFinal);
 
-            // APLICA PROPRIEDADE READONLY EM TODOS OS CAMPOS
             aplicarEstadoCampos(true);
         }
 
