@@ -19,6 +19,7 @@
             --warning: #f59e0b;
             --success: #10b981;
             --shadow-color: rgba(0, 0, 0, 0.4);
+            --tr-hover: #27272a;
         }
 
         :root[data-theme="light"] {
@@ -35,6 +36,7 @@
             --warning: #d97706;
             --success: #059669;
             --shadow-color: rgba(0, 0, 0, 0.08);
+            --tr-hover: #f4f4f5;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
@@ -48,10 +50,8 @@
             min-height: 100vh;
         }
 
-        /* SISTEMA MODERNO DE BOTÕES */
         button, .btn {
             appearance: none;
-            -webkit-appearance: none;
             border: 1px solid transparent;
             outline: none;
             font-family: inherit;
@@ -126,7 +126,6 @@
             transform: rotate(45deg);
         }
 
-        /* MODAIS E SCREENS */
         #login-screen, #prog-modal, #menu-screen, #settings-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(9, 9, 11, 0.7); backdrop-filter: blur(12px);
@@ -167,7 +166,7 @@
             color: var(--text-main); padding: 0.75rem 1rem; border-radius: 8px; outline: none; font-size: 0.95rem;
         }
         input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-        input[readonly] { opacity: 0.75; cursor: not-allowed; }
+        input[readonly], select[disabled], textarea[readonly] { opacity: 0.8; cursor: not-allowed; }
 
         .checkbox-label { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; user-select: none; }
         .checkbox-label input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
@@ -199,7 +198,10 @@
         .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 0.5rem; }
         table { width: 100%; border-collapse: collapse; min-width: 580px; }
         th { background-color: var(--bg-input); color: var(--text-muted); font-size: 0.8rem; padding: 0.75rem; text-align: left; }
-        td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; }
+        td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; }
+
+        .tr-clickable { cursor: pointer; }
+        .tr-clickable:hover { background-color: var(--tr-hover); }
 
         .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
         .badge-synced { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
@@ -212,6 +214,20 @@
         .loader { border: 3px solid var(--border-color); border-top: 3px solid var(--accent); border-radius: 50%; width: 28px; height: 28px; animation: spin 0.8s linear infinite; margin: 0 auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        .read-only-banner {
+            background-color: rgba(6, 182, 212, 0.12);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         @media (max-width: 768px) {
             .grid-2, .grid-3 { grid-template-columns: 1fr; }
             .container { margin: 0; border-radius: 0; padding: 1rem; }
@@ -220,7 +236,7 @@
 </head>
 <body>
 
-    <!-- 1. TELA DE LOGIN COM VALIDAÇÃO DE SENHA -->
+    <!-- 1. LOGIN -->
     <div id="login-screen">
         <div class="modal-box">
             <img src="logo.png" alt="Clealco" style="height: 56px; margin: 0 auto 1.2rem auto; display: block; object-fit: contain;">
@@ -280,7 +296,7 @@
         </div>
     </div>
 
-    <!-- 3. MODAL DE CONFIGURAÇÕES / DESLOGAR / TEMA -->
+    <!-- 3. CONFIGURAÇÕES / TEMA -->
     <div id="settings-modal" style="display: none;">
         <div class="modal-box">
             <h2>Configurações</h2>
@@ -321,7 +337,7 @@
         </div>
     </div>
 
-    <!-- 5. TELA DE GESTÃO DE OS -->
+    <!-- 5. GESTÃO DE OS -->
     <div class="container" id="gestao-app">
         <div class="header">
             <div class="logo-container">
@@ -380,7 +396,7 @@
         </div>
     </div>
 
-    <!-- 7. FORMULÁRIO PRINCIPAL DE LANÇAMENTO -->
+    <!-- 7. FORMULÁRIO PRINCIPAL (LANÇAMENTO E VISUALIZAÇÃO) -->
     <div class="container" id="main-app">
         <div class="header">
             <div class="logo-container">
@@ -388,9 +404,14 @@
                 <div class="logo-text">CONTROLE<br>AGRICOLA</div>
             </div>
             <div style="display: flex; align-items: center; gap: 1rem;">
-                <h1 style="font-size: 1.25rem; color: var(--accent);">Lançamento de OS</h1>
+                <h1 style="font-size: 1.25rem; color: var(--accent);" id="main-app-title">Lançamento de OS</h1>
                 <button class="btn-icon-gear" title="Configurações" onclick="abrirConfiguracoes()">⚙️</button>
             </div>
+        </div>
+
+        <!-- BANNER INFORMATIVO SE ESTIVER EM MODO SOMENTE LEITURA -->
+        <div id="view-mode-banner" class="read-only-banner" style="display: none;">
+            <span>🔍 MODO VISUALIZAÇÃO DE OS: Esta OS foi gravada no banco e não pode ser alterada nesta tela.</span>
         </div>
 
         <form id="os-form">
@@ -427,11 +448,15 @@
                     </div>
                 </div>
 
-                <div class="form-group" style="margin-top: 1rem;">
+                <div class="form-group" style="margin-top: 1rem;" id="group-digitar-talhoes">
                     <label>Digitar Talhões (Ex: 1-12, 15-18, 30 e pressione Enter)</label>
                     <input type="text" id="talhoes-range-input" placeholder="Digite aqui a sequência..." autocomplete="off">
-                    <div id="talhoes-container" class="talhoes-container" style="margin-top: 0.5rem;">
-                        <span class="text-muted" style="font-size: 0.85rem;">Selecione a fazenda e digite os talhões acima.</span>
+                </div>
+
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label>Talhões Selecionados</label>
+                    <div id="talhoes-container" class="talhoes-container" style="margin-top: 0.2rem;">
+                        <span class="text-muted" style="font-size: 0.85rem;">Nenhum talhão selecionado.</span>
                     </div>
                 </div>
 
@@ -468,7 +493,7 @@
                     </div>
                 </div>
                 <div class="form-group" style="margin-top: 1rem;">
-                    <label>Equipamentos / Frota (Selecione um ou mais)</label>
+                    <label>Equipamentos / Frota</label>
                     <input type="text" id="frota-input" placeholder="Digite para buscar e adicionar..." autocomplete="off">
                     <div id="frota-autocomplete" class="autocomplete-list"></div>
                     <div id="equipamentos-selecionados" class="talhoes-container" style="margin-top: 0.5rem; min-height: 42px;">
@@ -488,14 +513,14 @@
                                 <th style="width: 10%">UN</th>
                                 <th style="width: 15%">Dosagem / ha</th>
                                 <th style="width: 15%">Qtd. Total</th>
-                                <th style="width: 5%"></th>
+                                <th style="width: 5%" id="th-action-col"></th>
                             </tr>
                         </thead>
                         <tbody id="produtos-tbody">
                         </tbody>
                     </table>
                 </div>
-                <button type="button" class="btn btn-outline" style="margin-top: 0.8rem;" onclick="adicionarLinhaProduto()">+ Adicionar Insumo</button>
+                <button type="button" class="btn btn-outline" style="margin-top: 0.8rem;" id="btn-add-insumo" onclick="adicionarLinhaProduto()">+ Adicionar Insumo</button>
             </div>
 
             <div class="section">
@@ -512,10 +537,19 @@
                 </div>
             </div>
 
-            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <!-- AÇÕES MODO EDICAO -->
+            <div id="box-actions-lancar" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="voltarAoMenu()">CANCELAR</button>
                 <button type="button" class="btn btn-primary" style="flex: 2;" onclick="enviarDados()" id="btn-submit">🚀 SALVAR ORDEM DE SERVIÇO</button>
             </div>
+
+            <!-- AÇÕES MODO VISUALIZACAO -->
+            <div id="box-actions-visualizar" style="display: none; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="fecharVisualizacaoOS()">
+                    ⬅️ VOLTAR PARA GESTÃO OS
+                </button>
+            </div>
+
             <div id="submit-loader" class="loader" style="margin-top: 1rem;"></div>
         </form>
     </div>
@@ -533,8 +567,9 @@
         let programacaoStatus = "SIM";
         let carreadorTexto = "";
         let equipamentosSelecionados = [];
+        let modoVisualizacao = false;
+        let listaOSCache = [];
 
-        // INICIALIZAÇÃO
         window.addEventListener('DOMContentLoaded', async () => {
             carregarPreferenciaTema();
             verificarSessaoSalva();
@@ -543,7 +578,6 @@
             window.addEventListener('online', () => sincronizarPendentes());
         });
 
-        // CONTROLADOR DE TEMA (CLARO / ESCURO)
         function carregarPreferenciaTema() {
             const temaSalvo = localStorage.getItem('theme_preference') || 'dark';
             document.documentElement.setAttribute('data-theme', temaSalvo);
@@ -565,16 +599,9 @@
             }
         }
 
-        // TELA DE CONFIGURAÇÕES
-        function abrirConfiguracoes() {
-            document.getElementById('settings-modal').style.display = 'flex';
-        }
+        function abrirConfiguracoes() { document.getElementById('settings-modal').style.display = 'flex'; }
+        function fecharConfiguracoes() { document.getElementById('settings-modal').style.display = 'none'; }
 
-        function fecharConfiguracoes() {
-            document.getElementById('settings-modal').style.display = 'none';
-        }
-
-        // VALIDAÇÃO E GESTÃO DE SESSÃO
         function verificarSessaoSalva() {
             const passSalva = localStorage.getItem('saved_pass');
             const userSalvo = localStorage.getItem('saved_user');
@@ -638,7 +665,7 @@
                 }
             } catch (err) {
                 loader.style.display = 'none';
-                errElem.innerText = 'Falha ao conectar com o servidor. Verifique a internet.';
+                errElem.innerText = 'Falha ao conectar com o servidor.';
                 errElem.style.display = 'block';
             }
         }
@@ -699,6 +726,7 @@
         }
 
         function iniciarLancarOS() {
+            desativarModoLeitura();
             document.getElementById('menu-screen').style.display = 'none';
             document.getElementById('prog-modal').style.display = 'flex';
             document.getElementById('justificativa-box').style.display = 'none';
@@ -742,7 +770,7 @@
             adicionarLinhaProduto();
         }
 
-        // HISTÓRICO LOCAL E GESTÃO OS
+        // GESTÃO DE OS E MODO SOMENTE LEITURA
         function obterHistoricoLocal() {
             return JSON.parse(localStorage.getItem('os_controle_agricola') || '[]');
         }
@@ -778,9 +806,9 @@
             }
 
             const historicoLocal = obterHistoricoLocal().filter(os => os.solicitante_cracha === solicitanteCracha && !os.sincronizado);
-            const listaCompleta = [...historicoLocal, ...historicoOnline];
+            listaOSCache = [...historicoLocal, ...historicoOnline];
 
-            renderizarTabelaGestao(listaCompleta);
+            renderizarTabelaGestao(listaOSCache);
         }
 
         function renderizarTabelaGestao(lista) {
@@ -792,8 +820,11 @@
                 return;
             }
 
-            lista.forEach(os => {
+            lista.forEach((os, index) => {
                 const tr = document.createElement('tr');
+                tr.className = 'tr-clickable';
+                tr.onclick = () => visualizarOS(index);
+
                 const badgeHtml = os.sincronizado 
                     ? `<span class="badge badge-synced">🟢 Sincronizado<br><small style="font-size:0.65rem;">${os.dataSincronizacao || ''}</small></span>`
                     : `<span class="badge badge-pending">🔴 Não Sincronizado<br><small style="font-size:0.65rem;">Salvo Offline</small></span>`;
@@ -808,6 +839,144 @@
                     <td>${badgeHtml}</td>
                 `;
                 tbody.appendChild(tr);
+            });
+        }
+
+        // CARREGA A OS NO MESMO LAYOUT MAS TRAVADA PARA LEITURA
+        function visualizarOS(index) {
+            const os = listaOSCache[index];
+            if (!os) return;
+
+            // Se for do localStorage pendente, pega do payload
+            const dataOS = os.payload ? os.payload : os;
+
+            modoVisualizacao = true;
+            document.getElementById('gestao-app').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+
+            // ATUALIZA CABEÇALHO E BANNERS
+            document.getElementById('main-app-title').innerText = `OS nº ${os.codigoOS || 'PENDENTE'}`;
+            document.getElementById('view-mode-banner').style.display = 'flex';
+            document.getElementById('box-actions-lancar').style.display = 'none';
+            document.getElementById('box-actions-visualizar').style.display = 'block';
+            document.getElementById('btn-add-insumo').style.display = 'none';
+            document.getElementById('th-action-col').style.display = 'none';
+            document.getElementById('group-digitar-talhoes').style.display = 'none';
+
+            // PREENCHE OS CAMPOS
+            document.getElementById('data-solicitacao-display').value = dataOS.data_solicitacao || os.data_solicitacao || "-";
+
+            const badgeElem = document.getElementById('status-programacao-badge');
+            if (dataOS.programacao === 'SIM') {
+                badgeElem.innerText = 'OS PROGRAMADA';
+                badgeElem.className = 'badge-prog-status badge-prog-sim';
+            } else {
+                badgeElem.innerText = 'OS NAO PROGRAMADA';
+                badgeElem.className = 'badge-prog-status badge-prog-nao';
+            }
+
+            document.getElementById('pea-input').value = dataOS.pea || "-";
+            document.getElementById('fundo-input').value = `${dataOS.fa_codigo || ''} - ${dataOS.descricao_fazenda || ''}`;
+            document.getElementById('tipo-fazenda').value = dataOS.tipo_fazenda || "-";
+
+            // RENDERIZA TALHÕES SOMENTE LEITURA
+            const containerTalhoes = document.getElementById('talhoes-container');
+            containerTalhoes.innerHTML = '';
+            const listTalhoesStr = dataOS.talhoes || "";
+            if (listTalhoesStr) {
+                listTalhoesStr.split(',').forEach(tNum => {
+                    const chip = document.createElement('div');
+                    chip.className = 'talhao-chip';
+                    chip.innerHTML = `<span>Talhão ${tNum.trim()}</span>`;
+                    containerTalhoes.appendChild(chip);
+                });
+            } else {
+                containerTalhoes.innerHTML = '<span class="text-muted" style="font-size: 0.85rem;">Nenhum talhão registrado.</span>';
+            }
+
+            document.getElementById('area-total').value = dataOS.areaTotal || "0.00";
+            document.getElementById('data-prev-inicio').value = dataOS.data_prevista_inicio || "";
+            document.getElementById('data-prev-fim').value = dataOS.data_prevista_fim || "";
+
+            // CENTRO DE CUSTO E OPERAÇÃO
+            const selectCC = document.getElementById('centro-custo');
+            selectCC.innerHTML = `<option value="${dataOS.centro_custo}">${dataOS.centro_custo}</option>`;
+
+            const selectOp = document.getElementById('operacao');
+            selectOp.innerHTML = `<option value="${dataOS.operacao}">${dataOS.operacao}</option>`;
+
+            // EQUIPAMENTOS SOMENTE LEITURA
+            const containerEquip = document.getElementById('equipamentos-selecionados');
+            containerEquip.innerHTML = '';
+            const listEquipStr = dataOS.frota || dataOS.equipamentos || "";
+            if (listEquipStr) {
+                listEquipStr.split(',').forEach(eqName => {
+                    const chip = document.createElement('div');
+                    chip.className = 'equip-chip';
+                    chip.innerHTML = `<span>${eqName.trim()}</span>`;
+                    containerEquip.appendChild(chip);
+                });
+            } else {
+                containerEquip.innerHTML = '<span class="text-muted" style="font-size: 0.8rem;">Nenhum equipamento registrado.</span>';
+            }
+
+            // INSUMOS SOMENTE LEITURA
+            const tbody = document.getElementById('produtos-tbody');
+            tbody.innerHTML = '';
+            const prods = dataOS.produtos || [];
+            if (prods.length > 0) {
+                prods.forEach(p => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><input type="text" value="${p.cod || ''}" readonly></td>
+                        <td><input type="text" value="${p.desc || ''}" readonly></td>
+                        <td><input type="text" value="${p.un || ''}" readonly style="width: 45px;"></td>
+                        <td><input type="text" value="${p.dose || ''}" readonly></td>
+                        <td><input type="text" value="${p.total || ''}" readonly></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Nenhum insumo lançado nesta OS.</td></tr>';
+            }
+
+            document.getElementById('observacao').value = dataOS.observacao || "";
+            document.getElementById('solicitante-display').value = `${dataOS.solicitante_cracha || os.solicitante_cracha} - ${dataOS.solicitante_nome || os.solicitante_nome}`;
+
+            // APLICA PROPRIEDADE READONLY EM TODOS OS CAMPOS
+            aplicarEstadoCampos(true);
+        }
+
+        function fecharVisualizacaoOS() {
+            desativarModoLeitura();
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('gestao-app').style.display = 'block';
+        }
+
+        function desativarModoLeitura() {
+            modoVisualizacao = false;
+            document.getElementById('main-app-title').innerText = "Lançamento de OS";
+            document.getElementById('view-mode-banner').style.display = 'none';
+            document.getElementById('box-actions-lancar').style.display = 'flex';
+            document.getElementById('box-actions-visualizar').style.display = 'none';
+            document.getElementById('btn-add-insumo').style.display = 'inline-flex';
+            document.getElementById('th-action-col').style.display = 'table-cell';
+            document.getElementById('group-digitar-talhoes').style.display = 'block';
+
+            aplicarEstadoCampos(false);
+            popularCentrosDeCusto();
+        }
+
+        function aplicarEstadoCampos(readonly) {
+            const form = document.getElementById('os-form');
+            const inputs = form.querySelectorAll('input:not(#data-solicitacao-display):not(#tipo-fazenda):not(#area-total):not(#solicitante-display), select, textarea');
+            
+            inputs.forEach(el => {
+                if (el.tagName === 'SELECT') {
+                    el.disabled = readonly;
+                } else {
+                    el.readOnly = readonly;
+                }
             });
         }
 
@@ -841,7 +1010,6 @@
             salvarHistoricoLocal(historico);
         }
 
-        // DADOS AUXILIARES E FORMULÁRIO
         function popularCentrosDeCusto() {
             const selectCC = document.getElementById('centro-custo');
             selectCC.innerHTML = '<option value="">Selecione o Centro de Custo...</option>';
@@ -866,6 +1034,7 @@
         const listFundo = document.getElementById('fundo-autocomplete');
 
         inputFundo.addEventListener('input', function() {
+            if (modoVisualizacao) return;
             const val = this.value.toLowerCase();
             listFundo.innerHTML = '';
             if (!val) { listFundo.style.display = 'none'; return; }
@@ -904,6 +1073,7 @@
         inputRangeTalhoes.addEventListener('keyup', (e) => { if (e.key === 'Enter') processarTalhoesInput(); });
 
         function processarTalhoesInput() {
+            if (modoVisualizacao) return;
             if (!fazendaSelecionada) {
                 alert("Selecione uma fazenda primeiro!");
                 return;
@@ -1002,11 +1172,11 @@
             recalcularProdutos();
         }
 
-        // EQUIPAMENTOS
         const inputFrota = document.getElementById('frota-input');
         const listFrota = document.getElementById('frota-autocomplete');
 
         inputFrota.addEventListener('input', function() {
+            if (modoVisualizacao) return;
             const val = this.value.toLowerCase();
             listFrota.innerHTML = '';
             if (!val) { listFrota.style.display = 'none'; return; }
@@ -1059,7 +1229,6 @@
             });
         }
 
-        // INSUMOS
         const tbodyProdutos = document.getElementById('produtos-tbody');
 
         function adicionarLinhaProduto() {
@@ -1081,6 +1250,7 @@
             const inDose = tr.querySelector('.prod-dose');
 
             inCod.addEventListener('input', function() {
+                if (modoVisualizacao) return;
                 const val = this.value.toLowerCase();
                 listCod.innerHTML = '';
                 if (!val) { listCod.style.display = 'none'; return; }
@@ -1115,9 +1285,9 @@
 
                 if (doseVal > 0) {
                     if (minVal > 0 && doseVal < minVal) {
-                        alert(`⚠️ Dosagem abaixo do mínimo recomendado (${minVal}) para "${descProd}".`);
+                        alert(`⚠️ Dosagem abaixo do recomendado (${minVal}) para "${descProd}".`);
                     } else if (maxVal > 0 && doseVal > maxVal) {
-                        alert(`⚠️ Dosagem acima do máximo recomendado (${maxVal}) para "${descProd}".`);
+                        alert(`⚠️ Dosagem acima do recomendado (${maxVal}) para "${descProd}".`);
                     }
                 }
             });
@@ -1141,8 +1311,9 @@
             if (e.target !== inputFrota) listFrota.style.display = 'none';
         });
 
-        // ENVIAR DADOS DA OS
         async function enviarDados() {
+            if (modoVisualizacao) return;
+
             const btn = document.getElementById('btn-submit');
             const loader = document.getElementById('submit-loader');
 
@@ -1155,6 +1326,7 @@
                 return;
             }
 
+            const areaTotalCalculada = document.getElementById('area-total').value;
             const propEquip = equipamentosSelecionados.length > 0 ? equipamentosSelecionados[0].propriedade : "PRÓPRIO";
 
             const payload = {
