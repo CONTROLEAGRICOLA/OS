@@ -15,6 +15,7 @@
             --accent: #06b6d4;
             --accent-glow: rgba(6, 182, 212, 0.3);
             --danger: #ef4444;
+            --warning: #f59e0b;
             --success: #10b981;
         }
 
@@ -29,12 +30,13 @@
             min-height: 100vh;
         }
 
-        #login-screen, #prog-modal {
+        #login-screen, #prog-modal, #menu-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(9, 9, 11, 0.95); backdrop-filter: blur(10px);
             display: flex; justify-content: center; align-items: center;
             z-index: 1000; transition: opacity 0.5s ease;
         }
+
         .modal-box {
             background: var(--bg-card); padding: 2.5rem; border-radius: 16px;
             border: 1px solid var(--border-color); box-shadow: 0 0 30px var(--accent-glow);
@@ -43,6 +45,13 @@
         .modal-box h2 { color: var(--accent); margin-bottom: 1.5rem; }
         .modal-box button { margin-top: 1rem; width: 100%; padding: 0.9rem; background: var(--accent); color: #000; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; }
         .modal-box button:hover { box-shadow: 0 0 15px var(--accent-glow); transform: translateY(-2px); }
+
+        .btn-menu {
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            font-size: 1.1rem !important; padding: 1.2rem !important; margin-top: 1rem !important;
+        }
+        .btn-menu-gestao { background: #3b82f6 !important; color: #fff !important; }
+        .btn-menu-lancar { background: var(--accent) !important; color: #000 !important; }
 
         .btn-group-prog { display: flex; gap: 1rem; margin-top: 1.5rem; }
         .btn-prog-sim { background: var(--success) !important; color: #fff !important; }
@@ -109,7 +118,7 @@
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; min-width: 600px; }
         th { background-color: var(--bg-input); color: var(--text-muted); font-size: 0.8rem; padding: 0.8rem; text-align: left; }
-        td { padding: 0.5rem; border-bottom: 1px solid var(--border-color); }
+        td { padding: 0.8rem; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
         td input { background-color: transparent !important; border: 1px solid transparent !important; }
         td input:focus { background-color: var(--bg-input) !important; border: 1px solid var(--accent) !important; }
         
@@ -117,6 +126,11 @@
         .btn-action:hover { box-shadow: 0 0 15px var(--accent-glow); }
         .btn-add-row { background: transparent; color: var(--accent); border: 1px dashed var(--accent); margin-top: 10px; }
         .btn-remove-row { color: var(--danger); background: none; border: none; font-size: 1.2rem; cursor: pointer; }
+
+        /* BADGES GESTÃO OS */
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
+        .badge-synced { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .badge-pending { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
 
         #receipt-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -150,7 +164,26 @@
         </div>
     </div>
 
-    <!-- 2. MODAL PROGRAMAÇÃO -->
+    <!-- 2. MENU PRINCIPAL DE OPÇÕES -->
+    <div id="menu-screen" style="display: none;">
+        <div class="modal-box">
+            <h2>Menu Principal</h2>
+            <p id="menu-user-name" style="color: var(--text-muted); font-weight: bold; margin-bottom: 1.5rem;"></p>
+            
+            <button class="btn-menu btn-menu-gestao" onclick="abrirGestaoOS()">
+                📋 GESTÃO OS
+            </button>
+            <button class="btn-menu btn-menu-lancar" onclick="iniciarLancarOS()">
+                🚜 LANÇAR OS
+            </button>
+            
+            <button style="background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); margin-top: 1.5rem;" onclick="trocarUsuario()">
+                🔒 Sair / Trocar Solicitante
+            </button>
+        </div>
+    </div>
+
+    <!-- 3. MODAL PROGRAMAÇÃO -->
     <div id="prog-modal" style="display: none;">
         <div class="modal-box">
             <h2>Verificação de Programação</h2>
@@ -171,22 +204,63 @@
         </div>
     </div>
 
-    <!-- 3. MODAL COMPROVANTE -->
+    <!-- 4. TELA DE GESTÃO DE OS -->
+    <div class="container" id="gestao-app">
+        <div class="header">
+            <div class="logo-container">
+                <img src="logo.png" alt="Clealco Logo" class="logo-img">
+                <div class="logo-text">CONTROLE<br>AGRICOLA</div>
+            </div>
+            <div>
+                <h1>Gestão de Ordens de Serviço</h1>
+                <p id="gestao-user-title" style="font-size: 0.85rem; color: var(--text-muted); text-align: right; margin-top: 4px;"></p>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; justify-content: space-between; align-items: center;">
+            <button class="btn-action" style="max-width: 220px; margin-top: 0; background: #3b82f6; color: #fff;" onclick="sincronizarPendentes()">
+                🔄 Sincronizar Pendentes
+            </button>
+            <button class="btn-action" style="max-width: 220px; margin-top: 0;" onclick="voltarAoMenu()">
+                ⬅️ Voltar ao Menu
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cód. OS</th>
+                        <th>Data Solicitação</th>
+                        <th>Fazenda (F.A)</th>
+                        <th>Operação</th>
+                        <th>Talhões</th>
+                        <th>Área (ha)</th>
+                        <th>Status Sincronização</th>
+                    </tr>
+                </thead>
+                <tbody id="gestao-tbody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 5. MODAL COMPROVANTE -->
     <div id="receipt-modal">
         <div class="receipt-box">
-            <h2 style="color: var(--success);">OS Lançada no Sheets!</h2>
+            <h2 id="receipt-status-title" style="color: var(--success);">OS Lançada!</h2>
             <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">Resumo da Ordem de Serviço:</p>
             <pre id="receipt-content"></pre>
             <button class="btn-action" style="background: #25D366; color: white;" onclick="enviarWhatsApp()">
                 📱 Enviar pelo WhatsApp
             </button>
-            <button class="btn-action" style="background: transparent; border: 1px solid var(--border-color); color: white; margin-top: 0.5rem;" onclick="location.reload()">
-                Nova Solicitação
+            <button class="btn-action" style="background: transparent; border: 1px solid var(--border-color); color: white; margin-top: 0.5rem;" onclick="voltarAoMenuAposLancamento()">
+                Ir para o Menu Principal
             </button>
         </div>
     </div>
 
-    <!-- 4. FORMULÁRIO PRINCIPAL -->
+    <!-- 6. FORMULÁRIO PRINCIPAL DE LANÇAMENTO -->
     <div class="container" id="main-app">
         <div class="header">
             <div class="logo-container">
@@ -331,7 +405,10 @@
                 </div>
             </div>
 
-            <button type="button" class="btn-action" onclick="enviarDados()" id="btn-submit">🚀 SALVAR EM 'DB - LANCAMENTO'</button>
+            <div style="display: flex; gap: 1rem;">
+                <button type="button" class="btn-action" style="background: transparent; border: 1px solid var(--border-color); color: #fff;" onclick="voltarAoMenu()">CANCELAR</button>
+                <button type="button" class="btn-action" onclick="enviarDados()" id="btn-submit">🚀 SALVAR ORDEM DE SERVIÇO</button>
+            </div>
             <div id="submit-loader" class="loader" style="margin-top: 1rem;"></div>
         </form>
     </div>
@@ -351,10 +428,16 @@
         let carreadorTexto = "";
         let equipamentosSelecionados = [];
 
+        // INICIALIZAÇÃO
         window.addEventListener('DOMContentLoaded', async () => {
             await carregarDadosIniciais();
             document.getElementById('data-solicitacao').valueAsDate = new Date();
             document.getElementById('data-prev-inicio').valueAsDate = new Date();
+            
+            // Ouvinte de sincronização quando a internet voltar
+            window.addEventListener('online', () => {
+                sincronizarPendentes();
+            });
         });
 
         async function carregarDadosIniciais() {
@@ -369,17 +452,19 @@
                     dbEquipamentos = res.dados.equipamentos || [];
                     dbOperacoes = res.dados.operacoes || [];
 
+                    // Salva cache local de apoio
+                    localStorage.setItem('db_solicitantes', JSON.stringify(dbSolicitantes));
                     configurarLoginAutocomplete();
                     popularCentrosDeCusto();
-                } else {
-                    alert('Erro ao carregar banco de dados.');
                 }
             } catch (e) {
-                console.error(e);
-                alert('Erro de conexão com a planilha.');
+                console.warn('Iniciado em modo offline com dados salvos em cache.');
+                dbSolicitantes = JSON.parse(localStorage.getItem('db_solicitantes') || '[]');
+                configurarLoginAutocomplete();
             }
         }
 
+        // LOGIN E RETORNO AO MENU
         function configurarLoginAutocomplete() {
             const input = document.getElementById('login-user');
             const list = document.getElementById('login-autocomplete');
@@ -425,8 +510,35 @@
             }
 
             document.getElementById('solicitante-display').value = `${solicitanteCracha} - ${solicitanteNome}`;
+            document.getElementById('menu-user-name').innerText = `Solicitante: ${solicitanteCracha} - ${solicitanteNome}`;
+            document.getElementById('gestao-user-title').innerText = `Solicitante: ${solicitanteCracha} - ${solicitanteNome}`;
+            
             document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'flex';
+        }
+
+        function trocarUsuario() {
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+        }
+
+        function voltarAoMenu() {
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('gestao-app').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'flex';
+        }
+
+        function voltarAoMenuAposLancamento() {
+            document.getElementById('receipt-modal').style.display = 'none';
+            voltarAoMenu();
+        }
+
+        function iniciarLancarOS() {
+            document.getElementById('menu-screen').style.display = 'none';
             document.getElementById('prog-modal').style.display = 'flex';
+            document.getElementById('justificativa-box').style.display = 'none';
+            document.getElementById('prog-btns').style.display = 'flex';
+            document.getElementById('justificativa-texto').value = '';
         }
 
         function mostrarJustificativa() {
@@ -448,9 +560,99 @@
             document.getElementById('prog-modal').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
 
+            document.getElementById('os-form').reset();
+            document.getElementById('produtos-tbody').innerHTML = '';
+            equipamentosSelecionados = [];
+            renderizarEquipamentos();
+            talhoesAtivos = [];
+            renderizarTalhoesSelecionados();
+            
+            document.getElementById('data-solicitacao').valueAsDate = new Date();
+            document.getElementById('data-prev-inicio').valueAsDate = new Date();
+            
             adicionarLinhaProduto();
         }
 
+        // GESTÃO DE OS LOCAL & SINCRONIZAÇÃO
+        function obterHistoricoLocal() {
+            return JSON.parse(localStorage.getItem('os_controle_agricola') || '[]');
+        }
+
+        function salvarHistoricoLocal(lista) {
+            localStorage.setItem('os_controle_agricola', JSON.stringify(lista));
+        }
+
+        function abrirGestaoOS() {
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('gestao-app').style.display = 'block';
+            renderizarTabelaGestao();
+            sincronizarPendentes();
+        }
+
+        function renderizarTabelaGestao() {
+            const tbody = document.getElementById('gestao-tbody');
+            tbody.innerHTML = '';
+
+            const historico = obterHistoricoLocal().filter(os => os.solicitante_cracha === solicitanteCracha);
+
+            if (historico.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--text-muted);">Nenhuma Ordem de Serviço encontrada para este crachá.</td></tr>';
+                return;
+            }
+
+            historico.sort((a, b) => new Date(b.dataLocal) - new Date(a.dataLocal));
+
+            historico.forEach(os => {
+                const tr = document.createElement('tr');
+                const badgeHtml = os.sincronizado 
+                    ? `<span class="badge badge-synced">🟢 Sincronizado<br><small style="font-size:0.65rem; opacity:0.8;">${os.dataSincronizacao || ''}</small></span>`
+                    : `<span class="badge badge-pending">🔴 Não Sincronizado<br><small style="font-size:0.65rem; opacity:0.8;">Salvo Offline</small></span>`;
+
+                tr.innerHTML = `
+                    <td><strong>${os.codigoOS || 'PENDENTE'}</strong></td>
+                    <td>${os.data_solicitacao}</td>
+                    <td>${os.fa_codigo} - ${os.descricao_fazenda}</td>
+                    <td>${os.operacao}</td>
+                    <td>${os.talhoes}</td>
+                    <td>${os.areaTotal} ha</td>
+                    <td>${badgeHtml}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function sincronizarPendentes() {
+            if (!navigator.onLine) return;
+
+            let historico = obterHistoricoLocal();
+            let pendentes = historico.filter(os => !os.sincronizado);
+
+            if (pendentes.length === 0) return;
+
+            for (let os of pendentes) {
+                try {
+                    const res = await fetch(APPSCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify(os.payload),
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                    });
+                    const data = await res.json();
+                    
+                    if (data.success) {
+                        os.sincronizado = true;
+                        os.codigoOS = data.codigoOS;
+                        os.dataSincronizacao = data.syncDate || new Date().toLocaleString('pt-BR');
+                    }
+                } catch (e) {
+                    console.error('Falha ao sincronizar item offline:', e);
+                }
+            }
+
+            salvarHistoricoLocal(historico);
+            renderizarTabelaGestao();
+        }
+
+        // CENTRO DE CUSTO E OPERAÇÃO
         function popularCentrosDeCusto() {
             const selectCC = document.getElementById('centro-custo');
             selectCC.innerHTML = '<option value="">Selecione o Centro de Custo...</option>';
@@ -505,7 +707,6 @@
             inputFundo.value = f.descricao;
             document.getElementById('zona-input').value = f.zona || "";
 
-            // Lógica do Tipo de Fazenda (< 300000 -> PRÓPRIA, >= 300000 -> FORNECEDORES)
             const codNum = parseInt(f.codigo, 10) || 0;
             document.getElementById('tipo-fazenda').value = (codNum < 300000) ? "PRÓPRIA" : "FORNECEDORES";
 
@@ -515,7 +716,6 @@
             renderizarTalhoesSelecionados();
         }
 
-        // PARSER SINTAXE DE TALHÕES (Ex: 1-12, 15-18, 30)
         const inputRangeTalhoes = document.getElementById('talhoes-range-input');
         inputRangeTalhoes.addEventListener('change', processarTalhoesInput);
         inputRangeTalhoes.addEventListener('keyup', (e) => { if (e.key === 'Enter') processarTalhoesInput(); });
@@ -661,7 +861,6 @@
             if (!equipamentosSelecionados.some(e => e.nome === equip.nome)) {
                 equipamentosSelecionados.push(equip);
 
-                // Marca o radio correspondente (PRÓPRIO, TERCEIRO ou ALUGADO)
                 const radios = document.getElementsByName('equip_prop');
                 radios.forEach(r => {
                     if (equip.propriedade.includes(r.value)) r.checked = true;
@@ -779,6 +978,7 @@
             if (e.target !== document.getElementById('login-user')) document.getElementById('login-autocomplete').style.display = 'none';
         });
 
+        // SALVAR E TRATAR MODO OFFLINE
         async function enviarDados() {
             const btn = document.getElementById('btn-submit');
             const loader = document.getElementById('submit-loader');
@@ -791,6 +991,8 @@
                 alert("Por favor, digite e selecione pelo menos um talhão antes de salvar!");
                 return;
             }
+
+            const areaTotalCalculada = document.getElementById('area-total').value;
 
             const payload = {
                 programacao: programacaoStatus,
@@ -830,38 +1032,78 @@
             btn.style.display = 'none';
             loader.style.display = 'block';
 
-            try {
-                const res = await fetch(APPSCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
-                
-                const data = await res.json();
-                gerarComprovanteWhatsApp(payload, data.codigoOS || "OS-OK");
-            } catch (err) {
-                alert('Erro ao enviar dados para a planilha.');
-                btn.style.display = 'block';
-                loader.style.display = 'none';
-                console.error(err);
+            let novoRegistroLocal = {
+                idLocal: Date.now(),
+                solicitante_cracha: solicitanteCracha,
+                codigoOS: null,
+                data_solicitacao: payload.data_solicitacao,
+                fa_codigo: payload.fa_codigo,
+                descricao_fazenda: payload.descricao_fazenda,
+                operacao: payload.operacao,
+                talhoes: payload.talhoes,
+                areaTotal: areaTotalCalculada,
+                sincronizado: false,
+                dataSincronizacao: null,
+                dataLocal: new Date().toISOString(),
+                payload: payload
+            };
+
+            // Tenta enviar para o Sheets
+            if (navigator.onLine) {
+                try {
+                    const res = await fetch(APPSCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify(payload),
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                    });
+                    
+                    const data = await res.json();
+                    if (data.success) {
+                        novoRegistroLocal.sincronizado = true;
+                        novoRegistroLocal.codigoOS = data.codigoOS;
+                        novoRegistroLocal.dataSincronizacao = data.syncDate || new Date().toLocaleString('pt-BR');
+                    }
+                } catch (err) {
+                    console.warn('Erro na rede, salvando localmente como pendente.');
+                }
             }
+
+            // Salva no histórico local do navegador
+            let historico = obterHistoricoLocal();
+            historico.push(novoRegistroLocal);
+            salvarHistoricoLocal(historico);
+
+            btn.style.display = 'block';
+            loader.style.display = 'none';
+
+            gerarComprovanteWhatsApp(payload, novoRegistroLocal);
         }
 
         let linkWhatsApp = "";
 
-        function gerarComprovanteWhatsApp(p, codOS) {
+        function gerarComprovanteWhatsApp(p, regLocal) {
             document.getElementById('main-app').style.display = 'none';
             document.getElementById('receipt-modal').style.display = 'flex';
 
+            const titleElem = document.getElementById('receipt-status-title');
+            if (regLocal.sincronizado) {
+                titleElem.innerText = "OS Lançada e Sincronizada! 🟢";
+                titleElem.style.color = "var(--success)";
+            } else {
+                titleElem.innerText = "OS Salva Offline! 🔴";
+                titleElem.style.color = "var(--warning)";
+            }
+
             let texto = `*ORDEM DE SERVIÇO CONFIRMADA* 🚜\n`;
-            texto += `*Código OS:* ${codOS}\n`;
+            texto += `*Código OS:* ${regLocal.codigoOS || 'PENDENTE DE SINCRONIZAÇÃO'}\n`;
+            texto += `*Status:* ${regLocal.sincronizado ? 'SINCRONIZADA' : 'PENDENTE DE REDE'}\n`;
             texto += `*Programação:* ${p.programacao}\n`;
             if (p.carreador) texto += `*Justificativa/Carreador:* ${p.carreador}\n`;
             texto += `*Fazenda:* ${p.fa_codigo} - ${p.descricao_fazenda}\n`;
             texto += `*Tipo Fazenda:* ${p.tipo_fazenda}\n`;
             texto += `*Centro de Custo:* ${p.centro_custo}\n`;
             texto += `*Operação:* ${p.operacao}\n`;
-            texto += `*Área Total:* ${document.getElementById('area-total').value} ha\n`;
+            texto += `*Área Total:* ${regLocal.areaTotal} ha\n`;
             texto += `*Talhões:* ${p.talhoes}\n`;
             texto += `*Equipamento(s):* ${p.frota}\n\n`;
             texto += `*🌱 INSUMOS APLICADOS:*\n`;
