@@ -105,7 +105,6 @@
         .autocomplete-item { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--bg-input); font-size: 0.85rem; }
         .autocomplete-item:hover { background-color: var(--bg-input); color: var(--accent); }
 
-        /* CHIPS - TALHÕES E EQUIPAMENTOS */
         .talhoes-container { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.8rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border-color); min-height: 48px; }
         .talhao-chip { background: var(--bg-card); border: 1px solid var(--accent); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; color: #fff; }
         .talhao-chip input[type="number"] { width: 65px; padding: 2px 4px; font-size: 0.75rem; border-radius: 4px; background: var(--bg-input); color: #fff; display: none; border: 1px solid #fff; }
@@ -127,7 +126,6 @@
         .btn-add-row { background: transparent; color: var(--accent); border: 1px dashed var(--accent); margin-top: 10px; }
         .btn-remove-row { color: var(--danger); background: none; border: none; font-size: 1.2rem; cursor: pointer; }
 
-        /* BADGES GESTÃO OS */
         .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
         .badge-synced { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
         .badge-pending { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
@@ -164,7 +162,7 @@
         </div>
     </div>
 
-    <!-- 2. MENU PRINCIPAL DE OPÇÕES -->
+    <!-- 2. MENU PRINCIPAL -->
     <div id="menu-screen" style="display: none;">
         <div class="modal-box">
             <h2>Menu Principal</h2>
@@ -218,8 +216,8 @@
         </div>
 
         <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; justify-content: space-between; align-items: center;">
-            <button class="btn-action" style="max-width: 220px; margin-top: 0; background: #3b82f6; color: #fff;" onclick="sincronizarPendentes()">
-                🔄 Sincronizar Pendentes
+            <button class="btn-action" style="max-width: 220px; margin-top: 0; background: #3b82f6; color: #fff;" onclick="carregarEExibirGestaoOS()">
+                🔄 Atualizar / Sincronizar
             </button>
             <button class="btn-action" style="max-width: 220px; margin-top: 0;" onclick="voltarAoMenu()">
                 ⬅️ Voltar ao Menu
@@ -235,8 +233,8 @@
                         <th>Fazenda (F.A)</th>
                         <th>Operação</th>
                         <th>Talhões</th>
-                        <th>Área (ha)</th>
-                        <th>Status Sincronização</th>
+                        <th>Equipamentos</th>
+                        <th>Status / Data Sinc.</th>
                     </tr>
                 </thead>
                 <tbody id="gestao-tbody">
@@ -428,13 +426,11 @@
         let carreadorTexto = "";
         let equipamentosSelecionados = [];
 
-        // INICIALIZAÇÃO
         window.addEventListener('DOMContentLoaded', async () => {
             await carregarDadosIniciais();
             document.getElementById('data-solicitacao').valueAsDate = new Date();
             document.getElementById('data-prev-inicio').valueAsDate = new Date();
             
-            // Ouvinte de sincronização quando a internet voltar
             window.addEventListener('online', () => {
                 sincronizarPendentes();
             });
@@ -452,19 +448,17 @@
                     dbEquipamentos = res.dados.equipamentos || [];
                     dbOperacoes = res.dados.operacoes || [];
 
-                    // Salva cache local de apoio
                     localStorage.setItem('db_solicitantes', JSON.stringify(dbSolicitantes));
                     configurarLoginAutocomplete();
                     popularCentrosDeCusto();
                 }
             } catch (e) {
-                console.warn('Iniciado em modo offline com dados salvos em cache.');
+                console.warn('Iniciado em modo offline.');
                 dbSolicitantes = JSON.parse(localStorage.getItem('db_solicitantes') || '[]');
                 configurarLoginAutocomplete();
             }
         }
 
-        // LOGIN E RETORNO AO MENU
         function configurarLoginAutocomplete() {
             const input = document.getElementById('login-user');
             const list = document.getElementById('login-autocomplete');
@@ -573,7 +567,7 @@
             adicionarLinhaProduto();
         }
 
-        // GESTÃO DE OS LOCAL & SINCRONIZAÇÃO
+        // CARREGA OS DO BANCO DB - LANCAMENTO + OFFLINE
         function obterHistoricoLocal() {
             return JSON.parse(localStorage.getItem('os_controle_agricola') || '[]');
         }
@@ -585,24 +579,48 @@
         function abrirGestaoOS() {
             document.getElementById('menu-screen').style.display = 'none';
             document.getElementById('gestao-app').style.display = 'block';
-            renderizarTabelaGestao();
-            sincronizarPendentes();
+            carregarEExibirGestaoOS();
         }
 
-        function renderizarTabelaGestao() {
+        async function carregarEExibirGestaoOS() {
+            const tbody = document.getElementById('gestao-tbody');
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem;">⏳ Carregando Ordens de Serviço da planilha DB - LANCAMENTO...</td></tr>';
+
+            await sincronizarPendentes();
+
+            let historicoOnline = [];
+
+            if (navigator.onLine) {
+                try {
+                    const res = await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`);
+                    const data = await res.json();
+                    if (data.success) {
+                        historicoOnline = data.dados || [];
+                    }
+                } catch (e) {
+                    console.warn('Não foi possível conectar ao banco online:', e);
+                }
+            }
+
+            // Pega itens pendentes do localStorage que ainda não foram sincronizados
+            const historicoLocal = obterHistoricoLocal().filter(os => os.solicitante_cracha === solicitanteCracha && !os.sincronizado);
+
+            // Combina (Pendentes offline no topo, seguidos das OS online)
+            const listaCompleta = [...historicoLocal, ...historicoOnline];
+
+            renderizarTabelaGestao(listaCompleta);
+        }
+
+        function renderizarTabelaGestao(lista) {
             const tbody = document.getElementById('gestao-tbody');
             tbody.innerHTML = '';
 
-            const historico = obterHistoricoLocal().filter(os => os.solicitante_cracha === solicitanteCracha);
-
-            if (historico.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--text-muted);">Nenhuma Ordem de Serviço encontrada para este crachá.</td></tr>';
+            if (lista.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 2rem;">Nenhuma Ordem de Serviço encontrada para este crachá na planilha.</td></tr>';
                 return;
             }
 
-            historico.sort((a, b) => new Date(b.dataLocal) - new Date(a.dataLocal));
-
-            historico.forEach(os => {
+            lista.forEach(os => {
                 const tr = document.createElement('tr');
                 const badgeHtml = os.sincronizado 
                     ? `<span class="badge badge-synced">🟢 Sincronizado<br><small style="font-size:0.65rem; opacity:0.8;">${os.dataSincronizacao || ''}</small></span>`
@@ -610,11 +628,11 @@
 
                 tr.innerHTML = `
                     <td><strong>${os.codigoOS || 'PENDENTE'}</strong></td>
-                    <td>${os.data_solicitacao}</td>
-                    <td>${os.fa_codigo} - ${os.descricao_fazenda}</td>
-                    <td>${os.operacao}</td>
-                    <td>${os.talhoes}</td>
-                    <td>${os.areaTotal} ha</td>
+                    <td>${os.data_solicitacao || '-'}</td>
+                    <td>${os.fa_codigo || ''} - ${os.descricao_fazenda || ''}</td>
+                    <td>${os.operacao || '-'}</td>
+                    <td>${os.talhoes || '-'}</td>
+                    <td>${os.equipamentos || os.frota || '-'}</td>
                     <td>${badgeHtml}</td>
                 `;
                 tbody.appendChild(tr);
@@ -649,7 +667,6 @@
             }
 
             salvarHistoricoLocal(historico);
-            renderizarTabelaGestao();
         }
 
         // CENTRO DE CUSTO E OPERAÇÃO
@@ -978,7 +995,7 @@
             if (e.target !== document.getElementById('login-user')) document.getElementById('login-autocomplete').style.display = 'none';
         });
 
-        // SALVAR E TRATAR MODO OFFLINE
+        // SALVAR
         async function enviarDados() {
             const btn = document.getElementById('btn-submit');
             const loader = document.getElementById('submit-loader');
@@ -1041,14 +1058,13 @@
                 descricao_fazenda: payload.descricao_fazenda,
                 operacao: payload.operacao,
                 talhoes: payload.talhoes,
-                areaTotal: areaTotalCalculada,
+                equipamentos: payload.frota,
                 sincronizado: false,
                 dataSincronizacao: null,
                 dataLocal: new Date().toISOString(),
                 payload: payload
             };
 
-            // Tenta enviar para o Sheets
             if (navigator.onLine) {
                 try {
                     const res = await fetch(APPSCRIPT_URL, {
@@ -1068,7 +1084,6 @@
                 }
             }
 
-            // Salva no histórico local do navegador
             let historico = obterHistoricoLocal();
             historico.push(novoRegistroLocal);
             salvarHistoricoLocal(historico);
@@ -1103,7 +1118,7 @@
             texto += `*Tipo Fazenda:* ${p.tipo_fazenda}\n`;
             texto += `*Centro de Custo:* ${p.centro_custo}\n`;
             texto += `*Operação:* ${p.operacao}\n`;
-            texto += `*Área Total:* ${regLocal.areaTotal} ha\n`;
+            texto += `*Área Total:* ${document.getElementById('area-total').value} ha\n`;
             texto += `*Talhões:* ${p.talhoes}\n`;
             texto += `*Equipamento(s):* ${p.frota}\n\n`;
             texto += `*🌱 INSUMOS APLICADOS:*\n`;
