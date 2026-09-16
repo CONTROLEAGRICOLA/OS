@@ -1,89 +1,378 @@
-// SOLICITA PERMISSÃO DE NOTIFICAÇÃO AO ENTRAR
-window.addEventListener('DOMContentLoaded', async () => {
-    carregarPreferenciaTema();
-    verificarSessaoSalva();
-    await carregarDadosIniciais();
-
-    if ("Notification" in window && Notification.permission !== "granted") {
-        Notification.requestPermission();
-    }
-
-    // Monitora atualizações de status para emitir notificação a cada 20 segundos
-    setInterval(verificarAtualizacaoStatusNotificacoes, 20000);
-});
-
-// MONITOR DE NOTIFICAÇÃO PUSH DE APROVAÇÃO/REJEIÇÃO
-async function verificarAtualizacaoStatusNotificacoes() {
-    if (!solicitanteCracha || !navigator.onLine) return;
-
-    try {
-        const res = await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`);
-        const data = await res.json();
-        
-        if (data.success && data.dados) {
-            const statusSalvos = JSON.parse(localStorage.getItem('os_tracker_status') || '{}');
-
-            data.dados.forEach(os => {
-                const statusAnterior = statusSalvos[os.codigoOS];
-                const statusAtual = os.statusAprovacao;
-
-                if (statusAnterior && statusAnterior === 'Em análise' && statusAtual !== 'Em análise') {
-                    dispararNotificacaoNavegador(os);
-                }
-                statusSalvos[os.codigoOS] = statusAtual;
-            });
-
-            localStorage.setItem('os_tracker_status', JSON.stringify(statusSalvos));
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GESTÃO A VISTA - Ordem de serviço | Clealco</title>
+    <style>
+        :root {
+            --bg-page: #05050a;
+            --bg-card: #0f0f17;
+            --bg-input: #1a1a26;
+            --border-color: #27273a;
+            --text-main: #f4f4f5;
+            --text-muted: #8e8ea0;
+            --accent: #06b6d4;
+            --accent-glow: rgba(6, 182, 212, 0.25);
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
         }
-    } catch (e) {
-        console.warn('Erro ao checar notificações.');
-    }
-}
 
-function dispararNotificacaoNavegador(os) {
-    if ("Notification" in window && Notification.permission === "granted") {
-        const aprovado = os.statusAprovacao === 'Aprovado';
-        const titulo = aprovado ? `✅ OS nº ${os.codigoOS} APROVADA!` : `❌ OS nº ${os.codigoOS} REJEITADA!`;
-        const corpo = aprovado 
-            ? `Sua solicitação para a fazenda ${os.descricao_fazenda} foi aprovada pelo Controle Agrícola.`
-            : `Motivo: ${os.justificativaRejeicao || 'Não especificado.'}`;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        new Notification(titulo, {
-            body: corpo,
-            icon: 'logo.png'
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            font-family: 'Segoe UI', -apple-system, Roboto, sans-serif;
+            padding: 1.5rem;
+            min-height: 100vh;
+        }
+
+        .header-dashboard {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 15, 23, 0.8);
+            backdrop-filter: blur(12px);
+            padding: 1.2rem 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-box { display: flex; align-items: center; gap: 1rem; }
+        .logo-box img { height: 48px; }
+        .title-dash { font-size: 1.4rem; font-weight: 800; letter-spacing: 1px; color: var(--accent); }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; margin-bottom: 1.5rem; }
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 1.2rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .kpi-card h3 { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; }
+        .kpi-card .val { font-size: 2rem; font-weight: 800; }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 1.5rem;
+        }
+
+        .table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            overflow: hidden;
+        }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { padding: 1rem; background: var(--bg-input); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
+        td { padding: 1rem; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
+        tr.selected { background-color: rgba(6, 182, 212, 0.15) !important; border-left: 4px solid var(--accent); }
+        tr:hover { background-color: var(--bg-input); cursor: pointer; }
+
+        .badge { padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; }
+        .badge-analise { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+        .badge-aprovado { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .badge-rejeitado { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+
+        .detail-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .field-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-top: 0.8rem; }
+        .field-val { font-size: 1rem; font-weight: 600; color: var(--text-main); margin-top: 2px; }
+
+        .btn {
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-approve { background: var(--success); color: #fff; flex: 1; }
+        .btn-approve:hover { filter: brightness(1.2); transform: translateY(-2px); }
+        .btn-reject { background: var(--danger); color: #fff; flex: 1; }
+        .btn-reject:hover { filter: brightness(1.2); transform: translateY(-2px); }
+
+        /* MODAL REJEIÇÃO */
+        #reject-modal {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+            display: none; justify-content: center; align-items: center; z-index: 2000;
+        }
+        .reject-box {
+            background: var(--bg-card); border: 1px solid var(--danger);
+            padding: 2rem; border-radius: 16px; width: 450px; text-align: left;
+        }
+        textarea {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border-color);
+            color: #fff; padding: 0.8rem; border-radius: 8px; margin: 1rem 0; outline: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CABEÇALHO DASHBOARD WINDOWS -->
+    <div class="header-dashboard">
+        <div class="logo-box">
+            <img src="logo.png" alt="Clealco">
+            <div>
+                <div class="title-dash">GESTÃO A VISTA - Ordem de serviço</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Painel de Aprovação do Controle Agrícola</div>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <button class="btn" style="background: var(--bg-input); color: #fff; border: 1px solid var(--border-color);" onclick="carregarTodasOS()">🔄 Atualizar Dados</button>
+            <div id="live-clock" style="font-weight: 700; color: var(--accent); font-size: 1.1rem;"></div>
+        </div>
+    </div>
+
+    <!-- CARDS DE KPI -->
+    <div class="kpi-grid">
+        <div class="kpi-card"><h3>Total Solicitado</h3><div class="val" id="kpi-total">0</div></div>
+        <div class="kpi-card" style="border-color: var(--warning);"><h3>Em Análise</h3><div class="val" style="color: var(--warning);" id="kpi-analise">0</div></div>
+        <div class="kpi-card" style="border-color: var(--success);"><h3>Aprovadas</h3><div class="val" style="color: var(--success);" id="kpi-aprovadas">0</div></div>
+        <div class="kpi-card" style="border-color: var(--danger);"><h3>Rejeitadas</h3><div class="val" style="color: var(--danger);" id="kpi-rejeitadas">0</div></div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="main-content">
+        <!-- TABELA DE TODAS AS OS -->
+        <div class="table-card">
+            <h2 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-muted);">Fila de Ordens de Serviço Lançadas</h2>
+            <div style="overflow-y: auto; max-height: 60vh;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>OS</th>
+                            <th>Solicitante</th>
+                            <th>Fazenda</th>
+                            <th>Operação</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dash-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- DETALHES E PAINEL DE DECISÃO -->
+        <div class="detail-card">
+            <div>
+                <h2 style="font-size: 1.1rem; color: var(--accent); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;" id="detalhe-titulo">Selecione uma OS</h2>
+                
+                <div id="detalhe-conteudo" style="display: none;">
+                    <div class="field-label">Solicitante</div>
+                    <div class="field-val" id="det-solicitante">-</div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <div style="flex: 1;">
+                            <div class="field-label">Fazenda</div>
+                            <div class="field-val" id="det-fazenda">-</div>
+                        </div>
+                        <div style="flex: 1;">
+                            <div class="field-label">Tipo</div>
+                            <div class="field-val" id="det-tipo">-</div>
+                        </div>
+                    </div>
+
+                    <div class="field-label">Operação</div>
+                    <div class="field-val" id="det-operacao">-</div>
+
+                    <div class="field-label">Talhões / Frota</div>
+                    <div class="field-val" id="det-talhoes-frota">-</div>
+
+                    <div class="field-label">Insumos Lançados</div>
+                    <div class="field-val" id="det-insumos" style="font-size: 0.85rem; color: var(--accent);">-</div>
+
+                    <div class="field-label">Observações do Campo</div>
+                    <div class="field-val" id="det-obs" style="font-size: 0.85rem; font-style: italic;">-</div>
+                </div>
+            </div>
+
+            <div id="action-buttons-box" style="display: none; gap: 1rem; margin-top: 1.5rem;">
+                <button class="btn btn-approve" onclick="aprovarOS()">Aprovar OS</button>
+                <button class="btn btn-reject" onclick="abrirModalRejeicao()">Rejeitar OS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE REJEIÇÃO COM JUSTIFICATIVA -->
+    <div id="reject-modal">
+        <div class="reject-box">
+            <h2 style="color: var(--danger);">Rejeitar Ordem de Serviço</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">Informe o motivo para o setor do Controle Agrícola:</p>
+            <textarea id="reject-reason" rows="4" placeholder="Ex: Equipamento sem disponibilidade / Insumo divergente..."></textarea>
+            <div style="display: flex; gap: 0.8rem;">
+                <button class="btn" style="background: var(--bg-input); color: #fff; flex: 1;" onclick="fecharModalRejeicao()">Cancelar</button>
+                <button class="btn btn-reject" onclick="confirmarRejeicao()">Confirmar Rejeição</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQZWlJ8xGg-VqRLvWWPuowCQ2QUJg-CEXjW8oM_tEo7fqVsGOov2UZxU85snQtvyLp/exec';
+
+        let listaOS = [];
+        let osSelecionada = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            solicitarPermissaoNotificacao();
+            carregarTodasOS();
+            setInterval(carregarTodasOS, 15000); // Polling a cada 15 segundos
+            setInterval(() => {
+                document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('pt-BR');
+            }, 1000);
         });
-    }
-}
 
-// RENDERIZADOR ATUALIZADO NA TABELA DA ABA GESTÃO OS DO APP
-function renderizarTabelaGestao(lista) {
-    const tbody = document.getElementById('gestao-tbody');
-    tbody.innerHTML = '';
+        function solicitarPermissaoNotificacao() {
+            if ("Notification" in window && Notification.permission !== "granted") {
+                Notification.requestPermission();
+            }
+        }
 
-    if (lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 2rem;">Nenhuma OS localizada para este crachá.</td></tr>';
-        return;
-    }
+        function dispararNotificacaoWindows(titulo, msg) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(titulo, { body: msg, icon: 'logo.png' });
+            }
+        }
 
-    lista.forEach((os, index) => {
-        const tr = document.createElement('tr');
-        tr.className = 'tr-clickable';
-        tr.onclick = () => visualizarOS(index);
+        async function carregarTodasOS() {
+            try {
+                const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_todas_os`)).json();
+                if (res.success) {
+                    const qtdAnterior = listaOS.length;
+                    listaOS = res.dados || [];
 
-        const st = os.statusAprovacao || "Em análise";
-        let statusBadge = `<span class="badge badge-pending">⏳ Em análise</span>`;
-        if (st === "Aprovado") statusBadge = `<span class="badge badge-synced">🟢 Aprovado</span>`;
-        if (st === "Rejeitado") statusBadge = `<span class="badge" style="background:rgba(239, 68, 68, 0.15); color:var(--danger); border:1px solid rgba(239, 68, 68, 0.3);">🔴 Rejeitado</span>`;
+                    // Notifica se chegou OS nova para o Controle
+                    if (qtdAnterior > 0 && listaOS.length > qtdAnterior) {
+                        dispararNotificacaoWindows("NOVA OS RECEBIDA! 🚜", `Nova solicitação aguardando aprovação.`);
+                    }
 
-        tr.innerHTML = `
-            <td><strong>#${os.codigoOS || 'PENDENTE'}</strong></td>
-            <td>${os.data_solicitacao || '-'}</td>
-            <td>${os.fa_codigo || ''} - ${os.descricao_fazenda || ''}</td>
-            <td>${os.operacao || '-'}</td>
-            <td>${os.talhoes || '-'}</td>
-            <td>${os.equipamentos || os.frota || '-'}</td>
-            <td>${statusBadge}</td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
+                    atualizarKPIs();
+                    renderizarTabela();
+                    if (osSelecionada) {
+                        const atualizada = listaOS.find(o => o.codigoOS === osSelecionada.codigoOS);
+                        if (atualizada) selecionarOS(atualizada);
+                    }
+                }
+            } catch (e) {}
+        }
+
+        function atualizarKPIs() {
+            document.getElementById('kpi-total').innerText = listaOS.length;
+            document.getElementById('kpi-analise').innerText = listaOS.filter(o => (o.status_aprovacao || 'Em análise') === 'Em análise').length;
+            document.getElementById('kpi-aprovadas').innerText = listaOS.filter(o => o.status_aprovacao === 'Aprovado').length;
+            document.getElementById('kpi-rejeitadas').innerText = listaOS.filter(o => o.status_aprovacao === 'Rejeitado').length;
+        }
+
+        function renderizarTabela() {
+            const tbody = document.getElementById('dash-tbody');
+            tbody.innerHTML = '';
+
+            listaOS.forEach(os => {
+                const tr = document.createElement('tr');
+                if (osSelecionada && osSelecionada.codigoOS === os.codigoOS) tr.className = 'selected';
+
+                let st = os.status_aprovacao || "Em análise";
+                let badgeClass = "badge-analise";
+                if (st === "Aprovado") badgeClass = "badge-aprovado";
+                if (st === "Rejeitado") badgeClass = "badge-rejeitado";
+
+                tr.onclick = () => selecionarOS(os);
+                tr.innerHTML = `
+                    <td><strong>${os.codigoOS}</strong></td>
+                    <td>${os.solicitante_nome || os.solicitante_cracha}</td>
+                    <td>${os.fa_codigo} - ${os.descricao_fazenda}</td>
+                    <td>${os.operacao}</td>
+                    <td><span class="badge ${badgeClass}">${st}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function selecionarOS(os) {
+            osSelecionada = os;
+            renderizarTabela();
+
+            document.getElementById('detalhe-titulo').innerText = `OS nº ${os.codigoOS} [${os.status_aprovacao || 'Em análise'}]`;
+            document.getElementById('det-solicitante').innerText = `${os.solicitante_cracha} - ${os.solicitante_nome}`;
+            document.getElementById('det-fazenda').innerText = `${os.fa_codigo} - ${os.descricao_fazenda}`;
+            document.getElementById('det-tipo').innerText = os.tipo_fazenda || "-";
+            document.getElementById('det-operacao').innerText = `${os.centro_custo} / ${os.operacao}`;
+            document.getElementById('det-talhoes-frota').innerText = `Talhões: ${os.talhoes} | Frota: ${os.equipamentos}`;
+
+            let prodsStr = (os.produtos || []).map(p => `▪ ${p.desc}: ${p.total} ${p.un}`).join('<br>');
+            document.getElementById('det-insumos').innerHTML = prodsStr || "Nenhum insumo";
+            document.getElementById('det-obs').innerText = os.observacao || "Sem observações";
+
+            document.getElementById('detalhe-conteudo').style.display = 'block';
+            document.getElementById('action-buttons-box').style.display = 'flex';
+        }
+
+        async function aprovarOS() {
+            if (!osSelecionada) return;
+            if (confirm(`Confirmar APROVAÇÃO da OS nº ${osSelecionada.codigoOS}?`)) {
+                await enviarAtualizacaoStatus("Aprovado", "");
+            }
+        }
+
+        function abrirModalRejeicao() {
+            if (!osSelecionada) return;
+            document.getElementById('reject-reason').value = '';
+            document.getElementById('reject-modal').style.display = 'flex';
+        }
+
+        function fecharModalRejeicao() {
+            document.getElementById('reject-modal').style.display = 'none';
+        }
+
+        async function confirmarRejeicao() {
+            const motivo = document.getElementById('reject-reason').value.trim();
+            if (!motivo) { alert("Informe a justificativa da rejeição!"); return; }
+            fecharModalRejeicao();
+            await enviarAtualizacaoStatus("Rejeitado", motivo);
+        }
+
+        async function enviarAtualizacaoStatus(status, justificativa) {
+            try {
+                const res = await (await fetch(APPSCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'atualizar_status',
+                        codigoOS: osSelecionada.codigoOS,
+                        status: status,
+                        justificativa: justificativa
+                    })
+                })).json();
+
+                if (res.success) {
+                    dispararNotificacaoWindows(`OS nº ${osSelecionada.codigoOS} ATUALIZADA!`, `Status alterado para ${status}.`);
+                    await carregarTodasOS();
+                } else {
+                    alert("Erro ao atualizar: " + res.error);
+                }
+            } catch(e) {
+                alert("Falha de conexão com a rede.");
+            }
+        }
+    </script>
+</body>
+</html>
