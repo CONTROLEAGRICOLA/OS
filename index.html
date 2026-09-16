@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ordem de Serviço - Controle Agrícola | Clealco</title>
     <style>
-        :root {
+        :root[data-theme="dark"] {
             --bg-page: #09090b;
             --bg-card: #18181b;
             --bg-input: #27272a;
@@ -13,191 +13,302 @@
             --text-main: #f4f4f5;
             --text-muted: #a1a1aa;
             --accent: #06b6d4;
-            --accent-glow: rgba(6, 182, 212, 0.3);
+            --accent-hover: #0891b2;
+            --accent-glow: rgba(6, 182, 212, 0.25);
             --danger: #ef4444;
             --warning: #f59e0b;
             --success: #10b981;
+            --shadow-color: rgba(0, 0, 0, 0.4);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root[data-theme="light"] {
+            --bg-page: #f4f4f5;
+            --bg-card: #ffffff;
+            --bg-input: #f4f4f5;
+            --border-color: #e4e4e7;
+            --text-main: #18181b;
+            --text-muted: #71717a;
+            --accent: #0284c7;
+            --accent-hover: #0369a1;
+            --accent-glow: rgba(2, 132, 199, 0.2);
+            --danger: #dc2626;
+            --warning: #d97706;
+            --success: #059669;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
 
         body {
             background-color: var(--bg-page);
             color: var(--text-main);
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
             justify-content: center;
             min-height: 100vh;
         }
 
-        #login-screen, #prog-modal, #menu-screen {
+        /* SISTEMA MODERNO DE BOTÕES */
+        button, .btn {
+            appearance: none;
+            -webkit-appearance: none;
+            border: 1px solid transparent;
+            outline: none;
+            font-family: inherit;
+            cursor: pointer;
+            border-radius: 8px;
+            padding: 0.75rem 1.25rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            user-select: none;
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 2px 8px var(--accent-glow);
+        }
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-input);
+            color: var(--text-main);
+            border-color: var(--border-color);
+        }
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text-main);
+            border-color: var(--border-color);
+        }
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-danger {
+            background-color: rgba(239, 68, 68, 0.12);
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        .btn-danger:hover {
+            background-color: var(--danger);
+            color: #ffffff;
+        }
+
+        .btn-icon-gear {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 1.2rem;
+        }
+        .btn-icon-gear:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: rotate(45deg);
+        }
+
+        /* MODAIS E SCREENS */
+        #login-screen, #prog-modal, #menu-screen, #settings-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(9, 9, 11, 0.95); backdrop-filter: blur(10px);
+            background: rgba(9, 9, 11, 0.7); backdrop-filter: blur(12px);
             display: flex; justify-content: center; align-items: center;
-            z-index: 1000; transition: opacity 0.5s ease;
+            z-index: 1000;
         }
 
         .modal-box {
             background: var(--bg-card); padding: 2.5rem; border-radius: 16px;
-            border: 1px solid var(--border-color); box-shadow: 0 0 30px var(--accent-glow);
-            width: 100%; max-width: 450px; text-align: center; position: relative;
+            border: 1px solid var(--border-color); box-shadow: 0 20px 40px var(--shadow-color);
+            width: 90%; max-width: 440px; text-align: center; position: relative;
         }
-        .modal-box h2 { color: var(--accent); margin-bottom: 1.5rem; }
-        .modal-box button { margin-top: 1rem; width: 100%; padding: 0.9rem; background: var(--accent); color: #000; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-        .modal-box button:hover { box-shadow: 0 0 15px var(--accent-glow); transform: translateY(-2px); }
-
-        .btn-menu {
-            display: flex; align-items: center; justify-content: center; gap: 12px;
-            font-size: 1.1rem !important; padding: 1.2rem !important; margin-top: 1rem !important;
-        }
-        .btn-menu-gestao { background: #3b82f6 !important; color: #fff !important; }
-        .btn-menu-lancar { background: var(--accent) !important; color: #000 !important; }
-
-        .btn-group-prog { display: flex; gap: 1rem; margin-top: 1.5rem; }
-        .btn-prog-sim { background: var(--success) !important; color: #fff !important; }
-        .btn-prog-nao { background: var(--danger) !important; color: #fff !important; }
-
-        .loader { border: 4px solid var(--border-color); border-top: 4px solid var(--accent); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto; display: none; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .modal-box h2 { color: var(--accent); margin-bottom: 1.2rem; font-size: 1.35rem; }
 
         .container {
             background-color: var(--bg-card);
-            max-width: 1200px; width: 100%; padding: 2rem;
+            max-width: 1100px; width: 100%; padding: 2rem;
             border-radius: 16px; border: 1px solid var(--border-color);
-            margin: 2rem; display: none;
+            margin: 1.5rem; display: none; box-shadow: 0 10px 30px var(--shadow-color);
         }
 
-        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--border-color); flex-wrap: wrap; gap: 1rem; }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1.2rem; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 1rem; }
         .logo-container { display: flex; align-items: center; gap: 12px; }
-        .logo-img { height: 50px; width: auto; object-fit: contain; }
-        .logo-text { font-weight: 700; font-size: 1.1rem; color: var(--text-main); line-height: 1.2; }
-        h1 { font-size: 1.5rem; color: var(--accent); text-align: right; }
+        .logo-img { height: 46px; width: auto; object-fit: contain; }
+        .logo-text { font-weight: 700; font-size: 1.05rem; color: var(--text-main); line-height: 1.2; }
 
         .section { margin-bottom: 2rem; }
-        .section-title { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
+        .section-title { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border-color); }
         .grid { display: grid; gap: 1.2rem; }
         .grid-2 { grid-template-columns: repeat(2, 1fr); }
         .grid-3 { grid-template-columns: repeat(3, 1fr); }
-        .grid-4 { grid-template-columns: repeat(4, 1fr); }
-        
+
         .form-group { display: flex; flex-direction: column; gap: 0.4rem; position: relative; }
-        label { font-size: 0.85rem; font-weight: 500; color: var(--text-muted); }
-        
-        input[type="text"], input[type="number"], input[type="date"], textarea, select {
+        label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+
+        input[type="text"], input[type="password"], input[type="number"], input[type="date"], textarea, select {
             width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-color);
-            color: var(--text-main); padding: 0.75rem; border-radius: 8px; outline: none; font-size: 0.95rem;
+            color: var(--text-main); padding: 0.75rem 1rem; border-radius: 8px; outline: none; font-size: 0.95rem;
         }
         input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-        input[readonly] { opacity: 0.7; cursor: not-allowed; }
+        input[readonly] { opacity: 0.75; cursor: not-allowed; }
+
+        .checkbox-label { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; user-select: none; }
+        .checkbox-label input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
 
         .badge-prog-status {
-            padding: 0.85rem; border-radius: 8px; font-weight: 800; text-align: center; font-size: 0.95rem;
-            letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; height: 46px;
+            padding: 0.75rem; border-radius: 8px; font-weight: 700; text-align: center; font-size: 0.9rem;
+            display: flex; align-items: center; justify-content: center; height: 44px;
         }
-        .badge-prog-sim { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid var(--success); }
-        .badge-prog-nao { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid var(--danger); }
+        .badge-prog-sim { background: rgba(16, 185, 129, 0.12); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-prog-nao { background: rgba(239, 68, 68, 0.12); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
 
         .autocomplete-list {
             position: absolute; top: 100%; left: 0; right: 0; z-index: 99; background: var(--bg-card);
             border: 1px solid var(--border-color); border-radius: 8px; max-height: 200px; overflow-y: auto; display: none;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 25px var(--shadow-color);
         }
-        .autocomplete-item { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--bg-input); font-size: 0.85rem; }
+        .autocomplete-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--bg-input); font-size: 0.85rem; }
         .autocomplete-item:hover { background-color: var(--bg-input); color: var(--accent); }
 
-        /* CHIPS */
         .talhoes-container { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.8rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border-color); min-height: 48px; }
-        .talhao-chip { background: var(--bg-card); border: 1px solid var(--accent); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; color: #fff; }
-        .talhao-chip input[type="number"] { width: 65px; padding: 2px 4px; font-size: 0.75rem; border-radius: 4px; background: var(--bg-input); color: #fff; display: none; border: 1px solid #fff; }
+        .talhao-chip { background: var(--bg-card); border: 1px solid var(--accent); padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
+        .talhao-chip input[type="number"] { width: 60px; padding: 2px 4px; font-size: 0.75rem; border-radius: 4px; background: var(--bg-input); color: var(--text-main); display: none; border: 1px solid var(--border-color); }
         .talhao-chip.partial input[type="number"] { display: block; }
-        .btn-partial { background: transparent; border: 1px solid #fff; color: inherit; border-radius: 4px; padding: 2px 5px; font-size: 0.7rem; cursor: pointer; }
+        .btn-partial { background: transparent; border: 1px solid var(--border-color); color: inherit; border-radius: 4px; padding: 2px 5px; font-size: 0.7rem; cursor: pointer; }
 
-        .equip-chip { background: var(--accent); color: #000; font-weight: bold; padding: 4px 10px; border-radius: 16px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; }
-        .equip-chip button { background: none; border: none; color: #000; font-weight: bold; cursor: pointer; font-size: 1rem; line-height: 1; }
+        .equip-chip { background: var(--accent); color: #fff; font-weight: 600; padding: 4px 10px; border-radius: 16px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; }
+        .equip-chip button { background: none; border: none; color: #fff; cursor: pointer; font-size: 1rem; line-height: 1; padding: 0; }
 
-        /* TABELA AJUSTADA PARA CELULAR */
-        .table-responsive {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            margin-top: 0.5rem;
-            position: relative;
-        }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 0.5rem; }
         table { width: 100%; border-collapse: collapse; min-width: 580px; }
-        th { background-color: var(--bg-input); color: var(--text-muted); font-size: 0.8rem; padding: 0.6rem; text-align: left; }
-        td { padding: 0.4rem; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; position: relative; }
-        td input { background-color: transparent !important; border: 1px solid transparent !important; font-size: 0.85rem !important; padding: 0.4rem !important; }
-        td input:focus { background-color: var(--bg-input) !important; border: 1px solid var(--accent) !important; }
+        th { background-color: var(--bg-input); color: var(--text-muted); font-size: 0.8rem; padding: 0.75rem; text-align: left; }
+        td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; }
 
-        td .autocomplete-list {
-            position: absolute; top: 100%; left: 0; min-width: 260px; max-width: 90vw; z-index: 999;
-        }
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+        .badge-synced { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
 
-        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
-        .badge-synced { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
-        .badge-pending { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
-
-        #receipt-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(9, 9, 11, 0.95); display: none; justify-content: center; align-items: center; z-index: 2000;
-        }
+        #receipt-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 9, 11, 0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .receipt-box { background: var(--bg-card); padding: 2rem; border-radius: 16px; border: 1px solid var(--accent); text-align: center; max-width: 450px; width: 90%; }
         .receipt-box pre { text-align: left; background: var(--bg-input); padding: 1rem; border-radius: 8px; font-size: 0.85rem; overflow-x: auto; color: var(--success); margin: 1rem 0; white-space: pre-wrap; font-family: monospace; }
 
+        .loader { border: 3px solid var(--border-color); border-top: 3px solid var(--accent); border-radius: 50%; width: 28px; height: 28px; animation: spin 0.8s linear infinite; margin: 0 auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         @media (max-width: 768px) {
-            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
             .container { margin: 0; border-radius: 0; padding: 1rem; }
-            h1 { text-align: left; margin-top: 1rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. TELA DE LOGIN -->
+    <!-- 1. TELA DE LOGIN COM VALIDAÇÃO DE SENHA -->
     <div id="login-screen">
         <div class="modal-box">
-            <img src="logo.png" alt="Clealco" style="height: 64px; margin: 0 auto 1.5rem auto; display: block; object-fit: contain;">
-            <h2>Acesso do Solicitante</h2>
-            <div class="form-group" style="text-align: left;">
-                <label>Selecione seu Nome/Crachá</label>
-                <input type="text" id="login-user" placeholder="Digite seu nome ou crachá..." autocomplete="off">
-                <div id="login-autocomplete" class="autocomplete-list"></div>
-            </div>
-            <button onclick="validarLogin()">AVANÇAR</button>
+            <img src="logo.png" alt="Clealco" style="height: 56px; margin: 0 auto 1.2rem auto; display: block; object-fit: contain;">
+            <h2>Controle Agrícola</h2>
+            
+            <form id="login-form" onsubmit="event.preventDefault(); executarLogin();">
+                <div class="form-group" style="text-align: left; margin-bottom: 1rem;">
+                    <label>Usuário / Crachá</label>
+                    <input type="text" id="login-user" placeholder="Digite seu crachá..." required autocomplete="username">
+                </div>
+
+                <div class="form-group" style="text-align: left; margin-bottom: 1.2rem;">
+                    <label>Senha</label>
+                    <input type="password" id="login-pass" placeholder="Digite sua senha..." required autocomplete="current-password">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 0.6rem; text-align: left; margin-bottom: 1.5rem;">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="chk-lembrar-senha">
+                        Lembrar minha senha
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="chk-permanecer-logado">
+                        Permanecer logado neste dispositivo
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    ENTRAR NO SISTEMA
+                </button>
+            </form>
+
             <div id="login-loader" class="loader" style="margin-top: 1rem;"></div>
-            <p id="login-error" style="color: var(--danger); margin-top: 1rem; display: none; font-size: 0.85rem;">Selecione um solicitante válido da lista.</p>
+            <p id="login-error" style="color: var(--danger); margin-top: 1rem; display: none; font-size: 0.85rem; font-weight: 600;"></p>
         </div>
     </div>
 
     <!-- 2. MENU PRINCIPAL -->
     <div id="menu-screen" style="display: none;">
         <div class="modal-box">
-            <h2>Menu Principal</h2>
-            <p id="menu-user-name" style="color: var(--text-muted); font-weight: bold; margin-bottom: 1.5rem;"></p>
+            <div style="position: absolute; top: 1.2rem; right: 1.2rem;">
+                <button class="btn-icon-gear" title="Configurações e Tema" onclick="abrirConfiguracoes()">⚙️</button>
+            </div>
+
+            <img src="logo.png" alt="Clealco" style="height: 48px; margin: 0 auto 1rem auto; display: block; object-fit: contain;">
+            <h2>Painel Principal</h2>
+            <p id="menu-user-name" style="color: var(--text-muted); font-weight: 600; margin-bottom: 1.8rem; font-size: 0.95rem;"></p>
             
-            <button class="btn-menu btn-menu-gestao" onclick="abrirGestaoOS()">
-                📋 GESTÃO OS
-            </button>
-            <button class="btn-menu btn-menu-lancar" onclick="iniciarLancarOS()">
-                🚜 LANÇAR OS
-            </button>
-            
-            <button style="background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); margin-top: 1.5rem;" onclick="trocarUsuario()">
-                🔒 Sair / Trocar Solicitante
-            </button>
+            <div style="display: flex; flex-direction: column; gap: 0.9rem;">
+                <button class="btn btn-primary" style="padding: 1rem; font-size: 1rem;" onclick="iniciarLancarOS()">
+                    🚜 LANÇAR OS
+                </button>
+                <button class="btn btn-secondary" style="padding: 1rem; font-size: 1rem;" onclick="abrirGestaoOS()">
+                    📋 GESTÃO OS
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- 3. MODAL PROGRAMAÇÃO -->
+    <!-- 3. MODAL DE CONFIGURAÇÕES / DESLOGAR / TEMA -->
+    <div id="settings-modal" style="display: none;">
+        <div class="modal-box">
+            <h2>Configurações</h2>
+            <div style="display: flex; flex-direction: column; gap: 1rem; margin: 1.5rem 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px;">
+                    <span style="font-weight: 600; font-size: 0.9rem;">Aparência do Sistema</span>
+                    <button class="btn btn-outline" onclick="alternarTema()" id="btn-toggle-theme">
+                        🌙 Modo Escuro
+                    </button>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 0.8rem;">
+                <button class="btn btn-secondary" style="flex: 1;" onclick="fecharConfiguracoes()">Voltar</button>
+                <button class="btn btn-danger" style="flex: 1;" onclick="efetuarLogout()">🚪 Sair / Deslogar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. MODAL PROGRAMAÇÃO -->
     <div id="prog-modal" style="display: none;">
         <div class="modal-box">
-            <h2>Verificação de Programação</h2>
-            <p style="color: var(--text-muted); font-size: 0.95rem;">Essa ordem está na programação?</p>
+            <h2>Validação de Programação</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Esta Ordem de Serviço consta na programação?</p>
             
-            <div class="btn-group-prog" id="prog-btns">
-                <button class="btn-prog-sim" onclick="respostaProgramacao('SIM')">SIM</button>
-                <button class="btn-prog-nao" onclick="mostrarJustificativa()">NÃO</button>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;" id="prog-btns">
+                <button class="btn btn-primary" style="flex: 1; background-color: var(--success);" onclick="respostaProgramacao('SIM')">SIM</button>
+                <button class="btn btn-danger" style="flex: 1;" onclick="mostrarJustificativa()">NÃO</button>
             </div>
 
             <div id="justificativa-box" style="display: none; margin-top: 1.5rem; text-align: left;">
@@ -205,29 +316,32 @@
                     <label>Informe a Justificativa:</label>
                     <textarea id="justificativa-texto" rows="3" placeholder="Escreva o motivo aqui..."></textarea>
                 </div>
-                <button onclick="respostaProgramacao('NÃO')">CONFIRMAR E ENTRAR</button>
+                <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="respostaProgramacao('NÃO')">CONFIRMAR E AVANÇAR</button>
             </div>
         </div>
     </div>
 
-    <!-- 4. TELA DE GESTÃO DE OS -->
+    <!-- 5. TELA DE GESTÃO DE OS -->
     <div class="container" id="gestao-app">
         <div class="header">
             <div class="logo-container">
                 <img src="logo.png" alt="Clealco Logo" class="logo-img">
                 <div class="logo-text">CONTROLE<br>AGRICOLA</div>
             </div>
-            <div>
-                <h1>Gestão de Ordens de Serviço</h1>
-                <p id="gestao-user-title" style="font-size: 0.85rem; color: var(--text-muted); text-align: right; margin-top: 4px;"></p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div>
+                    <h1 style="font-size: 1.25rem; color: var(--accent);">Gestão de Ordens de Serviço</h1>
+                    <p id="gestao-user-title" style="font-size: 0.8rem; color: var(--text-muted); text-align: right;"></p>
+                </div>
+                <button class="btn-icon-gear" title="Configurações" onclick="abrirConfiguracoes()">⚙️</button>
             </div>
         </div>
 
-        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; justify-content: space-between; align-items: center;">
-            <button class="btn-action" style="max-width: 220px; margin-top: 0; background: #3b82f6; color: #fff;" onclick="carregarEExibirGestaoOS()">
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; justify-content: space-between;">
+            <button class="btn btn-primary" onclick="carregarEExibirGestaoOS()">
                 🔄 Atualizar / Sincronizar
             </button>
-            <button class="btn-action" style="max-width: 220px; margin-top: 0;" onclick="voltarAoMenu()">
+            <button class="btn btn-secondary" onclick="voltarAoMenu()">
                 ⬅️ Voltar ao Menu
             </button>
         </div>
@@ -251,40 +365,42 @@
         </div>
     </div>
 
-    <!-- 5. MODAL COMPROVANTE -->
+    <!-- 6. MODAL COMPROVANTE -->
     <div id="receipt-modal">
         <div class="receipt-box">
             <h2 id="receipt-status-title" style="color: var(--success);">OS Lançada!</h2>
-            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">Resumo da Ordem de Serviço:</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">Resumo da Ordem de Serviço:</p>
             <pre id="receipt-content"></pre>
-            <button class="btn-action" style="background: #25D366; color: white;" onclick="enviarWhatsApp()">
+            <button class="btn btn-primary" style="width: 100%; background-color: #25D366;" onclick="enviarWhatsApp()">
                 📱 Enviar pelo WhatsApp
             </button>
-            <button class="btn-action" style="background: transparent; border: 1px solid var(--border-color); color: white; margin-top: 0.5rem;" onclick="voltarAoMenuAposLancamento()">
+            <button class="btn btn-outline" style="width: 100%; margin-top: 0.6rem;" onclick="voltarAoMenuAposLancamento()">
                 Ir para o Menu Principal
             </button>
         </div>
     </div>
 
-    <!-- 6. FORMULÁRIO PRINCIPAL DE LANÇAMENTO -->
+    <!-- 7. FORMULÁRIO PRINCIPAL DE LANÇAMENTO -->
     <div class="container" id="main-app">
         <div class="header">
             <div class="logo-container">
                 <img src="logo.png" alt="Clealco Logo" class="logo-img">
                 <div class="logo-text">CONTROLE<br>AGRICOLA</div>
             </div>
-            <h1>Ordem de Serviço Agrícola</h1>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <h1 style="font-size: 1.25rem; color: var(--accent);">Lançamento de OS</h1>
+                <button class="btn-icon-gear" title="Configurações" onclick="abrirConfiguracoes()">⚙️</button>
+            </div>
         </div>
 
         <form id="os-form">
-            <!-- HIDDEN FIELDS DADOS INTERNOS -->
             <input type="hidden" id="zona-input">
 
             <div class="section">
                 <div class="grid grid-3">
                     <div class="form-group">
                         <label>Data e Hora da Solicitação</label>
-                        <input type="text" id="data-solicitacao-display" readonly style="font-weight: bold; color: var(--accent);">
+                        <input type="text" id="data-solicitacao-display" readonly style="font-weight: 700; color: var(--accent);">
                     </div>
                     <div class="form-group" style="justify-content: flex-end;">
                         <label>Status da Programação</label>
@@ -307,7 +423,7 @@
                     </div>
                     <div class="form-group">
                         <label>Tipo de Fazenda</label>
-                        <input type="text" id="tipo-fazenda" readonly placeholder="Automático" style="font-weight: bold; color: var(--accent);">
+                        <input type="text" id="tipo-fazenda" readonly placeholder="Automático" style="font-weight: 700; color: var(--accent);">
                     </div>
                 </div>
 
@@ -322,7 +438,7 @@
                 <div class="grid grid-3" style="margin-top: 1rem;">
                     <div class="form-group">
                         <label>Área Total Selecionada (ha)</label>
-                        <input type="number" id="area-total" readonly value="0.00" style="font-weight: bold; color: var(--accent);">
+                        <input type="number" id="area-total" readonly value="0.00" style="font-weight: 700; color: var(--accent);">
                     </div>
                     <div class="form-group">
                         <label>Data Previsão Início</label>
@@ -379,7 +495,7 @@
                         </tbody>
                     </table>
                 </div>
-                <button type="button" class="btn-action btn-add-row" onclick="adicionarLinhaProduto()">+ Adicionar Insumo</button>
+                <button type="button" class="btn btn-outline" style="margin-top: 0.8rem;" onclick="adicionarLinhaProduto()">+ Adicionar Insumo</button>
             </div>
 
             <div class="section">
@@ -391,14 +507,14 @@
                     </div>
                     <div class="form-group" style="justify-content: flex-end;">
                         <label>Solicitante Logado</label>
-                        <input type="text" id="solicitante-display" readonly style="font-weight: bold;">
+                        <input type="text" id="solicitante-display" readonly style="font-weight: 700;">
                     </div>
                 </div>
             </div>
 
-            <div style="display: flex; gap: 1rem;">
-                <button type="button" class="btn-action" style="background: transparent; border: 1px solid var(--border-color); color: #fff;" onclick="voltarAoMenu()">CANCELAR</button>
-                <button type="button" class="btn-action" onclick="enviarDados()" id="btn-submit">🚀 SALVAR ORDEM DE SERVIÇO</button>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="voltarAoMenu()">CANCELAR</button>
+                <button type="button" class="btn btn-primary" style="flex: 2;" onclick="enviarDados()" id="btn-submit">🚀 SALVAR ORDEM DE SERVIÇO</button>
             </div>
             <div id="submit-loader" class="loader" style="margin-top: 1rem;"></div>
         </form>
@@ -407,7 +523,6 @@
     <script>
         const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQZWlJ8xGg-VqRLvWWPuowCQ2QUJg-CEXjW8oM_tEo7fqVsGOov2UZxU85snQtvyLp/exec';
 
-        let dbSolicitantes = [];
         let dbFazendas = [];
         let dbInsumos = [];
         let dbEquipamentos = [];
@@ -419,14 +534,141 @@
         let carreadorTexto = "";
         let equipamentosSelecionados = [];
 
+        // INICIALIZAÇÃO
         window.addEventListener('DOMContentLoaded', async () => {
+            carregarPreferenciaTema();
+            verificarSessaoSalva();
             await carregarDadosIniciais();
-            document.getElementById('data-prev-inicio').valueAsDate = new Date();
-            
-            window.addEventListener('online', () => {
-                sincronizarPendentes();
-            });
+
+            window.addEventListener('online', () => sincronizarPendentes());
         });
+
+        // CONTROLADOR DE TEMA (CLARO / ESCURO)
+        function carregarPreferenciaTema() {
+            const temaSalvo = localStorage.getItem('theme_preference') || 'dark';
+            document.documentElement.setAttribute('data-theme', temaSalvo);
+            atualizarTextoBotaoTema(temaSalvo);
+        }
+
+        function alternarTema() {
+            const temaAtual = document.documentElement.getAttribute('data-theme');
+            const novoTema = temaAtual === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', novoTema);
+            localStorage.setItem('theme_preference', novoTema);
+            atualizarTextoBotaoTema(novoTema);
+        }
+
+        function atualizarTextoBotaoTema(tema) {
+            const btn = document.getElementById('btn-toggle-theme');
+            if (btn) {
+                btn.innerText = tema === 'dark' ? '🌙 Modo Escuro' : '☀️ Modo Claro';
+            }
+        }
+
+        // TELA DE CONFIGURAÇÕES
+        function abrirConfiguracoes() {
+            document.getElementById('settings-modal').style.display = 'flex';
+        }
+
+        function fecharConfiguracoes() {
+            document.getElementById('settings-modal').style.display = 'none';
+        }
+
+        // VALIDAÇÃO E GESTÃO DE SESSÃO
+        function verificarSessaoSalva() {
+            const passSalva = localStorage.getItem('saved_pass');
+            const userSalvo = localStorage.getItem('saved_user');
+            const permanecerLogado = localStorage.getItem('permanecer_logado') === 'true';
+
+            if (userSalvo && passSalva) {
+                document.getElementById('login-user').value = userSalvo;
+                document.getElementById('login-pass').value = passSalva;
+                document.getElementById('chk-lembrar-senha').checked = true;
+            }
+
+            if (permanecerLogado) {
+                document.getElementById('chk-permanecer-logado').checked = true;
+                const crachaVal = localStorage.getItem('logged_cracha');
+                const nomeVal = localStorage.getItem('logged_nome');
+
+                if (crachaVal && nomeVal) {
+                    efetuarLoginSucesso(crachaVal, nomeVal);
+                }
+            }
+        }
+
+        async function executarLogin() {
+            const u = document.getElementById('login-user').value.trim();
+            const p = document.getElementById('login-pass').value.trim();
+            const errElem = document.getElementById('login-error');
+            const loader = document.getElementById('login-loader');
+
+            errElem.style.display = 'none';
+            if (!u || !p) return;
+
+            loader.style.display = 'block';
+
+            try {
+                const res = await fetch(`${APPSCRIPT_URL}?action=validar_login&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`);
+                const data = await res.json();
+                loader.style.display = 'none';
+
+                if (data.success) {
+                    const lembrarSenha = document.getElementById('chk-lembrar-senha').checked;
+                    const permLogado = document.getElementById('chk-permanecer-logado').checked;
+
+                    if (lembrarSenha) {
+                        localStorage.setItem('saved_user', u);
+                        localStorage.setItem('saved_pass', p);
+                    } else {
+                        localStorage.removeItem('saved_user');
+                        localStorage.removeItem('saved_pass');
+                    }
+
+                    if (permLogado) {
+                        localStorage.setItem('permanecer_logado', 'true');
+                    } else {
+                        localStorage.removeItem('permanecer_logado');
+                    }
+
+                    efetuarLoginSucesso(data.cracha, data.solicitante);
+                } else {
+                    errElem.innerText = data.error || 'Credenciais inválidas.';
+                    errElem.style.display = 'block';
+                }
+            } catch (err) {
+                loader.style.display = 'none';
+                errElem.innerText = 'Falha ao conectar com o servidor. Verifique a internet.';
+                errElem.style.display = 'block';
+            }
+        }
+
+        function efetuarLoginSucesso(cracha, nome) {
+            solicitanteCracha = cracha;
+            solicitanteNome = nome;
+
+            localStorage.setItem('logged_cracha', cracha);
+            localStorage.setItem('logged_nome', nome);
+
+            document.getElementById('solicitante-display').value = `${solicitanteCracha} - ${solicitanteNome}`;
+            document.getElementById('menu-user-name').innerText = `Solicitante: ${solicitanteCracha} - ${solicitanteNome}`;
+            document.getElementById('gestao-user-title').innerText = `Solicitante: ${solicitanteCracha} - ${solicitanteNome}`;
+
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'flex';
+        }
+
+        function efetuarLogout() {
+            localStorage.removeItem('permanecer_logado');
+            localStorage.removeItem('logged_cracha');
+            localStorage.removeItem('logged_nome');
+
+            document.getElementById('settings-modal').style.display = 'none';
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('gestao-app').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+        }
 
         async function carregarDadosIniciais() {
             try {
@@ -434,78 +676,15 @@
                 const res = await response.json();
                 
                 if (res.success) {
-                    dbSolicitantes = res.dados.solicitantes || [];
                     dbFazendas = res.dados.fazendas || [];
                     dbInsumos = res.dados.insumos || [];
                     dbEquipamentos = res.dados.equipamentos || [];
                     dbOperacoes = res.dados.operacoes || [];
-
-                    localStorage.setItem('db_solicitantes', JSON.stringify(dbSolicitantes));
-                    configurarLoginAutocomplete();
                     popularCentrosDeCusto();
                 }
             } catch (e) {
-                console.warn('Iniciado em modo offline.');
-                dbSolicitantes = JSON.parse(localStorage.getItem('db_solicitantes') || '[]');
-                configurarLoginAutocomplete();
+                console.warn('Executando em modo offline.');
             }
-        }
-
-        function configurarLoginAutocomplete() {
-            const input = document.getElementById('login-user');
-            const list = document.getElementById('login-autocomplete');
-
-            input.addEventListener('input', function() {
-                const val = this.value.toLowerCase();
-                list.innerHTML = '';
-                if (!val) { list.style.display = 'none'; return; }
-
-                const filtrados = dbSolicitantes.filter(s => s.toLowerCase().includes(val));
-                if (filtrados.length > 0) {
-                    list.style.display = 'block';
-                    filtrados.forEach(s => {
-                        const div = document.createElement('div');
-                        div.className = 'autocomplete-item';
-                        div.innerText = s;
-                        div.addEventListener('click', () => {
-                            input.value = s;
-                            list.style.display = 'none';
-                        });
-                        list.appendChild(div);
-                    });
-                } else {
-                    list.style.display = 'none';
-                }
-            });
-        }
-
-        function validarLogin() {
-            const val = document.getElementById('login-user').value.trim();
-            if (!val) {
-                document.getElementById('login-error').style.display = 'block';
-                return;
-            }
-
-            if (val.includes('-')) {
-                const parts = val.split('-');
-                solicitanteCracha = parts[0].trim();
-                solicitanteNome = parts.slice(1).join('-').trim();
-            } else {
-                solicitanteCracha = val;
-                solicitanteNome = val;
-            }
-
-            document.getElementById('solicitante-display').value = `${solicitanteCracha} - ${solicitanteNome}`;
-            document.getElementById('menu-user-name').innerText = `Solicitante: ${solicitanteCracha} - ${solicitanteNome}`;
-            document.getElementById('gestao-user-title').innerText = `Solicitante: ${solicitanteCracha} - ${solicitanteNome}`;
-            
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('menu-screen').style.display = 'flex';
-        }
-
-        function trocarUsuario() {
-            document.getElementById('menu-screen').style.display = 'none';
-            document.getElementById('login-screen').style.display = 'flex';
         }
 
         function voltarAoMenu() {
@@ -534,13 +713,8 @@
 
         function respostaProgramacao(resp) {
             programacaoStatus = resp;
-            if (resp === 'NÃO') {
-                carreadorTexto = document.getElementById('justificativa-texto').value.trim();
-            } else {
-                carreadorTexto = "";
-            }
+            carreadorTexto = (resp === 'NÃO') ? document.getElementById('justificativa-texto').value.trim() : "";
 
-            // ATUALIZA O BADGE VISUAL DE PROGRAMAÇÃO
             const badgeElem = document.getElementById('status-programacao-badge');
             if (resp === 'SIM') {
                 badgeElem.innerText = 'OS PROGRAMADA';
@@ -550,16 +724,14 @@
                 badgeElem.className = 'badge-prog-status badge-prog-nao';
             }
 
-            // PEGA DATA E HORA EXATA NO FORMATO PT-BR
             const agora = new Date();
             const dataHoraStr = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('data-solicitacao-display').value = dataHoraStr;
-
+            
             document.getElementById('prog-modal').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
 
             document.getElementById('os-form').reset();
-            document.getElementById('data-solicitacao-display').value = dataHoraStr; // Re-aplica após o reset
+            document.getElementById('data-solicitacao-display').value = dataHoraStr;
             document.getElementById('produtos-tbody').innerHTML = '';
             equipamentosSelecionados = [];
             renderizarEquipamentos();
@@ -567,11 +739,10 @@
             renderizarTalhoesSelecionados();
             
             document.getElementById('data-prev-inicio').valueAsDate = new Date();
-            
             adicionarLinhaProduto();
         }
 
-        // HISTÓRICO E GESTÃO OS
+        // HISTÓRICO LOCAL E GESTÃO OS
         function obterHistoricoLocal() {
             return JSON.parse(localStorage.getItem('os_controle_agricola') || '[]');
         }
@@ -588,7 +759,7 @@
 
         async function carregarEExibirGestaoOS() {
             const tbody = document.getElementById('gestao-tbody');
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem;">⏳ Carregando Ordens de Serviço da planilha DB - LANCAMENTO...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem;">⏳ Buscando dados da planilha DB - LANCAMENTO...</td></tr>';
 
             await sincronizarPendentes();
 
@@ -602,7 +773,7 @@
                         historicoOnline = data.dados || [];
                     }
                 } catch (e) {
-                    console.warn('Não foi possível conectar ao banco online:', e);
+                    console.warn('Servidor offline:', e);
                 }
             }
 
@@ -617,15 +788,15 @@
             tbody.innerHTML = '';
 
             if (lista.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 2rem;">Nenhuma Ordem de Serviço encontrada para este crachá na planilha.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 2rem;">Nenhuma OS localizada para este crachá.</td></tr>';
                 return;
             }
 
             lista.forEach(os => {
                 const tr = document.createElement('tr');
                 const badgeHtml = os.sincronizado 
-                    ? `<span class="badge badge-synced">🟢 Sincronizado<br><small style="font-size:0.65rem; opacity:0.8;">${os.dataSincronizacao || ''}</small></span>`
-                    : `<span class="badge badge-pending">🔴 Não Sincronizado<br><small style="font-size:0.65rem; opacity:0.8;">Salvo Offline</small></span>`;
+                    ? `<span class="badge badge-synced">🟢 Sincronizado<br><small style="font-size:0.65rem;">${os.dataSincronizacao || ''}</small></span>`
+                    : `<span class="badge badge-pending">🔴 Não Sincronizado<br><small style="font-size:0.65rem;">Salvo Offline</small></span>`;
 
                 tr.innerHTML = `
                     <td><strong>${os.codigoOS || 'PENDENTE'}</strong></td>
@@ -663,22 +834,20 @@
                         os.dataSincronizacao = data.syncDate || new Date().toLocaleString('pt-BR');
                     }
                 } catch (e) {
-                    console.error('Falha ao sincronizar item offline:', e);
+                    console.error('Erro na sincronização offline:', e);
                 }
             }
 
             salvarHistoricoLocal(historico);
         }
 
-        // CENTRO DE CUSTO E OPERAÇÃO
+        // DADOS AUXILIARES E FORMULÁRIO
         function popularCentrosDeCusto() {
             const selectCC = document.getElementById('centro-custo');
             selectCC.innerHTML = '<option value="">Selecione o Centro de Custo...</option>';
             
             const ccs = [...new Set(dbOperacoes.map(o => o.centroCusto))].filter(Boolean);
-            ccs.forEach(cc => {
-                selectCC.innerHTML += `<option value="${cc}">${cc}</option>`;
-            });
+            ccs.forEach(cc => selectCC.innerHTML += `<option value="${cc}">${cc}</option>`);
 
             selectCC.addEventListener('change', function() {
                 const opSelect = document.getElementById('operacao');
@@ -686,14 +855,10 @@
                 
                 const opsFiltradas = dbOperacoes.filter(o => o.centroCusto === this.value);
                 const opsUnicas = [...new Set(opsFiltradas.map(o => o.operacao))].filter(Boolean);
-                
-                opsUnicas.forEach(op => {
-                    opSelect.innerHTML += `<option value="${op}">${op}</option>`;
-                });
+                opsUnicas.forEach(op => opSelect.innerHTML += `<option value="${op}">${op}</option>`);
             });
         }
 
-        // FAZENDAS E TALHÕES
         let fazendaSelecionada = null;
         let talhoesAtivos = [];
 
@@ -755,11 +920,7 @@
                 if (item.includes('-')) {
                     const [inicio, fim] = item.split('-').map(n => parseInt(n.trim(), 10));
                     if (!isNaN(inicio) && !isNaN(fim)) {
-                        const min = Math.min(inicio, fim);
-                        const max = Math.max(inicio, fim);
-                        for (let i = min; i <= max; i++) {
-                            numerosDesejados.add(i);
-                        }
+                        for (let i = Math.min(inicio, fim); i <= Math.max(inicio, fim); i++) numerosDesejados.add(i);
                     }
                 } else {
                     const num = parseInt(item, 10);
@@ -771,12 +932,7 @@
                 const tNum = parseInt(t.talhao, 10);
                 if (numerosDesejados.has(tNum)) {
                     if (!talhoesAtivos.some(ativo => parseInt(ativo.num, 10) === tNum)) {
-                        talhoesAtivos.push({
-                            num: t.talhao,
-                            areaOriginal: parseFloat(t.area),
-                            areaParcial: parseFloat(t.area),
-                            isParcial: false
-                        });
+                        talhoesAtivos.push({ num: t.talhao, areaOriginal: parseFloat(t.area), areaParcial: parseFloat(t.area), isParcial: false });
                     }
                 }
             });
@@ -798,12 +954,11 @@
             talhoesAtivos.forEach((t, idx) => {
                 const chip = document.createElement('div');
                 chip.className = `talhao-chip ${t.isParcial ? 'partial' : ''}`;
-
                 chip.innerHTML = `
                     <span>Talhão ${t.num} (${t.areaParcial.toFixed(2)} ha)</span>
                     <button type="button" class="btn-partial">Parcial</button>
                     <input type="number" step="0.01" value="${t.areaParcial.toFixed(2)}">
-                    <button type="button" onclick="removerTalhao(${idx})" style="background:none; border:none; color:var(--danger); font-weight:bold; cursor:pointer; font-size:1.1rem; line-height:1; margin-left:4px;">×</button>
+                    <button type="button" onclick="removerTalhao(${idx})" style="background:none; border:none; color:var(--danger); font-weight:bold; cursor:pointer; font-size:1.1rem;">×</button>
                 `;
 
                 const btnParcial = chip.querySelector('.btn-partial');
@@ -899,10 +1054,7 @@
             equipamentosSelecionados.forEach((e, idx) => {
                 const chip = document.createElement('div');
                 chip.className = 'equip-chip';
-                chip.innerHTML = `
-                    <span>${e.nome}</span>
-                    <button type="button" onclick="removerEquipamento(${idx})">×</button>
-                `;
+                chip.innerHTML = `<span>${e.nome}</span><button type="button" onclick="removerEquipamento(${idx})">×</button>`;
                 container.appendChild(chip);
             });
         }
@@ -921,7 +1073,7 @@
                 <td><input type="text" class="prod-un" readonly style="width: 45px;"></td>
                 <td><input type="number" step="0.001" class="prod-dose" placeholder="0.00"></td>
                 <td><input type="number" step="0.01" class="prod-total" readonly placeholder="0.00"></td>
-                <td style="text-align: center;"><button type="button" class="btn-remove-row">×</button></td>
+                <td style="text-align: center;"><button type="button" class="btn btn-danger" style="padding: 2px 8px; font-size: 0.8rem;">×</button></td>
             `;
 
             const inCod = tr.querySelector('.prod-cod');
@@ -963,15 +1115,15 @@
 
                 if (doseVal > 0) {
                     if (minVal > 0 && doseVal < minVal) {
-                        alert(`⚠️ ATENÇÃO DE DOSAGEM!\n\nA dosagem digitada (${doseVal}) está ABAIXO da dose mínima recomendada (${minVal}) para o produto:\n"${descProd}".`);
+                        alert(`⚠️ Dosagem abaixo do mínimo recomendado (${minVal}) para "${descProd}".`);
                     } else if (maxVal > 0 && doseVal > maxVal) {
-                        alert(`⚠️ ATENÇÃO DE DOSAGEM!\n\nA dosagem digitada (${doseVal}) está ACIMA da dose máxima recomendada (${maxVal}) para o produto:\n"${descProd}".`);
+                        alert(`⚠️ Dosagem acima do máximo recomendado (${maxVal}) para "${descProd}".`);
                     }
                 }
             });
 
             inDose.addEventListener('input', recalcularProdutos);
-            tr.querySelector('.btn-remove-row').addEventListener('click', () => { tr.remove(); recalcularProdutos(); });
+            tr.querySelector('.btn-danger').addEventListener('click', () => { tr.remove(); recalcularProdutos(); });
             tbodyProdutos.appendChild(tr);
         }
 
@@ -987,10 +1139,9 @@
             if (!e.target.classList.contains('prod-cod')) document.querySelectorAll('.list-cod').forEach(el => el.style.display = 'none');
             if (e.target !== inputFundo) listFundo.style.display = 'none';
             if (e.target !== inputFrota) listFrota.style.display = 'none';
-            if (e.target !== document.getElementById('login-user')) document.getElementById('login-autocomplete').style.display = 'none';
         });
 
-        // SALVAR
+        // ENVIAR DADOS DA OS
         async function enviarDados() {
             const btn = document.getElementById('btn-submit');
             const loader = document.getElementById('submit-loader');
@@ -1004,9 +1155,6 @@
                 return;
             }
 
-            const areaTotalCalculada = document.getElementById('area-total').value;
-
-            // PEGA PROPRIEDADE DO PRIMEIRO EQUIPAMENTO SELECIONADO SE HOUVER
             const propEquip = equipamentosSelecionados.length > 0 ? equipamentosSelecionados[0].propriedade : "PRÓPRIO";
 
             const payload = {
@@ -1080,7 +1228,7 @@
                         novoRegistroLocal.dataSincronizacao = data.syncDate || new Date().toLocaleString('pt-BR');
                     }
                 } catch (err) {
-                    console.warn('Erro na rede, salvando localmente como pendente.');
+                    console.warn('Conexão instável, salvando offline.');
                 }
             }
 
@@ -1088,7 +1236,7 @@
             historico.push(novoRegistroLocal);
             salvarHistoricoLocal(historico);
 
-            btn.style.display = 'block';
+            btn.style.display = 'inline-flex';
             loader.style.display = 'none';
 
             gerarComprovanteWhatsApp(payload, novoRegistroLocal);
