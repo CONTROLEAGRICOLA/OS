@@ -90,12 +90,12 @@
         input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
         input[readonly] { opacity: 0.7; cursor: not-allowed; }
 
-        .flex-group { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
-        .checkbox-label { display: flex; align-items: center; gap: 0.6rem; cursor: pointer; font-size: 0.85rem; }
-        input[type="radio"] { appearance: none; background-color: var(--bg-input); width: 1.25rem; height: 1.25rem; border: 1px solid var(--border-color); border-radius: 50%; display: grid; place-content: center; cursor: pointer; }
-        input[type="radio"]::before { content: ""; width: 0.65em; height: 0.65em; border-radius: 50%; transform: scale(0); background-color: var(--accent); transition: 120ms transform; }
-        input[type="radio"]:checked::before { transform: scale(1); }
-        input[type="radio"]:checked { border-color: var(--accent); }
+        .badge-prog-status {
+            padding: 0.85rem; border-radius: 8px; font-weight: 800; text-align: center; font-size: 0.95rem;
+            letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; height: 46px;
+        }
+        .badge-prog-sim { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid var(--success); }
+        .badge-prog-nao { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid var(--danger); }
 
         .autocomplete-list {
             position: absolute; top: 100%; left: 0; right: 0; z-index: 99; background: var(--bg-card);
@@ -105,6 +105,7 @@
         .autocomplete-item { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--bg-input); font-size: 0.85rem; }
         .autocomplete-item:hover { background-color: var(--bg-input); color: var(--accent); }
 
+        /* CHIPS */
         .talhoes-container { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.8rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border-color); min-height: 48px; }
         .talhao-chip { background: var(--bg-card); border: 1px solid var(--accent); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; color: #fff; }
         .talhao-chip input[type="number"] { width: 65px; padding: 2px 4px; font-size: 0.75rem; border-radius: 4px; background: var(--bg-input); color: #fff; display: none; border: 1px solid #fff; }
@@ -114,17 +115,24 @@
         .equip-chip { background: var(--accent); color: #000; font-weight: bold; padding: 4px 10px; border-radius: 16px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; }
         .equip-chip button { background: none; border: none; color: #000; font-weight: bold; cursor: pointer; font-size: 1rem; line-height: 1; }
 
-        .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; min-width: 600px; }
-        th { background-color: var(--bg-input); color: var(--text-muted); font-size: 0.8rem; padding: 0.8rem; text-align: left; }
-        td { padding: 0.8rem; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
-        td input { background-color: transparent !important; border: 1px solid transparent !important; }
+        /* TABELA AJUSTADA PARA CELULAR */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-top: 0.5rem;
+            position: relative;
+        }
+        table { width: 100%; border-collapse: collapse; min-width: 580px; }
+        th { background-color: var(--bg-input); color: var(--text-muted); font-size: 0.8rem; padding: 0.6rem; text-align: left; }
+        td { padding: 0.4rem; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; position: relative; }
+        td input { background-color: transparent !important; border: 1px solid transparent !important; font-size: 0.85rem !important; padding: 0.4rem !important; }
         td input:focus { background-color: var(--bg-input) !important; border: 1px solid var(--accent) !important; }
-        
-        .btn-action { background: var(--accent); color: #000; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 1rem; }
-        .btn-action:hover { box-shadow: 0 0 15px var(--accent-glow); }
-        .btn-add-row { background: transparent; color: var(--accent); border: 1px dashed var(--accent); margin-top: 10px; }
-        .btn-remove-row { color: var(--danger); background: none; border: none; font-size: 1.2rem; cursor: pointer; }
+
+        td .autocomplete-list {
+            position: absolute; top: 100%; left: 0; min-width: 260px; max-width: 90vw; z-index: 999;
+        }
 
         .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
         .badge-synced { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
@@ -194,7 +202,7 @@
 
             <div id="justificativa-box" style="display: none; margin-top: 1.5rem; text-align: left;">
                 <div class="form-group">
-                    <label>Informe a Justificativa / Carreador:</label>
+                    <label>Informe a Justificativa:</label>
                     <textarea id="justificativa-texto" rows="3" placeholder="Escreva o motivo aqui..."></textarea>
                 </div>
                 <button onclick="respostaProgramacao('NÃO')">CONFIRMAR E ENTRAR</button>
@@ -269,19 +277,18 @@
         </div>
 
         <form id="os-form">
+            <!-- HIDDEN FIELDS DADOS INTERNOS -->
+            <input type="hidden" id="zona-input">
+
             <div class="section">
-                <div class="grid grid-4">
+                <div class="grid grid-3">
                     <div class="form-group">
-                        <label>Está na Programação?</label>
-                        <input type="text" id="prog-status" readonly style="font-weight: bold;">
+                        <label>Data e Hora da Solicitação</label>
+                        <input type="text" id="data-solicitacao-display" readonly style="font-weight: bold; color: var(--accent);">
                     </div>
-                    <div class="form-group">
-                        <label>Justificativa / Carreador</label>
-                        <input type="text" id="carreador-val" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>Data Solicitação</label>
-                        <input type="date" id="data-solicitacao" required>
+                    <div class="form-group" style="justify-content: flex-end;">
+                        <label>Status da Programação</label>
+                        <div id="status-programacao-badge" class="badge-prog-status"></div>
                     </div>
                     <div class="form-group">
                         <label>PEA (Permissão Entrada)</label>
@@ -292,7 +299,7 @@
 
             <div class="section">
                 <div class="section-title">Localização e Talhões</div>
-                <div class="grid grid-3">
+                <div class="grid grid-2">
                     <div class="form-group">
                         <label>Fazenda / Descrição (F.A)</label>
                         <input type="text" id="fundo-input" placeholder="Digite o código ou nome..." autocomplete="off">
@@ -301,10 +308,6 @@
                     <div class="form-group">
                         <label>Tipo de Fazenda</label>
                         <input type="text" id="tipo-fazenda" readonly placeholder="Automático" style="font-weight: bold; color: var(--accent);">
-                    </div>
-                    <div class="form-group">
-                        <label>Zona</label>
-                        <input type="text" id="zona-input" readonly>
                     </div>
                 </div>
 
@@ -348,22 +351,12 @@
                         </select>
                     </div>
                 </div>
-                <div class="grid grid-2" style="margin-top: 1rem;">
-                    <div class="form-group">
-                        <label>Equipamentos / Frota (Selecione um ou mais)</label>
-                        <input type="text" id="frota-input" placeholder="Digite para buscar e adicionar..." autocomplete="off">
-                        <div id="frota-autocomplete" class="autocomplete-list"></div>
-                        <div id="equipamentos-selecionados" class="talhoes-container" style="margin-top: 0.5rem; min-height: 42px;">
-                            <span class="text-muted" style="font-size: 0.8rem;">Nenhum equipamento selecionado.</span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Propriedade do Equipamento</label>
-                        <div class="flex-group" style="padding-top: 0.5rem;">
-                            <label class="checkbox-label"><input type="radio" name="equip_prop" value="PRÓPRIO" id="prop-proprio" checked> Próprio</label>
-                            <label class="checkbox-label"><input type="radio" name="equip_prop" value="TERCEIRO"> Terceiro</label>
-                            <label class="checkbox-label"><input type="radio" name="equip_prop" value="ALUGADO"> Alugado</label>
-                        </div>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label>Equipamentos / Frota (Selecione um ou mais)</label>
+                    <input type="text" id="frota-input" placeholder="Digite para buscar e adicionar..." autocomplete="off">
+                    <div id="frota-autocomplete" class="autocomplete-list"></div>
+                    <div id="equipamentos-selecionados" class="talhoes-container" style="margin-top: 0.5rem; min-height: 42px;">
+                        <span class="text-muted" style="font-size: 0.8rem;">Nenhum equipamento selecionado.</span>
                     </div>
                 </div>
             </div>
@@ -374,7 +367,7 @@
                     <table id="produtos-table">
                         <thead>
                             <tr>
-                                <th style="width: 20%">Cód. Insumo</th>
+                                <th style="width: 25%">Cód. Insumo</th>
                                 <th style="width: 35%">Descrição</th>
                                 <th style="width: 10%">UN</th>
                                 <th style="width: 15%">Dosagem / ha</th>
@@ -428,7 +421,6 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             await carregarDadosIniciais();
-            document.getElementById('data-solicitacao').valueAsDate = new Date();
             document.getElementById('data-prev-inicio').valueAsDate = new Date();
             
             window.addEventListener('online', () => {
@@ -548,26 +540,38 @@
                 carreadorTexto = "";
             }
 
-            document.getElementById('prog-status').value = programacaoStatus;
-            document.getElementById('carreador-val').value = carreadorTexto || "-";
+            // ATUALIZA O BADGE VISUAL DE PROGRAMAÇÃO
+            const badgeElem = document.getElementById('status-programacao-badge');
+            if (resp === 'SIM') {
+                badgeElem.innerText = 'OS PROGRAMADA';
+                badgeElem.className = 'badge-prog-status badge-prog-sim';
+            } else {
+                badgeElem.innerText = 'OS NAO PROGRAMADA';
+                badgeElem.className = 'badge-prog-status badge-prog-nao';
+            }
+
+            // PEGA DATA E HORA EXATA NO FORMATO PT-BR
+            const agora = new Date();
+            const dataHoraStr = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('data-solicitacao-display').value = dataHoraStr;
 
             document.getElementById('prog-modal').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
 
             document.getElementById('os-form').reset();
+            document.getElementById('data-solicitacao-display').value = dataHoraStr; // Re-aplica após o reset
             document.getElementById('produtos-tbody').innerHTML = '';
             equipamentosSelecionados = [];
             renderizarEquipamentos();
             talhoesAtivos = [];
             renderizarTalhoesSelecionados();
             
-            document.getElementById('data-solicitacao').valueAsDate = new Date();
             document.getElementById('data-prev-inicio').valueAsDate = new Date();
             
             adicionarLinhaProduto();
         }
 
-        // CARREGA OS DO BANCO DB - LANCAMENTO + OFFLINE
+        // HISTÓRICO E GESTÃO OS
         function obterHistoricoLocal() {
             return JSON.parse(localStorage.getItem('os_controle_agricola') || '[]');
         }
@@ -602,10 +606,7 @@
                 }
             }
 
-            // Pega itens pendentes do localStorage que ainda não foram sincronizados
             const historicoLocal = obterHistoricoLocal().filter(os => os.solicitante_cracha === solicitanteCracha && !os.sincronizado);
-
-            // Combina (Pendentes offline no topo, seguidos das OS online)
             const listaCompleta = [...historicoLocal, ...historicoOnline];
 
             renderizarTabelaGestao(listaCompleta);
@@ -877,12 +878,6 @@
         function adicionarEquipamento(equip) {
             if (!equipamentosSelecionados.some(e => e.nome === equip.nome)) {
                 equipamentosSelecionados.push(equip);
-
-                const radios = document.getElementsByName('equip_prop');
-                radios.forEach(r => {
-                    if (equip.propriedade.includes(r.value)) r.checked = true;
-                });
-
                 renderizarEquipamentos();
             }
         }
@@ -919,11 +914,11 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>
-                    <input type="text" class="prod-cod" placeholder="Digite cód ou nome..." autocomplete="off">
+                    <input type="text" class="prod-cod" placeholder="Cód/Nome..." autocomplete="off">
                     <div class="autocomplete-list list-cod"></div>
                 </td>
                 <td><input type="text" class="prod-desc" readonly></td>
-                <td><input type="text" class="prod-un" readonly style="width: 50px;"></td>
+                <td><input type="text" class="prod-un" readonly style="width: 45px;"></td>
                 <td><input type="number" step="0.001" class="prod-dose" placeholder="0.00"></td>
                 <td><input type="number" step="0.01" class="prod-total" readonly placeholder="0.00"></td>
                 <td style="text-align: center;"><button type="button" class="btn-remove-row">×</button></td>
@@ -1011,15 +1006,19 @@
 
             const areaTotalCalculada = document.getElementById('area-total').value;
 
+            // PEGA PROPRIEDADE DO PRIMEIRO EQUIPAMENTO SELECIONADO SE HOUVER
+            const propEquip = equipamentosSelecionados.length > 0 ? equipamentosSelecionados[0].propriedade : "PRÓPRIO";
+
             const payload = {
                 programacao: programacaoStatus,
                 carreador: carreadorTexto,
-                data_solicitacao: document.getElementById('data-solicitacao').value,
+                data_solicitacao: document.getElementById('data-solicitacao-display').value,
                 solicitante_cracha: solicitanteCracha,
                 solicitante_nome: solicitanteNome,
                 tipo_fazenda: document.getElementById('tipo-fazenda').value,
                 fa_codigo: fazendaSelecionada ? fazendaSelecionada.codigo : "",
                 descricao_fazenda: fazendaSelecionada ? fazendaSelecionada.nome : document.getElementById('fundo-input').value,
+                zona: document.getElementById('zona-input').value,
                 tipo_atividade: ativObj.tipo || "",
                 centro_custo: ccVal,
                 grupo_atividades: ativObj.grupo || "",
@@ -1030,6 +1029,7 @@
                 pea: document.getElementById('pea-input').value,
                 talhoes: talhoesAtivos.map(t => t.num).join(', '),
                 frota: equipamentosSelecionados.map(e => e.nome).join(', '),
+                tipo_equip: propEquip,
                 produtos: []
             };
 
@@ -1113,7 +1113,7 @@
             texto += `*Código OS:* ${regLocal.codigoOS || 'PENDENTE DE SINCRONIZAÇÃO'}\n`;
             texto += `*Status:* ${regLocal.sincronizado ? 'SINCRONIZADA' : 'PENDENTE DE REDE'}\n`;
             texto += `*Programação:* ${p.programacao}\n`;
-            if (p.carreador) texto += `*Justificativa/Carreador:* ${p.carreador}\n`;
+            if (p.carreador) texto += `*Justificativa:* ${p.carreador}\n`;
             texto += `*Fazenda:* ${p.fa_codigo} - ${p.descricao_fazenda}\n`;
             texto += `*Tipo Fazenda:* ${p.tipo_fazenda}\n`;
             texto += `*Centro de Custo:* ${p.centro_custo}\n`;
