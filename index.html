@@ -3,243 +3,389 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GESTÃO A VISTA - Ordem de serviço | Clealco</title>
+    <title>Ordem de Serviço - Lançamento | Clealco</title>
     <style>
-        :root {
-            --bg-page: #05050a;
-            --bg-card: #0f0f17;
-            --bg-input: #1a1a26;
-            --border-color: #27273a;
-            --text-main: #f4f4f5;
-            --text-muted: #8e8ea0;
-            --accent: #06b6d4;
-            --accent-glow: rgba(6, 182, 212, 0.25);
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --success: #10b981;
+        :root[data-theme="dark"] {
+            --bg-page: #09090b; --bg-card: #18181b; --bg-input: #27272a;
+            --border-color: #3f3f46; --text-main: #f4f4f5; --text-muted: #a1a1aa;
+            --accent: #06b6d4; --accent-hover: #0891b2; --accent-glow: rgba(6, 182, 212, 0.25);
+            --danger: #ef4444; --warning: #f59e0b; --success: #10b981;
+            --shadow-color: rgba(0, 0, 0, 0.4); --tr-hover: #27272a;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root[data-theme="light"] {
+            --bg-page: #f4f4f5; --bg-card: #ffffff; --bg-input: #f4f4f5;
+            --border-color: #e4e4e7; --text-main: #18181b; --text-muted: #71717a;
+            --accent: #0284c7; --accent-hover: #0369a1; --accent-glow: rgba(2, 132, 199, 0.2);
+            --danger: #dc2626; --warning: #d97706; --success: #059669;
+            --shadow-color: rgba(0, 0, 0, 0.08); --tr-hover: #f4f4f5;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
 
         body {
-            background-color: var(--bg-page);
-            color: var(--text-main);
-            font-family: 'Segoe UI', -apple-system, Roboto, sans-serif;
-            padding: 1.5rem;
-            min-height: 100vh;
+            background-color: var(--bg-page); color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex; justify-content: center; min-height: 100vh;
         }
 
-        .header-dashboard {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(15, 15, 23, 0.8);
-            backdrop-filter: blur(12px);
-            padding: 1.2rem 2rem;
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 1.5rem;
+        button, .btn {
+            appearance: none; border: 1px solid transparent; outline: none; font-family: inherit;
+            cursor: pointer; border-radius: 8px; padding: 0.75rem 1.25rem; font-weight: 600;
+            font-size: 0.9rem; display: inline-flex; align-items: center; justify-content: center;
+            gap: 8px; transition: all 0.2s; text-decoration: none; user-select: none;
         }
 
-        .logo-box { display: flex; align-items: center; gap: 1rem; }
-        .logo-box img { height: 48px; }
-        .title-dash { font-size: 1.4rem; font-weight: 800; letter-spacing: 1px; color: var(--accent); }
+        .btn-primary { background-color: var(--accent); color: #fff; box-shadow: 0 2px 8px var(--accent-glow); }
+        .btn-primary:hover { background-color: var(--accent-hover); transform: translateY(-1px); }
+        .btn-secondary { background-color: var(--bg-input); color: var(--text-main); border-color: var(--border-color); }
+        .btn-secondary:hover { background-color: var(--border-color); }
+        .btn-outline { background-color: transparent; color: var(--text-main); border-color: var(--border-color); }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-danger { background-color: rgba(239, 68, 68, 0.12); color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
+        .btn-danger:hover { background-color: var(--danger); color: #fff; }
 
-        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; margin-bottom: 1.5rem; }
-        .kpi-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 1.2rem;
-            border-radius: 12px;
-            text-align: center;
-        }
-        .kpi-card h3 { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; }
-        .kpi-card .val { font-size: 2rem; font-weight: 800; }
+        .btn-icon-gear { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); width: 42px; height: 42px; padding: 0; border-radius: 50%; font-size: 1.2rem; }
+        .btn-icon-gear:hover { border-color: var(--accent); color: var(--accent); transform: rotate(45deg); }
 
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 420px;
-            gap: 1.5rem;
+        #login-screen, #prog-modal, #menu-screen, #settings-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(9, 9, 11, 0.7); backdrop-filter: blur(12px);
+            display: flex; justify-content: center; align-items: center; z-index: 1000;
         }
 
-        .table-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 1.5rem;
-            overflow: hidden;
+        .modal-box {
+            background: var(--bg-card); padding: 2.5rem; border-radius: 16px;
+            border: 1px solid var(--border-color); box-shadow: 0 20px 40px var(--shadow-color);
+            width: 90%; max-width: 440px; text-align: center; position: relative;
+        }
+        .modal-box h2 { color: var(--accent); margin-bottom: 1.2rem; font-size: 1.35rem; }
+
+        .container {
+            background-color: var(--bg-card); max-width: 1100px; width: 100%; padding: 2rem;
+            border-radius: 16px; border: 1px solid var(--border-color); margin: 1.5rem; display: none;
+            box-shadow: 0 10px 30px var(--shadow-color);
         }
 
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { padding: 1rem; background: var(--bg-input); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
-        td { padding: 1rem; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
-        tr.selected { background-color: rgba(6, 182, 212, 0.15) !important; border-left: 4px solid var(--accent); }
-        tr:hover { background-color: var(--bg-input); cursor: pointer; }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1.2rem; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 1rem; }
+        .logo-container { display: flex; align-items: center; gap: 12px; }
+        .logo-img { height: 46px; width: auto; object-fit: contain; }
+        .logo-text { font-weight: 700; font-size: 1.05rem; color: var(--text-main); line-height: 1.2; }
 
-        .badge { padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; }
-        .badge-analise { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
-        .badge-aprovado { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
-        .badge-rejeitado { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+        .section { margin-bottom: 2rem; }
+        .section-title { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border-color); }
+        .grid { display: grid; gap: 1.2rem; }
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
 
-        .detail-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
+        .form-group { display: flex; flex-direction: column; gap: 0.4rem; position: relative; }
+        label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
 
-        .field-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-top: 0.8rem; }
-        .field-val { font-size: 1rem; font-weight: 600; color: var(--text-main); margin-top: 2px; }
+        input[type="text"], input[type="password"], input[type="number"], input[type="date"], textarea, select {
+            width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-color);
+            color: var(--text-main); padding: 0.75rem 1rem; border-radius: 8px; outline: none; font-size: 0.95rem;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        input[readonly], select[disabled], textarea[readonly] { opacity: 0.8; cursor: not-allowed; }
 
-        .btn {
-            padding: 0.8rem 1.2rem;
-            border-radius: 8px;
-            border: none;
-            font-weight: 700;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-        .btn-approve { background: var(--success); color: #fff; flex: 1; }
-        .btn-approve:hover { filter: brightness(1.2); transform: translateY(-2px); }
-        .btn-reject { background: var(--danger); color: #fff; flex: 1; }
-        .btn-reject:hover { filter: brightness(1.2); transform: translateY(-2px); }
+        .badge-prog-status { padding: 0.75rem; border-radius: 8px; font-weight: 700; text-align: center; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; height: 44px; }
+        .badge-prog-sim { background: rgba(16, 185, 129, 0.12); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-prog-nao { background: rgba(239, 68, 68, 0.12); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
 
-        /* MODAL REJEIÇÃO */
-        #reject-modal {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
-            display: none; justify-content: center; align-items: center; z-index: 2000;
-        }
-        .reject-box {
-            background: var(--bg-card); border: 1px solid var(--danger);
-            padding: 2rem; border-radius: 16px; width: 450px; text-align: left;
-        }
-        textarea {
-            width: 100%; background: var(--bg-input); border: 1px solid var(--border-color);
-            color: #fff; padding: 0.8rem; border-radius: 8px; margin: 1rem 0; outline: none;
-        }
+        .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; z-index: 99; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; max-height: 200px; overflow-y: auto; display: none; box-shadow: 0 10px 25px var(--shadow-color); }
+        .autocomplete-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--bg-input); font-size: 0.85rem; }
+        .autocomplete-item:hover { background-color: var(--bg-input); color: var(--accent); }
+
+        .talhoes-container { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.8rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border-color); min-height: 48px; }
+        .talhao-chip { background: var(--bg-card); border: 1px solid var(--accent); padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
+        .equip-chip { background: var(--accent); color: #fff; font-weight: 600; padding: 4px 10px; border-radius: 16px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; }
+
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 0.5rem; }
+        table { width: 100%; border-collapse: collapse; min-width: 580px; }
+        th { background-color: var(--bg-input); color: var(--text-muted); font-size: 0.8rem; padding: 0.75rem; text-align: left; }
+        td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; }
+
+        .tr-clickable { cursor: pointer; }
+        .tr-clickable:hover { background-color: var(--tr-hover); }
+
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+        .badge-analise { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-aprovado { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-rejeitado { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        #receipt-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 9, 11, 0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .receipt-box { background: var(--bg-card); padding: 2rem; border-radius: 16px; border: 1px solid var(--accent); text-align: center; max-width: 450px; width: 90%; }
+        .receipt-box pre { text-align: left; background: var(--bg-input); padding: 1rem; border-radius: 8px; font-size: 0.85rem; overflow-x: auto; color: var(--success); margin: 1rem 0; white-space: pre-wrap; font-family: monospace; }
+
+        .loader { border: 3px solid var(--border-color); border-top: 3px solid var(--accent); border-radius: 50%; width: 28px; height: 28px; animation: spin 0.8s linear infinite; margin: 0 auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .read-only-banner { background-color: rgba(6, 182, 212, 0.12); border: 1px solid var(--accent); color: var(--accent); padding: 0.6rem 1rem; border-radius: 8px; font-weight: 700; font-size: 0.85rem; margin-bottom: 1.5rem; }
     </style>
 </head>
 <body>
 
-    <!-- CABEÇALHO DASHBOARD WINDOWS -->
-    <div class="header-dashboard">
-        <div class="logo-box">
-            <img src="logo.png" alt="Clealco">
-            <div>
-                <div class="title-dash">GESTÃO A VISTA - Ordem de serviço</div>
-                <div style="font-size: 0.85rem; color: var(--text-muted);">Painel de Aprovação do Controle Agrícola</div>
-            </div>
-        </div>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <button class="btn" style="background: var(--bg-input); color: #fff; border: 1px solid var(--border-color);" onclick="carregarTodasOS()">🔄 Atualizar Dados</button>
-            <div id="live-clock" style="font-weight: 700; color: var(--accent); font-size: 1.1rem;"></div>
+    <!-- LOGIN -->
+    <div id="login-screen">
+        <div class="modal-box">
+            <img src="logo.png" alt="Clealco" style="height: 56px; margin: 0 auto 1.2rem auto; display: block; object-fit: contain;">
+            <h2>Controle Agrícola</h2>
+            <form id="login-form" onsubmit="event.preventDefault(); executarLogin();">
+                <div class="form-group" style="text-align: left; margin-bottom: 1rem;">
+                    <label>Usuário / Crachá</label>
+                    <input type="text" id="login-user" placeholder="Digite seu crachá..." required>
+                </div>
+                <div class="form-group" style="text-align: left; margin-bottom: 1.2rem;">
+                    <label>Senha</label>
+                    <input type="password" id="login-pass" placeholder="Digite sua senha..." required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">ENTRAR NO SISTEMA</button>
+            </form>
+            <div id="login-loader" class="loader" style="margin-top: 1rem;"></div>
+            <p id="login-error" style="color: var(--danger); margin-top: 1rem; display: none; font-size: 0.85rem; font-weight: 600;"></p>
         </div>
     </div>
 
-    <!-- CARDS DE KPI -->
-    <div class="kpi-grid">
-        <div class="kpi-card"><h3>Total Solicitado</h3><div class="val" id="kpi-total">0</div></div>
-        <div class="kpi-card" style="border-color: var(--warning);"><h3>Em Análise</h3><div class="val" style="color: var(--warning);" id="kpi-analise">0</div></div>
-        <div class="kpi-card" style="border-color: var(--success);"><h3>Aprovadas</h3><div class="val" style="color: var(--success);" id="kpi-aprovadas">0</div></div>
-        <div class="kpi-card" style="border-color: var(--danger);"><h3>Rejeitadas</h3><div class="val" style="color: var(--danger);" id="kpi-rejeitadas">0</div></div>
+    <!-- MENU PRINCIPAL -->
+    <div id="menu-screen" style="display: none;">
+        <div class="modal-box">
+            <div style="position: absolute; top: 1.2rem; right: 1.2rem;">
+                <button class="btn-icon-gear" title="Configurações" onclick="abrirConfiguracoes()">⚙️</button>
+            </div>
+            <img src="logo.png" alt="Clealco" style="height: 48px; margin: 0 auto 1rem auto; display: block; object-fit: contain;">
+            <h2>Painel Principal</h2>
+            <p id="menu-user-name" style="color: var(--text-muted); font-weight: 600; margin-bottom: 1.8rem; font-size: 0.95rem;"></p>
+            <div style="display: flex; flex-direction: column; gap: 0.9rem;">
+                <button class="btn btn-primary" style="padding: 1rem; font-size: 1rem;" onclick="iniciarLancarOS()">🚜 LANÇAR OS</button>
+                <button class="btn btn-secondary" style="padding: 1rem; font-size: 1rem;" onclick="abrirGestaoOS()">📋 GESTÃO OS</button>
+            </div>
+        </div>
     </div>
 
-    <!-- CONTEÚDO PRINCIPAL -->
-    <div class="main-content">
-        <!-- TABELA DE TODAS AS OS -->
-        <div class="table-card">
-            <h2 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-muted);">Fila de Ordens de Serviço Lançadas</h2>
-            <div style="overflow-y: auto; max-height: 60vh;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>OS</th>
-                            <th>Solicitante</th>
-                            <th>Fazenda</th>
-                            <th>Operação</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dash-tbody"></tbody>
-                </table>
+    <!-- CONFIGURAÇÕES -->
+    <div id="settings-modal" style="display: none;">
+        <div class="modal-box">
+            <h2>Configurações</h2>
+            <div style="display: flex; flex-direction: column; gap: 0.8rem; margin: 1.5rem 0;">
+                <div style="background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px; text-align: left;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">LOGIN ATIVO / SESSÃO</span>
+                    <div id="settings-user-display" style="font-weight: 700; color: var(--accent); font-size: 0.95rem; margin-top: 2px;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px;">
+                    <span style="font-weight: 600; font-size: 0.9rem;">Aparência do Sistema</span>
+                    <button class="btn btn-outline" onclick="alternarTema()" id="btn-toggle-theme">🌙 Modo Escuro</button>
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.8rem;">
+                <button class="btn btn-secondary" style="flex: 1;" onclick="fecharConfiguracoes()">Voltar</button>
+                <button class="btn btn-danger" style="flex: 1;" onclick="efetuarLogout()">🚪 Sair / Deslogar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PROGRAMAÇÃO -->
+    <div id="prog-modal" style="display: none;">
+        <div class="modal-box">
+            <h2>Validação de Programação</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Esta Ordem de Serviço consta na programação?</p>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;" id="prog-btns">
+                <button class="btn btn-primary" style="flex: 1; background-color: var(--success);" onclick="respostaProgramacao('SIM')">SIM</button>
+                <button class="btn btn-danger" style="flex: 1;" onclick="mostrarJustificativa()">NÃO</button>
+            </div>
+            <div id="justificativa-box" style="display: none; margin-top: 1.5rem; text-align: left;">
+                <div class="form-group">
+                    <label>Informe a Justificativa:</label>
+                    <textarea id="justificativa-texto" rows="3" placeholder="Escreva o motivo aqui..."></textarea>
+                </div>
+                <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="respostaProgramacao('NÃO')">CONFIRMAR E AVANÇAR</button>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem;" onclick="cancelarProgramacao()">❌ Cancelar Lançamento</button>
+        </div>
+    </div>
+
+    <!-- GESTÃO OS (ACOMPANHAMENTO PELO CAMPO) -->
+    <div class="container" id="gestao-app">
+        <div class="header">
+            <div class="logo-container">
+                <img src="logo.png" alt="Clealco" class="logo-img">
+                <div class="logo-text">CONTROLE<br>AGRICOLA</div>
+            </div>
+            <div>
+                <h1 style="font-size: 1.25rem; color: var(--accent);">Minhas Ordens de Serviço</h1>
+                <p id="gestao-user-title" style="font-size: 0.8rem; color: var(--text-muted); text-align: right;"></p>
             </div>
         </div>
 
-        <!-- DETALHES E PAINEL DE DECISÃO -->
-        <div class="detail-card">
-            <div>
-                <h2 style="font-size: 1.1rem; color: var(--accent); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;" id="detalhe-titulo">Selecione uma OS</h2>
-                
-                <div id="detalhe-conteudo" style="display: none;">
-                    <div class="field-label">Solicitante</div>
-                    <div class="field-val" id="det-solicitante">-</div>
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; justify-content: space-between;">
+            <button class="btn btn-primary" onclick="carregarEExibirGestaoOS()">🔄 Atualizar Status</button>
+            <button class="btn btn-secondary" onclick="voltarAoMenu()">⬅️ Voltar ao Menu</button>
+        </div>
 
-                    <div style="display: flex; gap: 1rem;">
-                        <div style="flex: 1;">
-                            <div class="field-label">Fazenda</div>
-                            <div class="field-val" id="det-fazenda">-</div>
-                        </div>
-                        <div style="flex: 1;">
-                            <div class="field-label">Tipo</div>
-                            <div class="field-val" id="det-tipo">-</div>
-                        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cód. OS</th>
+                        <th>Data Solicitação</th>
+                        <th>Fazenda (F.A)</th>
+                        <th>Operação</th>
+                        <th>Talhões</th>
+                        <th>Status Aprovação</th>
+                    </tr>
+                </thead>
+                <tbody id="gestao-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- COMPROVANTE -->
+    <div id="receipt-modal">
+        <div class="receipt-box">
+            <h2 id="receipt-status-title" style="color: var(--success);">OS Lançada com Sucesso!</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">Status Inicial: <strong>Em análise</strong> pelo Controle Agrícola.</p>
+            <pre id="receipt-content"></pre>
+            <button class="btn btn-primary" style="width: 100%; background-color: #25D366;" onclick="enviarWhatsApp()">📱 Enviar pelo WhatsApp</button>
+            <button class="btn btn-outline" style="width: 100%; margin-top: 0.6rem;" onclick="voltarAoMenuAposLancamento()">Ir para o Menu Principal</button>
+        </div>
+    </div>
+
+    <!-- FORMULÁRIO DE LANÇAMENTO DA OS -->
+    <div class="container" id="main-app">
+        <div class="header">
+            <div class="logo-container">
+                <img src="logo.png" alt="Clealco" class="logo-img">
+                <div class="logo-text">CONTROLE<br>AGRICOLA</div>
+            </div>
+            <h1 style="font-size: 1.25rem; color: var(--accent);" id="main-app-title">Lançamento de OS</h1>
+        </div>
+
+        <div id="view-mode-banner" class="read-only-banner" style="display: none;">
+            <span>🔍 MODO VISUALIZAÇÃO: Esta OS já foi cadastrada.</span>
+        </div>
+
+        <form id="os-form">
+            <input type="hidden" id="zona-input">
+            <div class="section">
+                <div class="grid grid-3">
+                    <div class="form-group">
+                        <label>Data e Hora Solicitação</label>
+                        <input type="text" id="data-solicitacao-display" readonly style="font-weight: 700; color: var(--accent);">
                     </div>
-
-                    <div class="field-label">Operação</div>
-                    <div class="field-val" id="det-operacao">-</div>
-
-                    <div class="field-label">Talhões / Frota</div>
-                    <div class="field-val" id="det-talhoes-frota">-</div>
-
-                    <div class="field-label">Insumos Lançados</div>
-                    <div class="field-val" id="det-insumos" style="font-size: 0.85rem; color: var(--accent);">-</div>
-
-                    <div class="field-label">Observações do Campo</div>
-                    <div class="field-val" id="det-obs" style="font-size: 0.85rem; font-style: italic;">-</div>
+                    <div class="form-group" style="justify-content: flex-end;">
+                        <label>Status Programação</label>
+                        <div id="status-programacao-badge" class="badge-prog-status"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>PEA (Permissão Entrada)</label>
+                        <input type="text" id="pea-input" placeholder="Nº PEA">
+                    </div>
                 </div>
             </div>
 
-            <div id="action-buttons-box" style="display: none; gap: 1rem; margin-top: 1.5rem;">
-                <button class="btn btn-approve" onclick="aprovarOS()">Aprovar OS</button>
-                <button class="btn btn-reject" onclick="abrirModalRejeicao()">Rejeitar OS</button>
+            <div class="section">
+                <div class="section-title">Localização e Talhões</div>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label>Fazenda / Descrição (F.A)</label>
+                        <input type="text" id="fundo-input" placeholder="Digite o código ou nome..." autocomplete="off">
+                        <div id="fundo-autocomplete" class="autocomplete-list"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Fazenda</label>
+                        <input type="text" id="tipo-fazenda" readonly placeholder="Automático" style="font-weight: 700; color: var(--accent);">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 1rem;" id="group-digitar-talhoes">
+                    <label>Digitar Talhões (Ex: 1-12, 15-18, 30 e Enter)</label>
+                    <input type="text" id="talhoes-range-input" placeholder="Digite aqui a sequência..." autocomplete="off">
+                </div>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label>Talhões Selecionados</label>
+                    <div id="talhoes-container" class="talhoes-container"></div>
+                </div>
+                <div class="grid grid-3" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label>Área Total (ha)</label>
+                        <input type="number" id="area-total" readonly value="0.00" style="font-weight: 700; color: var(--accent);">
+                    </div>
+                    <div class="form-group"><label>Previsão Início</label><input type="date" id="data-prev-inicio"></div>
+                    <div class="form-group"><label>Previsão Fim</label><input type="date" id="data-prev-fim"></div>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <!-- MODAL DE REJEIÇÃO COM JUSTIFICATIVA -->
-    <div id="reject-modal">
-        <div class="reject-box">
-            <h2 style="color: var(--danger);">Rejeitar Ordem de Serviço</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">Informe o motivo para o setor do Controle Agrícola:</p>
-            <textarea id="reject-reason" rows="4" placeholder="Ex: Equipamento sem disponibilidade / Insumo divergente..."></textarea>
-            <div style="display: flex; gap: 0.8rem;">
-                <button class="btn" style="background: var(--bg-input); color: #fff; flex: 1;" onclick="fecharModalRejeicao()">Cancelar</button>
-                <button class="btn btn-reject" onclick="confirmarRejeicao()">Confirmar Rejeição</button>
+            <div class="section">
+                <div class="section-title">Centro de Custo e Equipamentos</div>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label>Centro de Custo</label>
+                        <select id="centro-custo"><option value="">Aguardando...</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Operação</label>
+                        <select id="operacao"><option value="">Selecione o Centro de Custo</option></select>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label>Equipamentos / Frota</label>
+                    <input type="text" id="frota-input" placeholder="Digite para buscar..." autocomplete="off">
+                    <div id="frota-autocomplete" class="autocomplete-list"></div>
+                    <div id="equipamentos-selecionados" class="talhoes-container" style="margin-top: 0.5rem;"></div>
+                </div>
             </div>
-        </div>
+
+            <div class="section">
+                <div class="section-title">Insumos Aplicados</div>
+                <div class="table-responsive">
+                    <table id="produtos-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%">Cód. Insumo</th>
+                                <th style="width: 35%">Descrição</th>
+                                <th style="width: 10%">UN</th>
+                                <th style="width: 15%">Dosagem/ha</th>
+                                <th style="width: 15%">Total</th>
+                                <th style="width: 5%" id="th-action-col"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="produtos-tbody"></tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn btn-outline" style="margin-top: 0.8rem;" id="btn-add-insumo" onclick="adicionarLinhaProduto()">+ Adicionar Insumo</button>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Observações e Solicitante</div>
+                <div class="grid grid-2">
+                    <div class="form-group"><label>Observação</label><textarea id="observacao" rows="3"></textarea></div>
+                    <div class="form-group"><label>Solicitante Logado</label><input type="text" id="solicitante-display" readonly style="font-weight: 700; color: var(--accent);"></div>
+                </div>
+            </div>
+
+            <div id="box-actions-lancar" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="voltarAoMenu()">CANCELAR</button>
+                <button type="button" class="btn btn-primary" style="flex: 2;" onclick="enviarDados()" id="btn-submit">🚀 ENVIAR PARA ANÁLISE</button>
+            </div>
+            <div id="box-actions-visualizar" style="display: none; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-primary" style="width: 100%;" onclick="fecharVisualizacaoOS()">⬅️ VOLTAR PARA MINHAS OS</button>
+            </div>
+            <div id="submit-loader" class="loader" style="margin-top: 1rem;"></div>
+        </form>
     </div>
 
     <script>
         const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQZWlJ8xGg-VqRLvWWPuowCQ2QUJg-CEXjW8oM_tEo7fqVsGOov2UZxU85snQtvyLp/exec';
 
-        let listaOS = [];
-        let osSelecionada = null;
+        let dbFazendas = [], dbInsumos = [], dbEquipamentos = [], dbOperacoes = [];
+        let solicitanteCracha = "", solicitanteNome = "", solicitanteLimpoDisplay = "";
+        let programacaoStatus = "SIM", carreadorTexto = "", equipamentosSelecionados = [], modoVisualizacao = false, listaOSCache = [];
+        let statusCacheAnterior = {};
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
+            carregarPreferenciaTema();
             solicitarPermissaoNotificacao();
-            carregarTodasOS();
-            setInterval(carregarTodasOS, 15000); // Polling a cada 15 segundos
-            setInterval(() => {
-                document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('pt-BR');
-            }, 1000);
+            verificarSessaoSalva();
+            await carregarDadosIniciais();
+            setInterval(checarMudancasStatusNotificacao, 20000); // Polling de Notificação a cada 20s
         });
 
         function solicitarPermissaoNotificacao() {
@@ -248,131 +394,461 @@
             }
         }
 
-        function dispararNotificacaoWindows(titulo, msg) {
+        function dispararNotificacaoNavegador(titulo, mensagem) {
             if ("Notification" in window && Notification.permission === "granted") {
-                new Notification(titulo, { body: msg, icon: 'logo.png' });
+                new Notification(titulo, { body: mensagem, icon: 'logo.png' });
             }
         }
 
-        async function carregarTodasOS() {
+        async function checarMudancasStatusNotificacao() {
+            if (!solicitanteCracha || !navigator.onLine) return;
             try {
-                const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_todas_os`)).json();
+                const res = await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`);
+                const data = await res.json();
+                if (data.success && data.dados) {
+                    data.dados.forEach(os => {
+                        const statusAnt = statusCacheAnterior[os.codigoOS];
+                        if (statusAnt && statusAnt !== os.status_aprovacao) {
+                            if (os.status_aprovacao === "Aprovado") {
+                                dispararNotificacaoNavegador(`OS nº ${os.codigoOS} APROVADA! 🎉`, `Operação: ${os.operacao} na fazenda ${os.descricao_fazenda}`);
+                            } else if (os.status_aprovacao === "Rejeitado") {
+                                dispararNotificacaoNavegador(`OS nº ${os.codigoOS} REJEITADA ❌`, `Motivo: ${os.justificativa_controle || 'Não informado'}`);
+                            }
+                        }
+                        statusCacheAnterior[os.codigoOS] = os.status_aprovacao;
+                    });
+                }
+            } catch(e) {}
+        }
+
+        function carregarPreferenciaTema() {
+            const temaSalvo = localStorage.getItem('theme_preference') || 'dark';
+            document.documentElement.setAttribute('data-theme', temaSalvo);
+        }
+
+        function alternarTema() {
+            const temaAtual = document.documentElement.getAttribute('data-theme');
+            const novoTema = temaAtual === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', novoTema);
+            localStorage.setItem('theme_preference', novoTema);
+        }
+
+        function abrirConfiguracoes() { document.getElementById('settings-modal').style.display = 'flex'; }
+        function fecharConfiguracoes() { document.getElementById('settings-modal').style.display = 'none'; }
+
+        function obterNomeSolicitanteLimpo(cracha, nome) {
+            if (!nome) return cracha || "";
+            let reg = new RegExp('^' + cracha + '\\s*-\\s*', 'i');
+            return nome.replace(reg, '').trim();
+        }
+
+        function verificarSessaoSalva() {
+            const crachaVal = localStorage.getItem('logged_cracha');
+            const nomeVal = localStorage.getItem('logged_nome');
+            if (crachaVal && nomeVal && localStorage.getItem('permanecer_logado') === 'true') {
+                efetuarLoginSucesso(crachaVal, nomeVal);
+            }
+        }
+
+        async function executarLogin() {
+            const u = document.getElementById('login-user').value.trim();
+            const p = document.getElementById('login-pass').value.trim();
+            if (!u || !p) return;
+            document.getElementById('login-loader').style.display = 'block';
+
+            try {
+                const res = await fetch(`${APPSCRIPT_URL}?action=validar_login&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`);
+                const data = await res.json();
+                document.getElementById('login-loader').style.display = 'none';
+
+                if (data.success) {
+                    localStorage.setItem('permanecer_logado', 'true');
+                    efetuarLoginSucesso(data.cracha, data.solicitante);
+                } else {
+                    document.getElementById('login-error').innerText = data.error;
+                    document.getElementById('login-error').style.display = 'block';
+                }
+            } catch (err) {
+                document.getElementById('login-loader').style.display = 'none';
+            }
+        }
+
+        function efetuarLoginSucesso(cracha, nome) {
+            solicitanteCracha = cracha;
+            solicitanteNome = nome;
+            solicitanteLimpoDisplay = obterNomeSolicitanteLimpo(cracha, nome);
+
+            localStorage.setItem('logged_cracha', cracha);
+            localStorage.setItem('logged_nome', nome);
+
+            document.getElementById('solicitante-display').value = solicitanteLimpoDisplay;
+            document.getElementById('menu-user-name').innerText = `Solicitante: ${solicitanteLimpoDisplay}`;
+            document.getElementById('settings-user-display').innerText = `${solicitanteCracha} - ${solicitanteLimpoDisplay}`;
+            document.getElementById('gestao-user-title').innerText = `Solicitante: ${solicitanteLimpoDisplay}`;
+
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'flex';
+        }
+
+        function efetuarLogout() {
+            localStorage.clear();
+            location.reload();
+        }
+
+        async function carregarDadosIniciais() {
+            try {
+                const res = await (await fetch(`${APPSCRIPT_URL}?action=init`)).json();
                 if (res.success) {
-                    const qtdAnterior = listaOS.length;
-                    listaOS = res.dados || [];
-
-                    // Notifica se chegou OS nova para o Controle
-                    if (qtdAnterior > 0 && listaOS.length > qtdAnterior) {
-                        dispararNotificacaoWindows("NOVA OS RECEBIDA! 🚜", `Nova solicitação aguardando aprovação.`);
-                    }
-
-                    atualizarKPIs();
-                    renderizarTabela();
-                    if (osSelecionada) {
-                        const atualizada = listaOS.find(o => o.codigoOS === osSelecionada.codigoOS);
-                        if (atualizada) selecionarOS(atualizada);
-                    }
+                    dbFazendas = res.dados.fazendas || [];
+                    dbInsumos = res.dados.insumos || [];
+                    dbEquipamentos = res.dados.equipamentos || [];
+                    dbOperacoes = res.dados.operacoes || [];
+                    popularCentrosDeCusto();
                 }
             } catch (e) {}
         }
 
-        function atualizarKPIs() {
-            document.getElementById('kpi-total').innerText = listaOS.length;
-            document.getElementById('kpi-analise').innerText = listaOS.filter(o => (o.status_aprovacao || 'Em análise') === 'Em análise').length;
-            document.getElementById('kpi-aprovadas').innerText = listaOS.filter(o => o.status_aprovacao === 'Aprovado').length;
-            document.getElementById('kpi-rejeitadas').innerText = listaOS.filter(o => o.status_aprovacao === 'Rejeitado').length;
+        function voltarAoMenu() {
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('gestao-app').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'flex';
         }
 
-        function renderizarTabela() {
-            const tbody = document.getElementById('dash-tbody');
+        function voltarAoMenuAposLancamento() {
+            document.getElementById('receipt-modal').style.display = 'none';
+            voltarAoMenu();
+        }
+
+        function iniciarLancarOS() {
+            desativarModoLeitura();
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('prog-modal').style.display = 'flex';
+        }
+
+        function cancelarProgramacao() {
+            document.getElementById('prog-modal').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'flex';
+        }
+
+        function mostrarJustificativa() {
+            document.getElementById('prog-btns').style.display = 'none';
+            document.getElementById('justificativa-box').style.display = 'block';
+        }
+
+        function respostaProgramacao(resp) {
+            programacaoStatus = resp;
+            carreadorTexto = (resp === 'NÃO') ? document.getElementById('justificativa-texto').value.trim() : "";
+            document.getElementById('prog-modal').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+
+            document.getElementById('os-form').reset();
+            document.getElementById('solicitante-display').value = solicitanteLimpoDisplay;
+            document.getElementById('data-solicitacao-display').value = new Date().toLocaleString('pt-BR');
+            document.getElementById('produtos-tbody').innerHTML = '';
+            equipamentosSelecionados = []; renderizerEquipamentos();
+            talhoesAtivos = []; renderizerTalhoesSelecionados();
+            document.getElementById('data-prev-inicio').valueAsDate = new Date();
+            adicionarLinhaProduto();
+        }
+
+        function abrirGestaoOS() {
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('gestao-app').style.display = 'block';
+            carregarEExibirGestaoOS();
+        }
+
+        async function carregarEExibirGestaoOS() {
+            const tbody = document.getElementById('gestao-tbody');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 2rem;">⏳ Atualizando status...</td></tr>';
+
+            try {
+                const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`)).json();
+                if (res.success) {
+                    listaOSCache = res.dados || [];
+                    renderizarTabelaGestao(listaOSCache);
+                }
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--danger);">Erro ao carregar do servidor.</td></tr>';
+            }
+        }
+
+        function renderizarTabelaGestao(lista) {
+            const tbody = document.getElementById('gestao-tbody');
             tbody.innerHTML = '';
 
-            listaOS.forEach(os => {
+            if (lista.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhuma OS enviada.</td></tr>';
+                return;
+            }
+
+            lista.forEach((os, index) => {
                 const tr = document.createElement('tr');
-                if (osSelecionada && osSelecionada.codigoOS === os.codigoOS) tr.className = 'selected';
+                tr.className = 'tr-clickable';
+                tr.onclick = () => visualizarOS(index);
 
                 let st = os.status_aprovacao || "Em análise";
                 let badgeClass = "badge-analise";
                 if (st === "Aprovado") badgeClass = "badge-aprovado";
                 if (st === "Rejeitado") badgeClass = "badge-rejeitado";
 
-                tr.onclick = () => selecionarOS(os);
                 tr.innerHTML = `
                     <td><strong>${os.codigoOS}</strong></td>
-                    <td>${os.solicitante_nome || os.solicitante_cracha}</td>
-                    <td>${os.fa_codigo} - ${os.descricao_fazenda}</td>
-                    <td>${os.operacao}</td>
+                    <td>${os.data_solicitacao || '-'}</td>
+                    <td>${os.fa_codigo || ''} - ${os.descricao_fazenda || ''}</td>
+                    <td>${os.operacao || '-'}</td>
+                    <td>${os.talhoes || '-'}</td>
                     <td><span class="badge ${badgeClass}">${st}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function selecionarOS(os) {
-            osSelecionada = os;
-            renderizarTabela();
+        function visualizarOS(index) {
+            const os = listaOSCache[index];
+            if (!os) return;
+            modoVisualizacao = true;
+            document.getElementById('gestao-app').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            document.getElementById('main-app-title').innerText = `OS nº ${os.codigoOS} [${os.status_aprovacao}]`;
+            document.getElementById('view-mode-banner').style.display = 'block';
+            document.getElementById('box-actions-lancar').style.display = 'none';
+            document.getElementById('box-actions-visualizar').style.display = 'block';
 
-            document.getElementById('detalhe-titulo').innerText = `OS nº ${os.codigoOS} [${os.status_aprovacao || 'Em análise'}]`;
-            document.getElementById('det-solicitante').innerText = `${os.solicitante_cracha} - ${os.solicitante_nome}`;
-            document.getElementById('det-fazenda').innerText = `${os.fa_codigo} - ${os.descricao_fazenda}`;
-            document.getElementById('det-tipo').innerText = os.tipo_fazenda || "-";
-            document.getElementById('det-operacao').innerText = `${os.centro_custo} / ${os.operacao}`;
-            document.getElementById('det-talhoes-frota').innerText = `Talhões: ${os.talhoes} | Frota: ${os.equipamentos}`;
+            document.getElementById('data-solicitacao-display').value = os.data_solicitacao || "-";
+            document.getElementById('pea-input').value = os.pea || "-";
+            document.getElementById('fundo-input').value = `${os.fa_codigo} - ${os.descricao_fazenda}`;
+            document.getElementById('tipo-fazenda').value = os.tipo_fazenda || "-";
 
-            let prodsStr = (os.produtos || []).map(p => `▪ ${p.desc}: ${p.total} ${p.un}`).join('<br>');
-            document.getElementById('det-insumos').innerHTML = prodsStr || "Nenhum insumo";
-            document.getElementById('det-obs').innerText = os.observacao || "Sem observações";
+            const containerTalhoes = document.getElementById('talhoes-container');
+            containerTalhoes.innerHTML = (os.talhoes || "").split(',').map(t => `<div class="talhao-chip">Talhão ${t.trim()}</div>`).join('');
 
-            document.getElementById('detalhe-conteudo').style.display = 'block';
-            document.getElementById('action-buttons-box').style.display = 'flex';
+            document.getElementById('centro-custo').innerHTML = `<option>${os.centro_custo}</option>`;
+            document.getElementById('operacao').innerHTML = `<option>${os.operacao}</option>`;
+
+            const containerEquip = document.getElementById('equipamentos-selecionados');
+            containerEquip.innerHTML = (os.equipamentos || "").split(',').map(e => `<div class="equip-chip">${e.trim()}</div>`).join('');
+
+            const tbody = document.getElementById('produtos-tbody');
+            tbody.innerHTML = '';
+            (os.produtos || []).forEach(p => {
+                tbody.innerHTML += `<tr>
+                    <td><input type="text" value="${p.cod}" readonly></td>
+                    <td><input type="text" value="${p.desc}" readonly></td>
+                    <td><input type="text" value="${p.un}" readonly style="width: 45px;"></td>
+                    <td><input type="text" value="${p.dose}" readonly></td>
+                    <td><input type="text" value="${p.total}" readonly></td>
+                </tr>`;
+            });
+
+            document.getElementById('observacao').value = (os.justificativa_controle ? `[JUSTIFICATIVA CONTROLE]: ${os.justificativa_controle}\n\n` : '') + (os.observacao || '');
+            document.getElementById('solicitante-display').value = obterNomeSolicitanteLimpo(os.solicitante_cracha, os.solicitante_nome);
+            aplicarEstadoCampos(true);
         }
 
-        async function aprovarOS() {
-            if (!osSelecionada) return;
-            if (confirm(`Confirmar APROVAÇÃO da OS nº ${osSelecionada.codigoOS}?`)) {
-                await enviarAtualizacaoStatus("Aprovado", "");
-            }
+        function fecharVisualizacaoOS() {
+            desativarModoLeitura();
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('gestao-app').style.display = 'block';
         }
 
-        function abrirModalRejeicao() {
-            if (!osSelecionada) return;
-            document.getElementById('reject-reason').value = '';
-            document.getElementById('reject-modal').style.display = 'flex';
+        function desativarModoLeitura() {
+            modoVisualizacao = false;
+            document.getElementById('main-app-title').innerText = "Lançamento de OS";
+            document.getElementById('view-mode-banner').style.display = 'none';
+            document.getElementById('box-actions-lancar').style.display = 'flex';
+            document.getElementById('box-actions-visualizar').style.display = 'none';
+            aplicarEstadoCampos(false);
+            popularCentrosDeCusto();
         }
 
-        function fecharModalRejeicao() {
-            document.getElementById('reject-modal').style.display = 'none';
-        }
-
-        async function confirmarRejeicao() {
-            const motivo = document.getElementById('reject-reason').value.trim();
-            if (!motivo) { alert("Informe a justificativa da rejeição!"); return; }
-            fecharModalRejeicao();
-            await enviarAtualizacaoStatus("Rejeitado", motivo);
-        }
-
-        async function enviarAtualizacaoStatus(status, justificativa) {
-            try {
-                const res = await (await fetch(APPSCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'atualizar_status',
-                        codigoOS: osSelecionada.codigoOS,
-                        status: status,
-                        justificativa: justificativa
-                    })
-                })).json();
-
-                if (res.success) {
-                    dispararNotificacaoWindows(`OS nº ${osSelecionada.codigoOS} ATUALIZADA!`, `Status alterado para ${status}.`);
-                    await carregarTodasOS();
-                } else {
-                    alert("Erro ao atualizar: " + res.error);
+        function aplicarEstadoCampos(readonly) {
+            document.querySelectorAll('#os-form input, #os-form select, #os-form textarea').forEach(el => {
+                if (el.id !== 'data-solicitacao-display' && el.id !== 'solicitante-display') {
+                    if (el.tagName === 'SELECT') el.disabled = readonly;
+                    else el.readOnly = readonly;
                 }
-            } catch(e) {
-                alert("Falha de conexão com a rede.");
+            });
+        }
+
+        function popularCentrosDeCusto() {
+            const selectCC = document.getElementById('centro-custo');
+            selectCC.innerHTML = '<option value="">Selecione...</option>';
+            [...new Set(dbOperacoes.map(o => o.centroCusto))].filter(Boolean).forEach(cc => selectCC.innerHTML += `<option value="${cc}">${cc}</option>`);
+
+            selectCC.onchange = function() {
+                const opSelect = document.getElementById('operacao');
+                opSelect.innerHTML = '<option value="">Selecione...</option>';
+                [...new Set(dbOperacoes.filter(o => o.centroCusto === this.value).map(o => o.operacao))].filter(Boolean).forEach(op => opSelect.innerHTML += `<option value="${op}">${op}</option>`);
+            };
+        }
+
+        let fazendaSelecionada = null, talhoesAtivos = [];
+        const inputFundo = document.getElementById('fundo-input'), listFundo = document.getElementById('fundo-autocomplete');
+
+        inputFundo.oninput = function() {
+            if (modoVisualizacao) return;
+            const val = this.value.toLowerCase(); listFundo.innerHTML = '';
+            if (!val) { listFundo.style.display = 'none'; return; }
+            dbFazendas.filter(f => f.descricao.toLowerCase().includes(val)).forEach(f => {
+                const div = document.createElement('div'); div.className = 'autocomplete-item';
+                div.innerHTML = `<strong>${f.codigo}</strong> - ${f.nome}`;
+                div.onclick = () => {
+                    fazendaSelecionada = f; inputFundo.value = f.descricao;
+                    document.getElementById('tipo-fazenda').value = (parseInt(f.codigo, 10) < 300000) ? "PRÓPRIA" : "FORNECEDORES";
+                    listFundo.style.display = 'none';
+                };
+                listFundo.appendChild(div);
+            });
+            listFundo.style.display = 'block';
+        };
+
+        const inputRangeTalhoes = document.getElementById('talhoes-range-input');
+        inputRangeTalhoes.onchange = function() {
+            if (!fazendaSelecionada) return;
+            const nums = inputRangeTalhoes.value.split(',').map(s => parseInt(s.trim(), 10)).filter(Boolean);
+            fazendaSelecionada.talhoes.forEach(t => {
+                if (nums.includes(parseInt(t.talhao, 10)) && !talhoesAtivos.some(a => a.num === t.talhao)) {
+                    talhoesAtivos.push({ num: t.talhao, areaParcial: parseFloat(t.area) });
+                }
+            });
+            renderizerTalhoesSelecionados();
+        };
+
+        function renderizerTalhoesSelecionados() {
+            const container = document.getElementById('talhoes-container'); container.innerHTML = '';
+            let tot = 0;
+            talhoesAtivos.forEach((t, i) => {
+                tot += t.areaParcial;
+                container.innerHTML += `<div class="talhao-chip">Talhão ${t.num} (${t.areaParcial} ha) <button type="button" onclick="talhoesAtivos.splice(${i},1);renderizerTalhoesSelecionados();" style="background:none;border:none;color:var(--danger);font-weight:bold;cursor:pointer;">×</button></div>`;
+            });
+            document.getElementById('area-total').value = tot.toFixed(2);
+        }
+
+        const inputFrota = document.getElementById('frota-input'), listFrota = document.getElementById('frota-autocomplete');
+        inputFrota.oninput = function() {
+            if (modoVisualizacao) return;
+            const val = this.value.toLowerCase(); listFrota.innerHTML = '';
+            if (!val) { listFrota.style.display = 'none'; return; }
+            dbEquipamentos.filter(e => e.nome.toLowerCase().includes(val)).forEach(e => {
+                const div = document.createElement('div'); div.className = 'autocomplete-item';
+                div.innerHTML = `<strong>${e.nome}</strong> (${e.propriedade})`;
+                div.onclick = () => {
+                    if (!equipamentosSelecionados.some(x => x.nome === e.nome)) equipamentosSelecionados.push(e);
+                    renderizerEquipamentos(); inputFrota.value = ''; listFrota.style.display = 'none';
+                };
+                listFrota.appendChild(div);
+            });
+            listFrota.style.display = 'block';
+        };
+
+        function renderizerEquipamentos() {
+            const container = document.getElementById('equipamentos-selecionados'); container.innerHTML = '';
+            equipamentosSelecionados.forEach((e, i) => {
+                container.innerHTML += `<div class="equip-chip"><span>${e.nome}</span><button type="button" onclick="equipamentosSelecionados.splice(${i},1);renderizerEquipamentos();">×</button></div>`;
+            });
+        }
+
+        function adicionarLinhaProduto() {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="prod-cod" placeholder="Cód/Nome..."><div class="autocomplete-list list-cod"></div></td>
+                <td><input type="text" class="prod-desc" readonly></td>
+                <td><input type="text" class="prod-un" readonly style="width: 45px;"></td>
+                <td><input type="number" step="0.001" class="prod-dose" placeholder="0.00"></td>
+                <td><input type="number" step="0.01" class="prod-total" readonly placeholder="0.00"></td>
+                <td style="text-align: center;"><button type="button" class="btn btn-danger" style="padding: 2px 8px;" onclick="this.closest('tr').remove();">×</button></td>
+            `;
+
+            const inCod = tr.querySelector('.prod-cod'), listCod = tr.querySelector('.list-cod'), inDose = tr.querySelector('.prod-dose');
+            inCod.oninput = function() {
+                const val = this.value.toLowerCase(); listCod.innerHTML = '';
+                if (!val) { listCod.style.display = 'none'; return; }
+                dbInsumos.filter(p => p.full.toLowerCase().includes(val)).forEach(p => {
+                    const div = document.createElement('div'); div.className = 'autocomplete-item';
+                    div.innerHTML = `<strong>${p.cod}</strong> - ${p.desc}`;
+                    div.onclick = () => {
+                        tr.querySelector('.prod-cod').value = p.cod;
+                        tr.querySelector('.prod-desc').value = p.desc;
+                        tr.querySelector('.prod-un').value = p.un;
+                        listCod.style.display = 'none';
+                    };
+                    listCod.appendChild(div);
+                });
+                listCod.style.display = 'block';
+            };
+
+            inDose.oninput = function() {
+                const area = parseFloat(document.getElementById('area-total').value) || 0;
+                tr.querySelector('.prod-total').value = ((parseFloat(this.value) || 0) * area).toFixed(2);
+            };
+
+            document.getElementById('produtos-tbody').appendChild(tr);
+        }
+
+        async function enviarDados() {
+            if (modoVisualizacao) return;
+            const btn = document.getElementById('btn-submit'), loader = document.getElementById('submit-loader');
+            const ccVal = document.getElementById('centro-custo').value, opVal = document.getElementById('operacao').value;
+
+            if (talhoesAtivos.length === 0) { alert("Selecione os talhões!"); return; }
+
+            const payload = {
+                programacao: programacaoStatus, carreador: carreadorTexto,
+                data_solicitacao: document.getElementById('data-solicitacao-display').value,
+                solicitante_cracha: solicitanteCracha, solicitante_nome: solicitanteNome,
+                tipo_fazenda: document.getElementById('tipo-fazenda').value,
+                fa_codigo: fazendaSelecionada ? fazendaSelecionada.codigo : "",
+                descricao_fazenda: fazendaSelecionada ? fazendaSelecionada.nome : document.getElementById('fundo-input').value,
+                centro_custo: ccVal, operacao: opVal,
+                data_prevista_inicio: document.getElementById('data-prev-inicio').value,
+                data_prevista_fim: document.getElementById('data-prev-fim').value,
+                observacao: document.getElementById('observacao').value,
+                pea: document.getElementById('pea-input').value,
+                talhoes: talhoesAtivos.map(t => t.num).join(', '),
+                frota: equipamentosSelecionados.map(e => e.nome).join(', '),
+                produtos: []
+            };
+
+            document.querySelectorAll('#produtos-tbody tr').forEach(tr => {
+                const cod = tr.querySelector('.prod-cod').value;
+                if (cod) {
+                    payload.produtos.push({
+                        cod: cod, desc: tr.querySelector('.prod-desc').value,
+                        un: tr.querySelector('.prod-un').value, dose: tr.querySelector('.prod-dose').value,
+                        total: tr.querySelector('.prod-total').value
+                    });
+                }
+            });
+
+            btn.style.display = 'none'; loader.style.display = 'block';
+
+            try {
+                const res = await (await fetch(APPSCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })).json();
+                btn.style.display = 'inline-flex'; loader.style.display = 'none';
+                if (res.success) {
+                    gerarComprovanteWhatsApp(payload, res.codigoOS);
+                }
+            } catch (err) {
+                btn.style.display = 'inline-flex'; loader.style.display = 'none';
+                alert("Erro ao enviar dados para a rede.");
             }
         }
+
+        let linkWhatsApp = "";
+        function gerarComprovanteWhatsApp(p, codOS) {
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('receipt-modal').style.display = 'flex';
+
+            let texto = `*ORDEM DE SERVIÇO ENVIADA PARA ANÁLISE* 🚜\n`;
+            texto += `*Cód. OS:* ${codOS}\n*Status:* Em análise pelo Controle Agrícola\n`;
+            texto += `*Fazenda:* ${p.fa_codigo} - ${p.descricao_fazenda}\n*Operação:* ${p.operacao}\n*Talhões:* ${p.talhoes}\n`;
+            texto += `*Solicitante:* ${solicitanteLimpoDisplay}`;
+
+            document.getElementById('receipt-content').innerText = texto;
+            linkWhatsApp = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+        }
+
+        function enviarWhatsApp() { window.open(linkWhatsApp, '_blank'); }
     </script>
 </body>
 </html>
