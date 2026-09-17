@@ -123,7 +123,7 @@
 
         .read-only-banner { background-color: rgba(6, 182, 212, 0.12); border: 1px solid var(--accent); color: var(--accent); padding: 0.6rem 1rem; border-radius: 8px; font-weight: 700; font-size: 0.85rem; margin-bottom: 1.5rem; }
 
-        /* BANNER DE NOTIFICAÇÃO FLUTUANTE (TOAST) */
+        /* BANNER DE NOTIFICAÇÃO FLUTUANTE (TOAST CORPORATIVO) */
         @keyframes slideDown {
             from { transform: translateY(-100%); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
@@ -138,10 +138,9 @@
 </head>
 <body>
 
-    <!-- BANNER DE NOTIFICAÇÃO VISUAL NO APP (TOAST) -->
+    <!-- NOTIFICAÇÃO TOAST SEM EMOJIS -->
     <div id="toast-notification">
         <div style="display: flex; align-items: flex-start; gap: 12px;">
-            <span id="toast-icon" style="font-size: 1.8rem;">🔔</span>
             <div style="flex: 1;">
                 <strong id="toast-title" style="font-size: 0.95rem; color: var(--text-main); display: block; margin-bottom: 3px;"></strong>
                 <p id="toast-body" style="font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.3;"></p>
@@ -181,8 +180,8 @@
             <h2>Painel Principal</h2>
             <p id="menu-user-name" style="color: var(--text-muted); font-weight: 600; margin-bottom: 1.8rem; font-size: 0.95rem;"></p>
             <div style="display: flex; flex-direction: column; gap: 0.9rem;">
-                <button class="btn btn-primary" style="padding: 1rem; font-size: 1rem;" onclick="abrirModalModoOperacao()">🚜 NOVA OPERAÇÃO / OS</button>
-                <button class="btn btn-secondary" style="padding: 1rem; font-size: 1rem;" onclick="abrirGestaoOS()">📋 GESTÃO OS</button>
+                <button class="btn btn-primary" style="padding: 1rem; font-size: 1rem;" onclick="abrirModalModoOperacao()">NOVA OPERAÇÃO / OS</button>
+                <button class="btn btn-secondary" style="padding: 1rem; font-size: 1rem;" onclick="abrirGestaoOS()">GESTÃO DE OS</button>
             </div>
         </div>
     </div>
@@ -195,13 +194,13 @@
             
             <div style="display: flex; flex-direction: column; gap: 0.8rem;">
                 <button class="btn btn-primary" style="padding: 0.9rem;" onclick="selecionarModoEAvancar('LANCAMENTO')">
-                    🚜 LANÇAR OS (Nova OS)
+                    LANÇAR OS (Nova OS)
                 </button>
                 <button class="btn btn-secondary" style="padding: 0.9rem; border-color: var(--warning); color: var(--warning);" onclick="selecionarModoEAvancar('APONTAMENTO')">
-                    ⏱️ APONTAR OS (Apontamento Parcial)
+                    APONTAR OS (Apontamento Parcial)
                 </button>
                 <button class="btn btn-secondary" style="padding: 0.9rem; border-color: var(--success); color: var(--success);" onclick="selecionarModoEAvancar('ENCERRAMENTO')">
-                    🏁 ENCERRAR OS (Copiar e Finalizar)
+                    ENCERRAR OS (Copiar e Finalizar)
                 </button>
             </div>
 
@@ -229,12 +228,12 @@
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px;">
                     <span style="font-weight: 600; font-size: 0.9rem;">Aparência do Sistema</span>
-                    <button class="btn btn-outline" onclick="alternarTema()" id="btn-toggle-theme">🌙 Modo Escuro</button>
+                    <button class="btn btn-outline" onclick="alternarTema()" id="btn-toggle-theme">Modo Escuro</button>
                 </div>
             </div>
             <div style="display: flex; gap: 0.8rem;">
                 <button class="btn btn-secondary" style="flex: 1;" onclick="fecharConfiguracoes()">Voltar</button>
-                <button class="btn btn-danger" style="flex: 1;" onclick="efetuarLogout()">🚪 Sair / Deslogar</button>
+                <button class="btn btn-danger" style="flex: 1;" onclick="efetuarLogout()">Sair / Deslogar</button>
             </div>
         </div>
     </div>
@@ -255,7 +254,7 @@
                 </div>
                 <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="respostaProgramacao('NÃO')">CONFIRMAR E AVANÇAR</button>
             </div>
-            <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem;" onclick="cancelarProgramacao()">❌ Cancelar Operação</button>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem;" onclick="cancelarProgramacao()">Cancelar Operação</button>
         </div>
     </div>
 
@@ -273,8 +272,8 @@
         </div>
 
         <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; justify-content: space-between;">
-            <button class="btn btn-primary" onclick="carregarEExibirGestaoOS()">🔄 Atualizar Status</button>
-            <button class="btn btn-secondary" onclick="voltarAoMenu()">⬅️ Voltar ao Menu</button>
+            <button class="btn btn-primary" onclick="carregarEExibirGestaoOS()">Atualizar Status</button>
+            <button class="btn btn-secondary" onclick="voltarAoMenu()">Voltar ao Menu</button>
         </div>
 
         <div class="table-responsive">
@@ -296,10 +295,10 @@
     <!-- COMPROVANTE -->
     <div id="receipt-modal">
         <div class="receipt-box">
-            <h2 id="receipt-status-title" style="color: var(--success);">Registro Enviado!</h2>
+            <h2 id="receipt-status-title" style="color: var(--success);">Registro Enviado</h2>
             <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">Status Inicial: <strong>Em análise</strong> pelo Controle Agrícola.</p>
             <pre id="receipt-content"></pre>
-            <button class="btn btn-primary" style="width: 100%; background-color: #25D366;" onclick="enviarWhatsApp()">📱 Enviar pelo WhatsApp</button>
+            <button class="btn btn-primary" style="width: 100%; background-color: #25D366;" onclick="enviarWhatsApp()">Enviar pelo WhatsApp</button>
             <button class="btn btn-outline" style="width: 100%; margin-top: 0.6rem;" onclick="voltarAoMenuAposLancamento()">Ir para o Menu Principal</button>
         </div>
     </div>
@@ -318,12 +317,12 @@
         </div>
 
         <div id="view-mode-banner" class="read-only-banner" style="display: none;">
-            <span>🔍 MODO VISUALIZAÇÃO: Este registro já foi cadastrado no sistema.</span>
+            <span>MODO VISUALIZAÇÃO: Este registro já foi cadastrado no sistema.</span>
         </div>
 
         <div id="box-btn-puxar-encerramento" style="display: none; margin-bottom: 1.2rem;">
             <button type="button" class="btn btn-primary" style="width: 100%; background: var(--success);" onclick="puxarTalhoesEProdutosOrigem()">
-                📋 PUXAR TALHÕES E PRODUTOS DA OS DE ORIGEM
+                PUXAR TALHÕES E PRODUTOS DA OS DE ORIGEM
             </button>
         </div>
 
@@ -362,8 +361,8 @@
                     </div>
                 </div>
                 <div class="form-group" style="margin-top: 1rem;" id="group-digitar-talhoes">
-                    <label>Digitar Talhões (Ex: 1-12, 15-18, 30 e Enter)</label>
-                    <input type="text" id="talhoes-range-input" placeholder="Digite aqui a sequência..." autocomplete="off">
+                    <label>Digitar Talhões (Ex: 1-12, 15-18, 30 e Pressione Enter)</label>
+                    <input type="text" id="talhoes-range-input" placeholder="Ex: 1-4, 8, 10-12" autocomplete="off">
                 </div>
                 <div class="form-group" style="margin-top: 1rem;">
                     <label>Talhões Selecionados</label>
@@ -429,10 +428,10 @@
 
             <div id="box-actions-lancar" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="voltarAoMenu()">CANCELAR</button>
-                <button type="button" class="btn btn-primary" style="flex: 2;" onclick="enviarDados()" id="btn-submit">🚀 ENVIAR PARA APROVAÇÃO</button>
+                <button type="button" class="btn btn-primary" style="flex: 2;" onclick="enviarDados()" id="btn-submit">ENVIAR PARA APROVAÇÃO</button>
             </div>
             <div id="box-actions-visualizar" style="display: none; margin-top: 1.5rem;">
-                <button type="button" class="btn btn-primary" style="width: 100%;" onclick="fecharVisualizacaoOS()">⬅️ VOLTAR PARA MINHAS OS</button>
+                <button type="button" class="btn btn-primary" style="width: 100%;" onclick="fecharVisualizacaoOS()">VOLTAR PARA MINHAS OS</button>
             </div>
             <div id="submit-loader" class="loader" style="margin-top: 1rem;"></div>
         </form>
@@ -447,19 +446,15 @@
         let modoOperacaoSelecionado = "LANCAMENTO";
         let osOrigemObjeto = null;
 
-        // SISTEMA DE GERENCIAMENTO DE NOTIFICAÇÕES E STATUS PERSISTENTE
         let statusCacheAnterior = JSON.parse(localStorage.getItem('os_status_cache') || '{}');
 
         window.addEventListener('DOMContentLoaded', async () => {
             carregarPreferenciaTema();
             verificarSessaoSalva();
             await carregarDadosIniciais();
-            
-            // Loop de verificação de atualizações a cada 10 segundos
             setInterval(checarMudancasStatusNotificacao, 10000);
         });
 
-        // SOLICITAR PERMISSÃO DE NOTIFICAÇÃO NO CLIQUE DO USUÁRIO
         function pedirPermissaoNotificacao() {
             if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
                 Notification.requestPermission();
@@ -467,19 +462,12 @@
         }
 
         function dispararNotificacaoCompleta(titulo, mensagem, tipo) {
-            // 1. Notificação Nativa do Sistema
             if ("Notification" in window && Notification.permission === "granted") {
-                try {
-                    new Notification(titulo, { body: mensagem, icon: 'logo.png' });
-                } catch(e) {}
+                try { new Notification(titulo, { body: mensagem }); } catch(e) {}
             }
-
-            // 2. Vibração no dispositivo móvel
             if ("vibrate" in navigator) {
                 navigator.vibrate([200, 100, 200]);
             }
-
-            // 3. Banner Flutuante (Toast) na tela do App
             exibirToast(titulo, mensagem, tipo);
         }
 
@@ -487,22 +475,12 @@
             const toast = document.getElementById('toast-notification');
             const toastTitle = document.getElementById('toast-title');
             const toastBody = document.getElementById('toast-body');
-            const toastIcon = document.getElementById('toast-icon');
 
             toastTitle.innerText = titulo;
             toastBody.innerText = mensagem;
-
-            if (tipo === 'sucesso') {
-                toastIcon.innerText = '🎉';
-                toast.style.border = '2px solid var(--success)';
-            } else {
-                toastIcon.innerText = '❌';
-                toast.style.border = '2px solid var(--danger)';
-            }
-
+            toast.style.border = (tipo === 'sucesso') ? '2px solid var(--success)' : '2px solid var(--danger)';
             toast.style.display = 'block';
 
-            // Auto-oculta após 12 segundos
             setTimeout(() => { fecharToast(); }, 12000);
         }
 
@@ -518,22 +496,17 @@
                     res.dados.forEach(os => {
                         const statusAnt = statusCacheAnterior[os.codigoTemp];
                         
-                        // Se o status mudou em relação ao cache gravado
                         if (statusAnt && statusAnt !== os.status_aprovacao) {
                             if (os.status_aprovacao === "OS Lançada") {
                                 const msg = `OS lançada no sistema, sua OS é a ${os.codigoOS || 'Sem Código'}`;
-                                dispararNotificacaoCompleta("OS LANÇADA! 🎉", msg, 'sucesso');
+                                dispararNotificacaoCompleta("OS LANÇADA", msg, 'sucesso');
                             } else if (os.status_aprovacao === "Rejeitado") {
-                                const msg = `Sua solicitação (${os.codigoTemp}) foi rejeitada. Motivo: ${os.justificativa_controle || 'Não informado'}`;
-                                dispararNotificacaoCompleta("OS REJEITADA ❌", msg, 'erro');
+                                const msg = `Solicitação ${os.codigoTemp} rejeitada. Motivo: ${os.justificativa_controle || 'Não informado'}`;
+                                dispararNotificacaoCompleta("OS REJEITADA", msg, 'erro');
                             }
                         }
-                        
-                        // Atualiza mapa de status
                         statusCacheAnterior[os.codigoTemp] = os.status_aprovacao;
                     });
-
-                    // Salva estado atual no navegador
                     localStorage.setItem('os_status_cache', JSON.stringify(statusCacheAnterior));
                 }
             } catch(e) {}
@@ -608,7 +581,6 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('menu-screen').style.display = 'flex';
 
-            // Primeira checagem para popular cache do usuário logado
             checarMudancasStatusNotificacao();
         }
 
@@ -689,11 +661,8 @@
                 const opSelect = document.getElementById('operacao');
                 opSelect.innerHTML = `<option value="${osOrigemObjeto.operacao}">${osOrigemObjeto.operacao}</option>`;
 
-                talhoesAtivos = [];
-                renderizerTalhoesSelecionados();
-                document.getElementById('produtos-tbody').innerHTML = '';
-                equipamentosSelecionados = [];
-                renderizerEquipamentos();
+                // AUTO-PUXAR TALHÕES, EQUIPAMENTOS E INSUMOS AUTOMATICAMENTE TANTO NO APONTAMENTO QUANTO NO ENCERRAMENTO
+                puxarTalhoesEProdutosOrigem();
             }
 
             programacaoStatus = "SIM";
@@ -712,34 +681,35 @@
             document.getElementById('solicitante-display').value = solicitanteLimpoDisplay;
             document.getElementById('data-solicitacao-display').value = new Date().toLocaleString('pt-BR');
             document.getElementById('data-prev-inicio').valueAsDate = new Date();
-
-            if (modoOperacaoSelecionado === 'APONTAMENTO') {
-                adicionarLinhaProduto();
-            }
         }
 
         function puxarTalhoesEProdutosOrigem() {
             if (!osOrigemObjeto) return;
 
-            const nums = (osOrigemObjeto.talhoes || "").split(',').map(s => s.trim()).filter(Boolean);
+            // PUXA TALHÕES
+            const nums = expandirIntervaloTalhoes(osOrigemObjeto.talhoes || "");
             talhoesAtivos = [];
             if (fazendaSelecionada) {
                 fazendaSelecionada.talhoes.forEach(t => {
-                    if (nums.includes(t.talhao)) {
+                    const numT = parseInt(t.talhao, 10);
+                    if (nums.includes(numT)) {
                         talhoesAtivos.push({ num: t.talhao, areaParcial: parseFloat(t.area) });
                     }
                 });
             }
             renderizerTalhoesSelecionados();
 
+            // PUXA EQUIPAMENTOS
             equipamentosSelecionados = [];
-            (osOrigemObjeto.equipamentos || "").split(',').forEach(eName => {
-                const eq = dbEquipamentos.find(x => x.nome === eName.trim());
+            (osOrigemObjeto.equipamentos || "").split(',').forEach(eStr => {
+                const nomeLimpo = eStr.split('[')[0].trim();
+                const eq = dbEquipamentos.find(x => x.nome === nomeLimpo);
                 if (eq) equipamentosSelecionados.push(eq);
-                else if (eName.trim()) equipamentosSelecionados.push({ nome: eName.trim(), propriedade: 'PRÓPRIO' });
+                else if (nomeLimpo) equipamentosSelecionados.push({ nome: nomeLimpo, colB: '', propriedade: 'PRÓPRIO' });
             });
             renderizerEquipamentos();
 
+            // PUXA INSUMOS
             const tbody = document.getElementById('produtos-tbody');
             tbody.innerHTML = '';
             (osOrigemObjeto.produtos || []).forEach(p => {
@@ -806,7 +776,7 @@
 
         async function carregarEExibirGestaoOS() {
             const tbody = document.getElementById('gestao-tbody');
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem;">⏳ Atualizando status...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem;">Atualizando status...</td></tr>';
 
             try {
                 const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`)).json();
@@ -888,7 +858,7 @@
             document.getElementById('operacao').innerHTML = `<option>${os.operacao}</option>`;
 
             const containerEquip = document.getElementById('equipamentos-selecionados');
-            containerEquip.innerHTML = (os.equipamentos || "").split(',').map(e => `<div class="equip-chip">${e.trim()}</div>`).join('');
+            containerEquip.innerHTML = (os.equipamentos || "").split(',').map(e => `<div class="equip-chip">${e.split('[')[0].trim()}</div>`).join('');
 
             const tbody = document.getElementById('produtos-tbody');
             tbody.innerHTML = '';
@@ -964,24 +934,56 @@
             listFundo.style.display = 'block';
         };
 
+        // FUNÇÃO DE EXPANSÃO DE INTERVALOS DE TALHÕES (1-12, 15-18, 30)
+        function expandirIntervaloTalhoes(texto) {
+            if (!texto) return [];
+            const resultado = new Set();
+            const partes = texto.split(',');
+
+            partes.forEach(parte => {
+                const p = parte.trim();
+                if (p.includes('-')) {
+                    const limites = p.split('-').map(x => parseInt(x.trim(), 10));
+                    if (limites.length === 2 && !isNaN(limites[0]) && !isNaN(limites[1])) {
+                        const min = Math.min(limites[0], limites[1]);
+                        const max = Math.max(limites[0], limites[1]);
+                        for (let i = min; i <= max; i++) {
+                            resultado.add(i);
+                        }
+                    }
+                } else {
+                    const num = parseInt(p, 10);
+                    if (!isNaN(num)) {
+                        resultado.add(num);
+                    }
+                }
+            });
+
+            return Array.from(resultado);
+        }
+
         const inputRangeTalhoes = document.getElementById('talhoes-range-input');
         inputRangeTalhoes.onchange = function() {
-            if (!fazendaSelecionada) return;
-            const nums = inputRangeTalhoes.value.split(',').map(s => parseInt(s.trim(), 10)).filter(Boolean);
+            if (!fazendaSelecionada) {
+                alert("Selecione uma fazenda primeiro!");
+                return;
+            }
+            const nums = expandirIntervaloTalhoes(inputRangeTalhoes.value);
 
+            // TRAVA DE TALHÕES NÃO PREVISTOS
             if ((modoOperacaoSelecionado === 'APONTAMENTO' || modoOperacaoSelecionado === 'ENCERRAMENTO') && osOrigemObjeto) {
-                const talhoesOrigemPermitidos = (osOrigemObjeto.talhoes || "").split(',').map(s => parseInt(s.trim(), 10)).filter(Boolean);
-                
+                const talhoesOrigemPermitidos = expandirIntervaloTalhoes(osOrigemObjeto.talhoes || "");
                 const NaoPrevistos = nums.filter(n => !talhoesOrigemPermitidos.includes(n));
                 if (NaoPrevistos.length > 0) {
-                    alert(`🚨 ATENÇÃO: Talhões não previstos!\n\nOs talhões (${NaoPrevistos.join(', ')}) não constam na OS de Origem (${osOrigemObjeto.codigoOS || osOrigemObjeto.codigoTemp}).`);
+                    alert(`ATENÇÃO: Talhões não previstos!\n\nOs talhões (${NaoPrevistos.join(', ')}) não constam na OS de Origem.`);
                     inputRangeTalhoes.value = '';
                     return;
                 }
             }
 
             fazendaSelecionada.talhoes.forEach(t => {
-                if (nums.includes(parseInt(t.talhao, 10)) && !talhoesAtivos.some(a => a.num === t.talhao)) {
+                const numT = parseInt(t.talhao, 10);
+                if (nums.includes(numT) && !talhoesAtivos.some(a => parseInt(a.num, 10) === numT)) {
                     talhoesAtivos.push({ num: t.talhao, areaParcial: parseFloat(t.area) });
                 }
             });
@@ -1007,7 +1009,9 @@
                 const div = document.createElement('div'); div.className = 'autocomplete-item';
                 div.innerHTML = `<strong>${e.nome}</strong> (${e.propriedade})`;
                 div.onclick = () => {
-                    if (!equipamentosSelecionados.some(x => x.nome === e.nome)) equipamentosSelecionados.push(e);
+                    if (!equipamentosSelecionados.some(x => x.nome === e.nome)) {
+                        equipamentosSelecionados.push(e); // INCLUI e.colB NO OBJETO
+                    }
                     renderizerEquipamentos(); inputFrota.value = ''; listFrota.style.display = 'none';
                 };
                 listFrota.appendChild(div);
@@ -1070,6 +1074,11 @@
 
             if (talhoesAtivos.length === 0) { alert("Selecione os talhões!"); return; }
 
+            // FORMATAÇÃO DO PAYLOAD DA FROTA EMBUTINDO A COLUNA B INVISIVELMENTE
+            const stringEquipamentosFormatados = equipamentosSelecionados.map(e => {
+                return e.colB ? `${e.nome} [${e.colB}]` : e.nome;
+            }).join(', ');
+
             const payload = {
                 tipo_registro: modoOperacaoSelecionado,
                 os_origem: document.getElementById('os-origem-id').value,
@@ -1086,7 +1095,7 @@
                 pea: document.getElementById('pea-input').value,
                 area_total: document.getElementById('area-total').value,
                 talhoes: talhoesAtivos.map(t => t.num).join(', '),
-                frota: equipamentosSelecionados.map(e => e.nome).join(', '),
+                frota: stringEquipamentosFormatados,
                 produtos: []
             };
 
@@ -1102,7 +1111,7 @@
             });
 
             if (payload.produtos.length === 0) {
-                alert("⚠️ LANÇAMENTO BLOQUEADO:\n\nÉ obrigatório informar e adicionar pelo menos 1 INSUMO/PRODUTO!");
+                alert("LANÇAMENTO BLOQUEADO:\n\nÉ obrigatório informar e adicionar pelo menos 1 INSUMO/PRODUTO!");
                 return;
             }
 
@@ -1112,7 +1121,6 @@
                 const res = await (await fetch(APPSCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })).json();
                 btn.style.display = 'inline-flex'; loader.style.display = 'none';
                 if (res.success) {
-                    // Armazena no cache local como 'Em análise'
                     statusCacheAnterior[res.codigoTemp] = "Em análise";
                     localStorage.setItem('os_status_cache', JSON.stringify(statusCacheAnterior));
                     
@@ -1129,7 +1137,7 @@
             document.getElementById('main-app').style.display = 'none';
             document.getElementById('receipt-modal').style.display = 'flex';
 
-            let texto = `*REGISTRO DE OPERAÇÃO ENVIADO* 🚜\n`;
+            let texto = `*REGISTRO DE OPERAÇÃO ENVIADO*\n`;
             texto += `*Tipo:* ${p.tipo_registro}\n*Cód. Temp:* ${codTemp}\n*Status:* Em análise pelo Controle Agrícola\n`;
             texto += `*Fazenda:* ${p.fa_codigo} - ${p.descricao_fazenda}\n*Operação:* ${p.operacao}\n*Área:* ${p.area_total} ha\n*Talhões:* ${p.talhoes}\n`;
             texto += `*Solicitante:* ${solicitanteLimpoDisplay}`;
