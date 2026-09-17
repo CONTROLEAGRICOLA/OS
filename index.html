@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ordem de Serviço - Lançamento | Clealco</title>
+    <title>Ordem de Serviço - Campo | Clealco</title>
     <style>
         :root[data-theme="dark"] {
             --bg-page: #09090b; --bg-card: #18181b; --bg-input: #27272a;
@@ -43,23 +43,21 @@
         .btn-outline { background-color: transparent; color: var(--text-main); border-color: var(--border-color); }
         .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
         .btn-danger { background-color: rgba(239, 68, 68, 0.12); color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
-        .btn-danger:hover { background-color: var(--danger); color: #fff; }
 
         .btn-icon-gear { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); width: 42px; height: 42px; padding: 0; border-radius: 50%; font-size: 1.2rem; }
-        .btn-icon-gear:hover { border-color: var(--accent); color: var(--accent); transform: rotate(45deg); }
 
-        #login-screen, #prog-modal, #menu-screen, #settings-modal {
+        #login-screen, #mode-modal, #prog-modal, #menu-screen, #settings-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(9, 9, 11, 0.7); backdrop-filter: blur(12px);
+            background: rgba(9, 9, 11, 0.75); backdrop-filter: blur(12px);
             display: flex; justify-content: center; align-items: center; z-index: 1000;
         }
 
         .modal-box {
-            background: var(--bg-card); padding: 2.5rem; border-radius: 16px;
+            background: var(--bg-card); padding: 2.2rem; border-radius: 16px;
             border: 1px solid var(--border-color); box-shadow: 0 20px 40px var(--shadow-color);
-            width: 90%; max-width: 440px; text-align: center; position: relative;
+            width: 90%; max-width: 460px; text-align: center; position: relative;
         }
-        .modal-box h2 { color: var(--accent); margin-bottom: 1.2rem; font-size: 1.35rem; }
+        .modal-box h2 { color: var(--accent); margin-bottom: 1.2rem; font-size: 1.3rem; }
 
         .container {
             background-color: var(--bg-card); max-width: 1100px; width: 100%; padding: 2rem;
@@ -108,10 +106,13 @@
         .tr-clickable { cursor: pointer; }
         .tr-clickable:hover { background-color: var(--tr-hover); }
 
-        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+        .badge { padding: 6px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
         .badge-analise { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
-        .badge-aprovado { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-lancada { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
         .badge-rejeitado { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        .progress-bar-bg { background: var(--bg-input); border-radius: 10px; height: 10px; width: 100%; overflow: hidden; margin-top: 4px; }
+        .progress-bar-fill { background: var(--accent); height: 100%; width: 0%; transition: width 0.4s ease; }
 
         #receipt-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 9, 11, 0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .receipt-box { background: var(--bg-card); padding: 2rem; border-radius: 16px; border: 1px solid var(--accent); text-align: center; max-width: 450px; width: 90%; }
@@ -125,7 +126,7 @@
 </head>
 <body>
 
-    <!-- LOGIN -->
+    <!-- 1. TELA DE LOGIN -->
     <div id="login-screen">
         <div class="modal-box">
             <img src="logo.png" alt="Clealco" style="height: 56px; margin: 0 auto 1.2rem auto; display: block; object-fit: contain;">
@@ -146,7 +147,7 @@
         </div>
     </div>
 
-    <!-- MENU PRINCIPAL -->
+    <!-- 2. MENU PRINCIPAL -->
     <div id="menu-screen" style="display: none;">
         <div class="modal-box">
             <div style="position: absolute; top: 1.2rem; right: 1.2rem;">
@@ -156,13 +157,45 @@
             <h2>Painel Principal</h2>
             <p id="menu-user-name" style="color: var(--text-muted); font-weight: 600; margin-bottom: 1.8rem; font-size: 0.95rem;"></p>
             <div style="display: flex; flex-direction: column; gap: 0.9rem;">
-                <button class="btn btn-primary" style="padding: 1rem; font-size: 1rem;" onclick="iniciarLancarOS()">🚜 LANÇAR OS</button>
+                <button class="btn btn-primary" style="padding: 1rem; font-size: 1rem;" onclick="abrirModalModoOperacao()">🚜 NOVA OPERAÇÃO / OS</button>
                 <button class="btn btn-secondary" style="padding: 1rem; font-size: 1rem;" onclick="abrirGestaoOS()">📋 GESTÃO OS</button>
             </div>
         </div>
     </div>
 
-    <!-- CONFIGURAÇÕES -->
+    <!-- 3. MODAL SELEÇÃO DE MODO: LANÇAR, APONTAR OU ENCERRAR -->
+    <div id="mode-modal" style="display: none;">
+        <div class="modal-box">
+            <h2>Selecione a Ação</h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Escolha qual tipo de registro deseja realizar:</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                <button class="btn btn-primary" style="padding: 0.9rem;" onclick="selecionarModoEAvancar('LANCAMENTO')">
+                    🚜 LANÇAR OS (Nova OS)
+                </button>
+                <button class="btn btn-secondary" style="padding: 0.9rem; border-color: var(--warning); color: var(--warning);" onclick="selecionarModoEAvancar('APONTAMENTO')">
+                    ⏱️ APONTAR OS (Apontamento Parcial)
+                </button>
+                <button class="btn btn-secondary" style="padding: 0.9rem; border-color: var(--success); color: var(--success);" onclick="selecionarModoEAvancar('ENCERRAMENTO')">
+                    🏁 ENCERRAR OS (Copiar e Finalizar)
+                </button>
+            </div>
+
+            <!-- SELEÇÃO DE OS DE ORIGEM PARA APONTAR OU ENCERRAR -->
+            <div id="box-os-origem-select" style="display: none; margin-top: 1.2rem; text-align: left;">
+                <div class="form-group">
+                    <label style="color: var(--accent);">Selecione a OS Lançada para Vincular / Copiar:</label>
+                    <select id="select-os-origem" onchange="copiarParametrosOSOrigem(this.value)">
+                        <option value="">Carregando Ordens de Serviço...</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn btn-outline" style="width: 100%; margin-top: 1.2rem;" onclick="fecharModalModo()">Voltar ao Menu</button>
+        </div>
+    </div>
+
+    <!-- 4. CONFIGURAÇÕES -->
     <div id="settings-modal" style="display: none;">
         <div class="modal-box">
             <h2>Configurações</h2>
@@ -183,7 +216,7 @@
         </div>
     </div>
 
-    <!-- MODAL PROGRAMAÇÃO -->
+    <!-- 5. MODAL VALIDAÇÃO DE PROGRAMAÇÃO -->
     <div id="prog-modal" style="display: none;">
         <div class="modal-box">
             <h2>Validação de Programação</h2>
@@ -199,11 +232,11 @@
                 </div>
                 <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="respostaProgramacao('NÃO')">CONFIRMAR E AVANÇAR</button>
             </div>
-            <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem;" onclick="cancelarProgramacao()">❌ Cancelar Lançamento</button>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem;" onclick="cancelarProgramacao()">❌ Cancelar Operação</button>
         </div>
     </div>
 
-    <!-- GESTÃO OS (ACOMPANHAMENTO PELO CAMPO) -->
+    <!-- 6. GESTÃO OS (ACOMPANHAMENTO PELO CAMPO COM VINCULAÇÃO E %) -->
     <div class="container" id="gestao-app">
         <div class="header">
             <div class="logo-container">
@@ -225,12 +258,11 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Cód. OS</th>
-                        <th>Data Solicitação</th>
-                        <th>Fazenda (F.A)</th>
-                        <th>Operação</th>
-                        <th>Talhões</th>
-                        <th>Status Aprovação</th>
+                        <th>Cód. Temp / Definitivo</th>
+                        <th>Tipo</th>
+                        <th>Fazenda / Operação</th>
+                        <th>Progresso Área</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody id="gestao-tbody"></tbody>
@@ -241,7 +273,7 @@
     <!-- COMPROVANTE -->
     <div id="receipt-modal">
         <div class="receipt-box">
-            <h2 id="receipt-status-title" style="color: var(--success);">OS Lançada com Sucesso!</h2>
+            <h2 id="receipt-status-title" style="color: var(--success);">Registro Enviado!</h2>
             <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">Status Inicial: <strong>Em análise</strong> pelo Controle Agrícola.</p>
             <pre id="receipt-content"></pre>
             <button class="btn btn-primary" style="width: 100%; background-color: #25D366;" onclick="enviarWhatsApp()">📱 Enviar pelo WhatsApp</button>
@@ -249,22 +281,27 @@
         </div>
     </div>
 
-    <!-- FORMULÁRIO DE LANÇAMENTO DA OS -->
+    <!-- FORMULÁRIO PRINCIPAL DE LANÇAMENTO DA OS -->
     <div class="container" id="main-app">
         <div class="header">
             <div class="logo-container">
                 <img src="logo.png" alt="Clealco" class="logo-img">
                 <div class="logo-text">CONTROLE<br>AGRICOLA</div>
             </div>
-            <h1 style="font-size: 1.25rem; color: var(--accent);" id="main-app-title">Lançamento de OS</h1>
+            <div>
+                <h1 style="font-size: 1.2rem; color: var(--accent);" id="main-app-title">Lançamento de OS</h1>
+                <span id="badge-tipo-operacao" class="badge badge-analise" style="margin-top: 4px;">MODO: LANÇAMENTO</span>
+            </div>
         </div>
 
         <div id="view-mode-banner" class="read-only-banner" style="display: none;">
-            <span>🔍 MODO VISUALIZAÇÃO: Esta OS já foi cadastrada.</span>
+            <span>🔍 MODO VISUALIZAÇÃO: Este registro já foi cadastrado no sistema.</span>
         </div>
 
         <form id="os-form">
             <input type="hidden" id="zona-input">
+            <input type="hidden" id="os-origem-id">
+
             <div class="section">
                 <div class="grid grid-3">
                     <div class="form-group">
@@ -363,7 +400,7 @@
 
             <div id="box-actions-lancar" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="voltarAoMenu()">CANCELAR</button>
-                <button type="button" class="btn btn-primary" style="flex: 2;" onclick="enviarDados()" id="btn-submit">🚀 ENVIAR PARA ANÁLISE</button>
+                <button type="button" class="btn btn-primary" style="flex: 2;" onclick="enviarDados()" id="btn-submit">🚀 ENVIAR PARA APROVAÇÃO</button>
             </div>
             <div id="box-actions-visualizar" style="display: none; margin-top: 1.5rem;">
                 <button type="button" class="btn btn-primary" style="width: 100%;" onclick="fecharVisualizacaoOS()">⬅️ VOLTAR PARA MINHAS OS</button>
@@ -378,6 +415,7 @@
         let dbFazendas = [], dbInsumos = [], dbEquipamentos = [], dbOperacoes = [];
         let solicitanteCracha = "", solicitanteNome = "", solicitanteLimpoDisplay = "";
         let programacaoStatus = "SIM", carreadorTexto = "", equipamentosSelecionados = [], modoVisualizacao = false, listaOSCache = [];
+        let modoOperacaoSelecionado = "LANCAMENTO"; // LANCAMENTO, APONTAMENTO, ENCERRAMENTO
         let statusCacheAnterior = {};
 
         window.addEventListener('DOMContentLoaded', async () => {
@@ -385,7 +423,7 @@
             solicitarPermissaoNotificacao();
             verificarSessaoSalva();
             await carregarDadosIniciais();
-            setInterval(checarMudancasStatusNotificacao, 20000); // Polling de Notificação a cada 20s
+            setInterval(checarMudancasStatusNotificacao, 15000);
         });
 
         function solicitarPermissaoNotificacao() {
@@ -403,19 +441,18 @@
         async function checarMudancasStatusNotificacao() {
             if (!solicitanteCracha || !navigator.onLine) return;
             try {
-                const res = await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`);
-                const data = await res.json();
-                if (data.success && data.dados) {
-                    data.dados.forEach(os => {
-                        const statusAnt = statusCacheAnterior[os.codigoOS];
+                const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`)).json();
+                if (res.success && res.dados) {
+                    res.dados.forEach(os => {
+                        const statusAnt = statusCacheAnterior[os.codigoTemp];
                         if (statusAnt && statusAnt !== os.status_aprovacao) {
-                            if (os.status_aprovacao === "Aprovado") {
-                                dispararNotificacaoNavegador(`OS nº ${os.codigoOS} APROVADA! 🎉`, `Operação: ${os.operacao} na fazenda ${os.descricao_fazenda}`);
+                            if (os.status_aprovacao === "OS Lançada") {
+                                dispararNotificacaoNavegador("OS Lançada! 🎉", `OS lançada no sistema, sua OS é a ${os.codigoOS}`);
                             } else if (os.status_aprovacao === "Rejeitado") {
-                                dispararNotificacaoNavegador(`OS nº ${os.codigoOS} REJEITADA ❌`, `Motivo: ${os.justificativa_controle || 'Não informado'}`);
+                                dispararNotificacaoNavegador("OS Rejeitada ❌", `Motivo: ${os.justificativa_controle || 'Não informado'}`);
                             }
                         }
-                        statusCacheAnterior[os.codigoOS] = os.status_aprovacao;
+                        statusCacheAnterior[os.codigoTemp] = os.status_aprovacao;
                     });
                 }
             } catch(e) {}
@@ -457,8 +494,7 @@
             document.getElementById('login-loader').style.display = 'block';
 
             try {
-                const res = await fetch(`${APPSCRIPT_URL}?action=validar_login&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`);
-                const data = await res.json();
+                const res = await (await fetch(`${APPSCRIPT_URL}?action=validar_login&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`)).json();
                 document.getElementById('login-loader').style.display = 'none';
 
                 if (data.success) {
@@ -490,10 +526,7 @@
             document.getElementById('menu-screen').style.display = 'flex';
         }
 
-        function efetuarLogout() {
-            localStorage.clear();
-            location.reload();
-        }
+        function efetuarLogout() { localStorage.clear(); location.reload(); }
 
         async function carregarDadosIniciais() {
             try {
@@ -508,6 +541,99 @@
             } catch (e) {}
         }
 
+        // CONTROLE DO NOVO MODAL DE SELEÇÃO DE AÇÃO
+        function abrirModalModoOperacao() {
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('mode-modal').style.display = 'flex';
+            document.getElementById('box-os-origem-select').style.display = 'none';
+        }
+
+        function fecharModalModo() {
+            document.getElementById('mode-modal').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'flex';
+        }
+
+        async function selecionarModoEAvancar(modo) {
+            modoOperacaoSelecionado = modo;
+            
+            if (modo === 'APONTAMENTO' || modo === 'ENCERRAMENTO') {
+                document.getElementById('box-os-origem-select').style.display = 'block';
+                await carregarSelectOSOrigem();
+            } else {
+                document.getElementById('os-origem-id').value = "";
+                avancarParaValidacaoProgramacao();
+            }
+        }
+
+        async function carregarSelectOSOrigem() {
+            const select = document.getElementById('select-os-origem');
+            select.innerHTML = '<option value="">Carregando Ordens de Serviço...</option>';
+
+            try {
+                const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`)).json();
+                if (res.success && res.dados) {
+                    const osLancadas = res.dados.filter(o => o.tipo_registro === 'LANCAMENTO');
+                    select.innerHTML = '<option value="">Selecione uma OS da lista...</option>';
+                    osLancadas.forEach(o => {
+                        const label = `${o.codigoOS ? 'OS ' + o.codigoOS : o.codigoTemp} - ${o.fa_codigo} ${o.descricao_fazenda} (${o.operacao})`;
+                        select.innerHTML += `<option value="${o.codigoTemp}">${label}</option>`;
+                    });
+                }
+            } catch(e) {
+                select.innerHTML = '<option value="">Erro ao carregar OS de Origem</option>';
+            }
+        }
+
+        function copiarParametrosOSOrigem(codTemp) {
+            if (!codTemp) return;
+            document.getElementById('os-origem-id').value = codTemp;
+
+            // Busca OS no cache local
+            const os = listaOSCache.find(x => x.codigoTemp === codTemp);
+            if (os) {
+                // Preenche automaticamente todos os parâmetros
+                document.getElementById('pea-input').value = os.pea || "";
+                document.getElementById('fundo-input').value = `${os.fa_codigo} - ${os.descricao_fazenda}`;
+                document.getElementById('tipo-fazenda').value = os.tipo_fazenda || "";
+
+                // Fazenda
+                fazendaSelecionada = dbFazendas.find(f => f.codigo === os.fa_codigo);
+
+                // Centro de Custo e Operação
+                const selectCC = document.getElementById('centro-custo');
+                selectCC.value = os.centro_custo;
+                
+                const opSelect = document.getElementById('operacao');
+                opSelect.innerHTML = `<option value="${os.operacao}">${os.operacao}</option>`;
+
+                // Equipamentos
+                equipamentosSelecionados = [];
+                (os.equipamentos || "").split(',').forEach(eName => {
+                    const eq = dbEquipamentos.find(x => x.nome === eName.trim());
+                    if (eq) equipamentosSelecionados.push(eq);
+                    else if (eName.trim()) equipamentosSelecionados.push({ nome: eName.trim(), propriedade: 'PRÓPRIO' });
+                });
+                renderizerEquipamentos();
+
+                // Insumos
+                const tbody = document.getElementById('produtos-tbody');
+                tbody.innerHTML = '';
+                (os.produtos || []).forEach(p => {
+                    adicionarLinhaProdutoComDados(p.cod, p.desc, p.un, p.dose, p.total);
+                });
+            }
+
+            avancarParaValidacaoProgramacao();
+        }
+
+        function avancarParaValidacaoProgramacao() {
+            document.getElementById('mode-modal').style.display = 'none';
+            document.getElementById('prog-modal').style.display = 'flex';
+            document.getElementById('justificativa-box').style.display = 'none';
+            document.getElementById('prog-btns').style.display = 'flex';
+            document.getElementById('justificativa-texto').value = '';
+        }
+
         function voltarAoMenu() {
             document.getElementById('main-app').style.display = 'none';
             document.getElementById('gestao-app').style.display = 'none';
@@ -517,12 +643,6 @@
         function voltarAoMenuAposLancamento() {
             document.getElementById('receipt-modal').style.display = 'none';
             voltarAoMenu();
-        }
-
-        function iniciarLancarOS() {
-            desativarModoLeitura();
-            document.getElementById('menu-screen').style.display = 'none';
-            document.getElementById('prog-modal').style.display = 'flex';
         }
 
         function cancelarProgramacao() {
@@ -541,14 +661,24 @@
             document.getElementById('prog-modal').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
 
-            document.getElementById('os-form').reset();
+            // Atualiza Badge do Modo
+            const badgeMode = document.getElementById('badge-tipo-operacao');
+            badgeMode.innerText = `MODO: ${modoOperacaoSelecionado}`;
+            if (modoOperacaoSelecionado === 'LANCAMENTO') badgeMode.className = 'badge badge-analise';
+            if (modoOperacaoSelecionado === 'APONTAMENTO') badgeMode.className = 'badge badge-lancada';
+            if (modoOperacaoSelecionado === 'ENCERRAMENTO') badgeMode.className = 'badge badge-rejeitado';
+
             document.getElementById('solicitante-display').value = solicitanteLimpoDisplay;
             document.getElementById('data-solicitacao-display').value = new Date().toLocaleString('pt-BR');
-            document.getElementById('produtos-tbody').innerHTML = '';
-            equipamentosSelecionados = []; renderizerEquipamentos();
-            talhoesAtivos = []; renderizerTalhoesSelecionados();
+            
+            if (modoOperacaoSelecionado === 'LANCAMENTO') {
+                document.getElementById('os-form').reset();
+                document.getElementById('produtos-tbody').innerHTML = '';
+                equipamentosSelecionados = []; renderizerEquipamentos();
+                talhoesAtivos = []; renderizerTalhoesSelecionados();
+                adicionarLinhaProduto();
+            }
             document.getElementById('data-prev-inicio').valueAsDate = new Date();
-            adicionarLinhaProduto();
         }
 
         function abrirGestaoOS() {
@@ -559,7 +689,7 @@
 
         async function carregarEExibirGestaoOS() {
             const tbody = document.getElementById('gestao-tbody');
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 2rem;">⏳ Atualizando status...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem;">⏳ Atualizando status...</td></tr>';
 
             try {
                 const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`)).json();
@@ -568,7 +698,7 @@
                     renderizarTabelaGestao(listaOSCache);
                 }
             } catch (e) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--danger);">Erro ao carregar do servidor.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--danger);">Erro ao carregar do servidor.</td></tr>';
             }
         }
 
@@ -577,7 +707,7 @@
             tbody.innerHTML = '';
 
             if (lista.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhuma OS enviada.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum registro encontrado.</td></tr>';
                 return;
             }
 
@@ -588,15 +718,29 @@
 
                 let st = os.status_aprovacao || "Em análise";
                 let badgeClass = "badge-analise";
-                if (st === "Aprovado") badgeClass = "badge-aprovado";
+                if (st === "OS Lançada") badgeClass = "badge-lancada";
                 if (st === "Rejeitado") badgeClass = "badge-rejeitado";
 
+                // Cálculo de Porcentagem de Execução se houver Apontamentos vinculados
+                let progressoHtml = `<span style="font-size:0.8rem; color:var(--text-muted);">${os.area_total} ha</span>`;
+                if (os.tipo_registro === 'LANCAMENTO') {
+                    const apontamentos = lista.filter(x => x.os_origem === os.codigoTemp);
+                    const areaApontada = apontamentos.reduce((acc, curr) => acc + (curr.area_total || 0), 0);
+                    const pct = os.area_total > 0 ? Math.min(100, Math.round((areaApontada / os.area_total) * 100)) : 0;
+
+                    progressoHtml = `
+                        <div style="font-size:0.75rem;"><strong>${pct}%</strong> (${areaApontada.toFixed(1)} / ${os.area_total} ha)</div>
+                        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${pct}%;"></div></div>
+                    `;
+                }
+
+                const codigoDisplay = os.codigoOS ? `<strong>${os.codigoOS}</strong> <br><small style="color:var(--text-muted);">${os.codigoTemp}</small>` : `<strong>${os.codigoTemp}</strong>`;
+
                 tr.innerHTML = `
-                    <td><strong>${os.codigoOS}</strong></td>
-                    <td>${os.data_solicitacao || '-'}</td>
-                    <td>${os.fa_codigo || ''} - ${os.descricao_fazenda || ''}</td>
-                    <td>${os.operacao || '-'}</td>
-                    <td>${os.talhoes || '-'}</td>
+                    <td>${codigoDisplay}</td>
+                    <td><span class="badge badge-analise">${os.tipo_registro}</span></td>
+                    <td>${os.fa_codigo} - ${os.descricao_fazenda}<br><small style="color:var(--text-muted);">${os.operacao}</small></td>
+                    <td>${progressoHtml}</td>
                     <td><span class="badge ${badgeClass}">${st}</span></td>
                 `;
                 tbody.appendChild(tr);
@@ -609,7 +753,7 @@
             modoVisualizacao = true;
             document.getElementById('gestao-app').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
-            document.getElementById('main-app-title').innerText = `OS nº ${os.codigoOS} [${os.status_aprovacao}]`;
+            document.getElementById('main-app-title').innerText = `${os.codigoOS ? 'OS nº ' + os.codigoOS : os.codigoTemp} [${os.status_aprovacao}]`;
             document.getElementById('view-mode-banner').style.display = 'block';
             document.getElementById('box-actions-lancar').style.display = 'none';
             document.getElementById('box-actions-visualizar').style.display = 'block';
@@ -622,6 +766,7 @@
             const containerTalhoes = document.getElementById('talhoes-container');
             containerTalhoes.innerHTML = (os.talhoes || "").split(',').map(t => `<div class="talhao-chip">Talhão ${t.trim()}</div>`).join('');
 
+            document.getElementById('area-total').value = os.area_total || 0;
             document.getElementById('centro-custo').innerHTML = `<option>${os.centro_custo}</option>`;
             document.getElementById('operacao').innerHTML = `<option>${os.operacao}</option>`;
 
@@ -749,13 +894,17 @@
         }
 
         function adicionarLinhaProduto() {
+            adicionarLinhaProdutoComDados("", "", "", "", "");
+        }
+
+        function adicionarLinhaProdutoComDados(cod, desc, un, dose, total) {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><input type="text" class="prod-cod" placeholder="Cód/Nome..."><div class="autocomplete-list list-cod"></div></td>
-                <td><input type="text" class="prod-desc" readonly></td>
-                <td><input type="text" class="prod-un" readonly style="width: 45px;"></td>
-                <td><input type="number" step="0.001" class="prod-dose" placeholder="0.00"></td>
-                <td><input type="number" step="0.01" class="prod-total" readonly placeholder="0.00"></td>
+                <td><input type="text" class="prod-cod" value="${cod}" placeholder="Cód/Nome..."><div class="autocomplete-list list-cod"></div></td>
+                <td><input type="text" class="prod-desc" value="${desc}" readonly></td>
+                <td><input type="text" class="prod-un" value="${un}" readonly style="width: 45px;"></td>
+                <td><input type="number" step="0.001" class="prod-dose" value="${dose}" placeholder="0.00"></td>
+                <td><input type="number" step="0.01" class="prod-total" value="${total}" readonly placeholder="0.00"></td>
                 <td style="text-align: center;"><button type="button" class="btn btn-danger" style="padding: 2px 8px;" onclick="this.closest('tr').remove();">×</button></td>
             `;
 
@@ -793,6 +942,8 @@
             if (talhoesAtivos.length === 0) { alert("Selecione os talhões!"); return; }
 
             const payload = {
+                tipo_registro: modoOperacaoSelecionado,
+                os_origem: document.getElementById('os-origem-id').value,
                 programacao: programacaoStatus, carreador: carreadorTexto,
                 data_solicitacao: document.getElementById('data-solicitacao-display').value,
                 solicitante_cracha: solicitanteCracha, solicitante_nome: solicitanteNome,
@@ -804,6 +955,7 @@
                 data_prevista_fim: document.getElementById('data-prev-fim').value,
                 observacao: document.getElementById('observacao').value,
                 pea: document.getElementById('pea-input').value,
+                area_total: document.getElementById('area-total').value,
                 talhoes: talhoesAtivos.map(t => t.num).join(', '),
                 frota: equipamentosSelecionados.map(e => e.nome).join(', '),
                 produtos: []
@@ -826,7 +978,7 @@
                 const res = await (await fetch(APPSCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })).json();
                 btn.style.display = 'inline-flex'; loader.style.display = 'none';
                 if (res.success) {
-                    gerarComprovanteWhatsApp(payload, res.codigoOS);
+                    gerarComprovanteWhatsApp(payload, res.codigoTemp);
                 }
             } catch (err) {
                 btn.style.display = 'inline-flex'; loader.style.display = 'none';
@@ -835,13 +987,13 @@
         }
 
         let linkWhatsApp = "";
-        function gerarComprovanteWhatsApp(p, codOS) {
+        function gerarComprovanteWhatsApp(p, codTemp) {
             document.getElementById('main-app').style.display = 'none';
             document.getElementById('receipt-modal').style.display = 'flex';
 
-            let texto = `*ORDEM DE SERVIÇO ENVIADA PARA ANÁLISE* 🚜\n`;
-            texto += `*Cód. OS:* ${codOS}\n*Status:* Em análise pelo Controle Agrícola\n`;
-            texto += `*Fazenda:* ${p.fa_codigo} - ${p.descricao_fazenda}\n*Operação:* ${p.operacao}\n*Talhões:* ${p.talhoes}\n`;
+            let texto = `*REGISTRO DE OPERAÇÃO ENVIADO* 🚜\n`;
+            texto += `*Tipo:* ${p.tipo_registro}\n*Cód. Temp:* ${codTemp}\n*Status:* Em análise pelo Controle Agrícola\n`;
+            texto += `*Fazenda:* ${p.fa_codigo} - ${p.descricao_fazenda}\n*Operação:* ${p.operacao}\n*Área:* ${p.area_total} ha\n*Talhões:* ${p.talhoes}\n`;
             texto += `*Solicitante:* ${solicitanteLimpoDisplay}`;
 
             document.getElementById('receipt-content').innerText = texto;
