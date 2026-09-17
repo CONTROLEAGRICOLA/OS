@@ -126,7 +126,7 @@
 </head>
 <body>
 
-    <!-- 1. TELA DE LOGIN -->
+    <!-- 1. LOGIN -->
     <div id="login-screen">
         <div class="modal-box">
             <img src="logo.png" alt="Clealco" style="height: 56px; margin: 0 auto 1.2rem auto; display: block; object-fit: contain;">
@@ -163,7 +163,7 @@
         </div>
     </div>
 
-    <!-- 3. MODAL SELEÇÃO DE MODO: LANÇAR, APONTAR OU ENCERRAR -->
+    <!-- 3. MODAL SELEÇÃO DE MODO -->
     <div id="mode-modal" style="display: none;">
         <div class="modal-box">
             <h2>Selecione a Ação</h2>
@@ -181,11 +181,10 @@
                 </button>
             </div>
 
-            <!-- SELEÇÃO DE OS DE ORIGEM PARA APONTAR OU ENCERRAR -->
             <div id="box-os-origem-select" style="display: none; margin-top: 1.2rem; text-align: left;">
                 <div class="form-group">
-                    <label style="color: var(--accent);">Selecione a OS Lançada para Vincular / Copiar:</label>
-                    <select id="select-os-origem" onchange="copiarParametrosOSOrigem(this.value)">
+                    <label style="color: var(--accent);">Selecione a OS Lançada para Vincular:</label>
+                    <select id="select-os-origem" onchange="processarSelecaoOSOrigem(this.value)">
                         <option value="">Carregando Ordens de Serviço...</option>
                     </select>
                 </div>
@@ -216,7 +215,7 @@
         </div>
     </div>
 
-    <!-- 5. MODAL VALIDAÇÃO DE PROGRAMAÇÃO -->
+    <!-- 5. MODAL VALIDAÇÃO DE PROGRAMAÇÃO (APENAS PARA MODO LANCAMENTO) -->
     <div id="prog-modal" style="display: none;">
         <div class="modal-box">
             <h2>Validação de Programação</h2>
@@ -236,7 +235,7 @@
         </div>
     </div>
 
-    <!-- 6. GESTÃO OS (ACOMPANHAMENTO PELO CAMPO COM VINCULAÇÃO E %) -->
+    <!-- 6. GESTÃO OS -->
     <div class="container" id="gestao-app">
         <div class="header">
             <div class="logo-container">
@@ -296,6 +295,13 @@
 
         <div id="view-mode-banner" class="read-only-banner" style="display: none;">
             <span>🔍 MODO VISUALIZAÇÃO: Este registro já foi cadastrado no sistema.</span>
+        </div>
+
+        <!-- BOTÃO ESPECIAL PARA PUXAR TALHÕES E PRODUTOS NO ENCERRAMENTO -->
+        <div id="box-btn-puxar-encerramento" style="display: none; margin-bottom: 1.2rem;">
+            <button type="button" class="btn btn-primary" style="width: 100%; background: var(--success);" onclick="puxarTalhoesEProdutosOrigem()">
+                📋 PUXAR TALHÕES E PRODUTOS DA OS DE ORIGEM
+            </button>
         </div>
 
         <form id="os-form">
@@ -371,7 +377,7 @@
             </div>
 
             <div class="section">
-                <div class="section-title">Insumos Aplicados</div>
+                <div class="section-title">Insumos Aplicados <span style="color: var(--danger);">* (Obrigatório Lançar)</span></div>
                 <div class="table-responsive">
                     <table id="produtos-table">
                         <thead>
@@ -415,7 +421,8 @@
         let dbFazendas = [], dbInsumos = [], dbEquipamentos = [], dbOperacoes = [];
         let solicitanteCracha = "", solicitanteNome = "", solicitanteLimpoDisplay = "";
         let programacaoStatus = "SIM", carreadorTexto = "", equipamentosSelecionados = [], modoVisualizacao = false, listaOSCache = [];
-        let modoOperacaoSelecionado = "LANCAMENTO"; // LANCAMENTO, APONTAMENTO, ENCERRAMENTO
+        let modoOperacaoSelecionado = "LANCAMENTO";
+        let osOrigemObjeto = null;
         let statusCacheAnterior = {};
 
         window.addEventListener('DOMContentLoaded', async () => {
@@ -497,11 +504,11 @@
                 const res = await (await fetch(`${APPSCRIPT_URL}?action=validar_login&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`)).json();
                 document.getElementById('login-loader').style.display = 'none';
 
-                if (data.success) {
+                if (res.success) {
                     localStorage.setItem('permanecer_logado', 'true');
-                    efetuarLoginSucesso(data.cracha, data.solicitante);
+                    efetuarLoginSucesso(res.cracha, res.solicitante);
                 } else {
-                    document.getElementById('login-error').innerText = data.error;
+                    document.getElementById('login-error').innerText = res.error;
                     document.getElementById('login-error').style.display = 'block';
                 }
             } catch (err) {
@@ -541,7 +548,6 @@
             } catch (e) {}
         }
 
-        // CONTROLE DO NOVO MODAL DE SELEÇÃO DE AÇÃO
         function abrirModalModoOperacao() {
             document.getElementById('menu-screen').style.display = 'none';
             document.getElementById('mode-modal').style.display = 'flex';
@@ -561,6 +567,7 @@
                 await carregarSelectOSOrigem();
             } else {
                 document.getElementById('os-origem-id').value = "";
+                osOrigemObjeto = null;
                 avancarParaValidacaoProgramacao();
             }
         }
@@ -572,6 +579,7 @@
             try {
                 const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`)).json();
                 if (res.success && res.dados) {
+                    listaOSCache = res.dados;
                     const osLancadas = res.dados.filter(o => o.tipo_registro === 'LANCAMENTO');
                     select.innerHTML = '<option value="">Selecione uma OS da lista...</option>';
                     osLancadas.forEach(o => {
@@ -584,46 +592,86 @@
             }
         }
 
-        function copiarParametrosOSOrigem(codTemp) {
+        function processarSelecaoOSOrigem(codTemp) {
             if (!codTemp) return;
             document.getElementById('os-origem-id').value = codTemp;
 
-            // Busca OS no cache local
-            const os = listaOSCache.find(x => x.codigoTemp === codTemp);
-            if (os) {
-                // Preenche automaticamente todos os parâmetros
-                document.getElementById('pea-input').value = os.pea || "";
-                document.getElementById('fundo-input').value = `${os.fa_codigo} - ${os.descricao_fazenda}`;
-                document.getElementById('tipo-fazenda').value = os.tipo_fazenda || "";
+            osOrigemObjeto = listaOSCache.find(x => x.codigoTemp === codTemp);
+            if (osOrigemObjeto) {
+                // Preenche Cabeçalho Pronto
+                document.getElementById('pea-input').value = osOrigemObjeto.pea || "";
+                document.getElementById('fundo-input').value = `${osOrigemObjeto.fa_codigo} - ${osOrigemObjeto.descricao_fazenda}`;
+                document.getElementById('tipo-fazenda').value = osOrigemObjeto.tipo_fazenda || "";
 
-                // Fazenda
-                fazendaSelecionada = dbFazendas.find(f => f.codigo === os.fa_codigo);
+                fazendaSelecionada = dbFazendas.find(f => f.codigo === osOrigemObjeto.fa_codigo);
 
-                // Centro de Custo e Operação
                 const selectCC = document.getElementById('centro-custo');
-                selectCC.value = os.centro_custo;
+                selectCC.value = osOrigemObjeto.centro_custo;
                 
                 const opSelect = document.getElementById('operacao');
-                opSelect.innerHTML = `<option value="${os.operacao}">${os.operacao}</option>`;
+                opSelect.innerHTML = `<option value="${osOrigemObjeto.operacao}">${osOrigemObjeto.operacao}</option>`;
 
-                // Equipamentos
+                // Limpa campos operacionais para lançamento parcial
+                talhoesAtivos = [];
+                renderizerTalhoesSelecionados();
+                document.getElementById('produtos-tbody').innerHTML = '';
                 equipamentosSelecionados = [];
-                (os.equipamentos || "").split(',').forEach(eName => {
-                    const eq = dbEquipamentos.find(x => x.nome === eName.trim());
-                    if (eq) equipamentosSelecionados.push(eq);
-                    else if (eName.trim()) equipamentosSelecionados.push({ nome: eName.trim(), propriedade: 'PRÓPRIO' });
-                });
                 renderizerEquipamentos();
-
-                // Insumos
-                const tbody = document.getElementById('produtos-tbody');
-                tbody.innerHTML = '';
-                (os.produtos || []).forEach(p => {
-                    adicionarLinhaProdutoComDados(p.cod, p.desc, p.un, p.dose, p.total);
-                });
             }
 
-            avancarParaValidacaoProgramacao();
+            // PULA A PERGUNTA DE PROGRAMAÇÃO NO APONTAMENTO/ENCERRAMENTO
+            programacaoStatus = "SIM";
+            carreadorTexto = "";
+            
+            document.getElementById('mode-modal').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+
+            const badgeMode = document.getElementById('badge-tipo-operacao');
+            badgeMode.innerText = `MODO: ${modoOperacaoSelecionado}`;
+            if (modoOperacaoSelecionado === 'APONTAMENTO') badgeMode.className = 'badge badge-lancada';
+            if (modoOperacaoSelecionado === 'ENCERRAMENTO') badgeMode.className = 'badge badge-rejeitado';
+
+            document.getElementById('box-btn-puxar-encerramento').style.display = (modoOperacaoSelecionado === 'ENCERRAMENTO') ? 'block' : 'none';
+
+            document.getElementById('solicitante-display').value = solicitanteLimpoDisplay;
+            document.getElementById('data-solicitacao-display').value = new Date().toLocaleString('pt-BR');
+            document.getElementById('data-prev-inicio').valueAsDate = new Date();
+
+            if (modoOperacaoSelecionado === 'APONTAMENTO') {
+                adicionarLinhaProduto();
+            }
+        }
+
+        function puxarTalhoesEProdutosOrigem() {
+            if (!osOrigemObjeto) return;
+
+            // Puxa Talhões
+            const nums = (osOrigemObjeto.talhoes || "").split(',').map(s => s.trim()).filter(Boolean);
+            talhoesAtivos = [];
+            if (fazendaSelecionada) {
+                fazendaSelecionada.talhoes.forEach(t => {
+                    if (nums.includes(t.talhao)) {
+                        talhoesAtivos.push({ num: t.talhao, areaParcial: parseFloat(t.area) });
+                    }
+                });
+            }
+            renderizerTalhoesSelecionados();
+
+            // Puxa Equipamentos
+            equipamentosSelecionados = [];
+            (osOrigemObjeto.equipamentos || "").split(',').forEach(eName => {
+                const eq = dbEquipamentos.find(x => x.nome === eName.trim());
+                if (eq) equipamentosSelecionados.push(eq);
+                else if (eName.trim()) equipamentosSelecionados.push({ nome: eName.trim(), propriedade: 'PRÓPRIO' });
+            });
+            renderizerEquipamentos();
+
+            // Puxa Insumos
+            const tbody = document.getElementById('produtos-tbody');
+            tbody.innerHTML = '';
+            (osOrigemObjeto.produtos || []).forEach(p => {
+                adicionarLinhaProdutoComDados(p.cod, p.desc, p.un, p.dose, p.total);
+            });
         }
 
         function avancarParaValidacaoProgramacao() {
@@ -661,23 +709,19 @@
             document.getElementById('prog-modal').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
 
-            // Atualiza Badge do Modo
             const badgeMode = document.getElementById('badge-tipo-operacao');
             badgeMode.innerText = `MODO: ${modoOperacaoSelecionado}`;
-            if (modoOperacaoSelecionado === 'LANCAMENTO') badgeMode.className = 'badge badge-analise';
-            if (modoOperacaoSelecionado === 'APONTAMENTO') badgeMode.className = 'badge badge-lancada';
-            if (modoOperacaoSelecionado === 'ENCERRAMENTO') badgeMode.className = 'badge badge-rejeitado';
+            badgeMode.className = 'badge badge-analise';
 
+            document.getElementById('box-btn-puxar-encerramento').style.display = 'none';
             document.getElementById('solicitante-display').value = solicitanteLimpoDisplay;
             document.getElementById('data-solicitacao-display').value = new Date().toLocaleString('pt-BR');
             
-            if (modoOperacaoSelecionado === 'LANCAMENTO') {
-                document.getElementById('os-form').reset();
-                document.getElementById('produtos-tbody').innerHTML = '';
-                equipamentosSelecionados = []; renderizerEquipamentos();
-                talhoesAtivos = []; renderizerTalhoesSelecionados();
-                adicionarLinhaProduto();
-            }
+            document.getElementById('os-form').reset();
+            document.getElementById('produtos-tbody').innerHTML = '';
+            equipamentosSelecionados = []; renderizerEquipamentos();
+            talhoesAtivos = []; renderizerTalhoesSelecionados();
+            adicionarLinhaProduto();
             document.getElementById('data-prev-inicio').valueAsDate = new Date();
         }
 
@@ -721,7 +765,6 @@
                 if (st === "OS Lançada") badgeClass = "badge-lancada";
                 if (st === "Rejeitado") badgeClass = "badge-rejeitado";
 
-                // Cálculo de Porcentagem de Execução se houver Apontamentos vinculados
                 let progressoHtml = `<span style="font-size:0.8rem; color:var(--text-muted);">${os.area_total} ha</span>`;
                 if (os.tipo_registro === 'LANCAMENTO') {
                     const apontamentos = lista.filter(x => x.os_origem === os.codigoTemp);
@@ -755,6 +798,7 @@
             document.getElementById('main-app').style.display = 'block';
             document.getElementById('main-app-title').innerText = `${os.codigoOS ? 'OS nº ' + os.codigoOS : os.codigoTemp} [${os.status_aprovacao}]`;
             document.getElementById('view-mode-banner').style.display = 'block';
+            document.getElementById('box-btn-puxar-encerramento').style.display = 'none';
             document.getElementById('box-actions-lancar').style.display = 'none';
             document.getElementById('box-actions-visualizar').style.display = 'block';
 
@@ -851,6 +895,19 @@
         inputRangeTalhoes.onchange = function() {
             if (!fazendaSelecionada) return;
             const nums = inputRangeTalhoes.value.split(',').map(s => parseInt(s.trim(), 10)).filter(Boolean);
+
+            // VALIDAÇÃO DE TALHÕES NÃO PREVISTOS SE FOR APONTAMENTO / ENCERRAMENTO
+            if ((modoOperacaoSelecionado === 'APONTAMENTO' || modoOperacaoSelecionado === 'ENCERRAMENTO') && osOrigemObjeto) {
+                const talhoesOrigemPermitidos = (osOrigemObjeto.talhoes || "").split(',').map(s => parseInt(s.trim(), 10)).filter(Boolean);
+                
+                const NaoPrevistos = nums.filter(n => !talhoesOrigemPermitidos.includes(n));
+                if (NaoPrevistos.length > 0) {
+                    alert(`🚨 ATENÇÃO: Talhões não previstos!\n\nOs talhões (${NaoPrevistos.join(', ')}) não constam na OS de Origem (${osOrigemObjeto.codigoOS || osOrigemObjeto.codigoTemp}).`);
+                    inputRangeTalhoes.value = '';
+                    return;
+                }
+            }
+
             fazendaSelecionada.talhoes.forEach(t => {
                 if (nums.includes(parseInt(t.talhao, 10)) && !talhoesAtivos.some(a => a.num === t.talhao)) {
                     talhoesAtivos.push({ num: t.talhao, areaParcial: parseFloat(t.area) });
@@ -971,6 +1028,12 @@
                     });
                 }
             });
+
+            // VALIDAÇÃO OBRIGATÓRIA DE INSUMO
+            if (payload.produtos.length === 0) {
+                alert("⚠️ LANÇAMENTO BLOQUEADO:\n\nÉ obrigatório informar e adicionar pelo menos 1 INSUMO/PRODUTO!");
+                return;
+            }
 
             btn.style.display = 'none'; loader.style.display = 'block';
 
