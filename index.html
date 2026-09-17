@@ -122,9 +122,33 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .read-only-banner { background-color: rgba(6, 182, 212, 0.12); border: 1px solid var(--accent); color: var(--accent); padding: 0.6rem 1rem; border-radius: 8px; font-weight: 700; font-size: 0.85rem; margin-bottom: 1.5rem; }
+
+        /* BANNER DE NOTIFICAÇÃO FLUTUANTE (TOAST) */
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        #toast-notification {
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
+            width: 92%; max-width: 480px; z-index: 9999; display: none;
+            background: var(--bg-card); border-radius: 14px; padding: 1rem;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.6); animation: slideDown 0.3s ease-out;
+        }
     </style>
 </head>
 <body>
+
+    <!-- BANNER DE NOTIFICAÇÃO VISUAL NO APP (TOAST) -->
+    <div id="toast-notification">
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+            <span id="toast-icon" style="font-size: 1.8rem;">🔔</span>
+            <div style="flex: 1;">
+                <strong id="toast-title" style="font-size: 0.95rem; color: var(--text-main); display: block; margin-bottom: 3px;"></strong>
+                <p id="toast-body" style="font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.3;"></p>
+            </div>
+            <button onclick="fecharToast()" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; padding: 0 4px;">✕</button>
+        </div>
+    </div>
 
     <!-- 1. LOGIN -->
     <div id="login-screen">
@@ -215,7 +239,7 @@
         </div>
     </div>
 
-    <!-- 5. MODAL VALIDAÇÃO DE PROGRAMAÇÃO (APENAS PARA MODO LANCAMENTO) -->
+    <!-- 5. MODAL VALIDAÇÃO DE PROGRAMAÇÃO -->
     <div id="prog-modal" style="display: none;">
         <div class="modal-box">
             <h2>Validação de Programação</h2>
@@ -297,7 +321,6 @@
             <span>🔍 MODO VISUALIZAÇÃO: Este registro já foi cadastrado no sistema.</span>
         </div>
 
-        <!-- BOTÃO ESPECIAL PARA PUXAR TALHÕES E PRODUTOS NO ENCERRAMENTO -->
         <div id="box-btn-puxar-encerramento" style="display: none; margin-bottom: 1.2rem;">
             <button type="button" class="btn btn-primary" style="width: 100%; background: var(--success);" onclick="puxarTalhoesEProdutosOrigem()">
                 📋 PUXAR TALHÕES E PRODUTOS DA OS DE ORIGEM
@@ -423,26 +446,68 @@
         let programacaoStatus = "SIM", carreadorTexto = "", equipamentosSelecionados = [], modoVisualizacao = false, listaOSCache = [];
         let modoOperacaoSelecionado = "LANCAMENTO";
         let osOrigemObjeto = null;
-        let statusCacheAnterior = {};
+
+        // SISTEMA DE GERENCIAMENTO DE NOTIFICAÇÕES E STATUS PERSISTENTE
+        let statusCacheAnterior = JSON.parse(localStorage.getItem('os_status_cache') || '{}');
 
         window.addEventListener('DOMContentLoaded', async () => {
             carregarPreferenciaTema();
-            solicitarPermissaoNotificacao();
             verificarSessaoSalva();
             await carregarDadosIniciais();
-            setInterval(checarMudancasStatusNotificacao, 15000);
+            
+            // Loop de verificação de atualizações a cada 10 segundos
+            setInterval(checarMudancasStatusNotificacao, 10000);
         });
 
-        function solicitarPermissaoNotificacao() {
-            if ("Notification" in window && Notification.permission !== "granted") {
+        // SOLICITAR PERMISSÃO DE NOTIFICAÇÃO NO CLIQUE DO USUÁRIO
+        function pedirPermissaoNotificacao() {
+            if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
                 Notification.requestPermission();
             }
         }
 
-        function dispararNotificacaoNavegador(titulo, mensagem) {
+        function dispararNotificacaoCompleta(titulo, mensagem, tipo) {
+            // 1. Notificação Nativa do Sistema
             if ("Notification" in window && Notification.permission === "granted") {
-                new Notification(titulo, { body: mensagem, icon: 'logo.png' });
+                try {
+                    new Notification(titulo, { body: mensagem, icon: 'logo.png' });
+                } catch(e) {}
             }
+
+            // 2. Vibração no dispositivo móvel
+            if ("vibrate" in navigator) {
+                navigator.vibrate([200, 100, 200]);
+            }
+
+            // 3. Banner Flutuante (Toast) na tela do App
+            exibirToast(titulo, mensagem, tipo);
+        }
+
+        function exibirToast(titulo, mensagem, tipo) {
+            const toast = document.getElementById('toast-notification');
+            const toastTitle = document.getElementById('toast-title');
+            const toastBody = document.getElementById('toast-body');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastTitle.innerText = titulo;
+            toastBody.innerText = mensagem;
+
+            if (tipo === 'sucesso') {
+                toastIcon.innerText = '🎉';
+                toast.style.border = '2px solid var(--success)';
+            } else {
+                toastIcon.innerText = '❌';
+                toast.style.border = '2px solid var(--danger)';
+            }
+
+            toast.style.display = 'block';
+
+            // Auto-oculta após 12 segundos
+            setTimeout(() => { fecharToast(); }, 12000);
+        }
+
+        function fecharToast() {
+            document.getElementById('toast-notification').style.display = 'none';
         }
 
         async function checarMudancasStatusNotificacao() {
@@ -452,15 +517,24 @@
                 if (res.success && res.dados) {
                     res.dados.forEach(os => {
                         const statusAnt = statusCacheAnterior[os.codigoTemp];
+                        
+                        // Se o status mudou em relação ao cache gravado
                         if (statusAnt && statusAnt !== os.status_aprovacao) {
                             if (os.status_aprovacao === "OS Lançada") {
-                                dispararNotificacaoNavegador("OS Lançada! 🎉", `OS lançada no sistema, sua OS é a ${os.codigoOS}`);
+                                const msg = `OS lançada no sistema, sua OS é a ${os.codigoOS || 'Sem Código'}`;
+                                dispararNotificacaoCompleta("OS LANÇADA! 🎉", msg, 'sucesso');
                             } else if (os.status_aprovacao === "Rejeitado") {
-                                dispararNotificacaoNavegador("OS Rejeitada ❌", `Motivo: ${os.justificativa_controle || 'Não informado'}`);
+                                const msg = `Sua solicitação (${os.codigoTemp}) foi rejeitada. Motivo: ${os.justificativa_controle || 'Não informado'}`;
+                                dispararNotificacaoCompleta("OS REJEITADA ❌", msg, 'erro');
                             }
                         }
+                        
+                        // Atualiza mapa de status
                         statusCacheAnterior[os.codigoTemp] = os.status_aprovacao;
                     });
+
+                    // Salva estado atual no navegador
+                    localStorage.setItem('os_status_cache', JSON.stringify(statusCacheAnterior));
                 }
             } catch(e) {}
         }
@@ -495,6 +569,7 @@
         }
 
         async function executarLogin() {
+            pedirPermissaoNotificacao();
             const u = document.getElementById('login-user').value.trim();
             const p = document.getElementById('login-pass').value.trim();
             if (!u || !p) return;
@@ -517,6 +592,7 @@
         }
 
         function efetuarLoginSucesso(cracha, nome) {
+            pedirPermissaoNotificacao();
             solicitanteCracha = cracha;
             solicitanteNome = nome;
             solicitanteLimpoDisplay = obterNomeSolicitanteLimpo(cracha, nome);
@@ -531,6 +607,9 @@
 
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('menu-screen').style.display = 'flex';
+
+            // Primeira checagem para popular cache do usuário logado
+            checarMudancasStatusNotificacao();
         }
 
         function efetuarLogout() { localStorage.clear(); location.reload(); }
@@ -598,7 +677,6 @@
 
             osOrigemObjeto = listaOSCache.find(x => x.codigoTemp === codTemp);
             if (osOrigemObjeto) {
-                // Preenche Cabeçalho Pronto
                 document.getElementById('pea-input').value = osOrigemObjeto.pea || "";
                 document.getElementById('fundo-input').value = `${osOrigemObjeto.fa_codigo} - ${osOrigemObjeto.descricao_fazenda}`;
                 document.getElementById('tipo-fazenda').value = osOrigemObjeto.tipo_fazenda || "";
@@ -611,7 +689,6 @@
                 const opSelect = document.getElementById('operacao');
                 opSelect.innerHTML = `<option value="${osOrigemObjeto.operacao}">${osOrigemObjeto.operacao}</option>`;
 
-                // Limpa campos operacionais para lançamento parcial
                 talhoesAtivos = [];
                 renderizerTalhoesSelecionados();
                 document.getElementById('produtos-tbody').innerHTML = '';
@@ -619,7 +696,6 @@
                 renderizerEquipamentos();
             }
 
-            // PULA A PERGUNTA DE PROGRAMAÇÃO NO APONTAMENTO/ENCERRAMENTO
             programacaoStatus = "SIM";
             carreadorTexto = "";
             
@@ -645,7 +721,6 @@
         function puxarTalhoesEProdutosOrigem() {
             if (!osOrigemObjeto) return;
 
-            // Puxa Talhões
             const nums = (osOrigemObjeto.talhoes || "").split(',').map(s => s.trim()).filter(Boolean);
             talhoesAtivos = [];
             if (fazendaSelecionada) {
@@ -657,7 +732,6 @@
             }
             renderizerTalhoesSelecionados();
 
-            // Puxa Equipamentos
             equipamentosSelecionados = [];
             (osOrigemObjeto.equipamentos || "").split(',').forEach(eName => {
                 const eq = dbEquipamentos.find(x => x.nome === eName.trim());
@@ -666,7 +740,6 @@
             });
             renderizerEquipamentos();
 
-            // Puxa Insumos
             const tbody = document.getElementById('produtos-tbody');
             tbody.innerHTML = '';
             (osOrigemObjeto.produtos || []).forEach(p => {
@@ -896,7 +969,6 @@
             if (!fazendaSelecionada) return;
             const nums = inputRangeTalhoes.value.split(',').map(s => parseInt(s.trim(), 10)).filter(Boolean);
 
-            // VALIDAÇÃO DE TALHÕES NÃO PREVISTOS SE FOR APONTAMENTO / ENCERRAMENTO
             if ((modoOperacaoSelecionado === 'APONTAMENTO' || modoOperacaoSelecionado === 'ENCERRAMENTO') && osOrigemObjeto) {
                 const talhoesOrigemPermitidos = (osOrigemObjeto.talhoes || "").split(',').map(s => parseInt(s.trim(), 10)).filter(Boolean);
                 
@@ -1029,7 +1101,6 @@
                 }
             });
 
-            // VALIDAÇÃO OBRIGATÓRIA DE INSUMO
             if (payload.produtos.length === 0) {
                 alert("⚠️ LANÇAMENTO BLOQUEADO:\n\nÉ obrigatório informar e adicionar pelo menos 1 INSUMO/PRODUTO!");
                 return;
@@ -1041,6 +1112,10 @@
                 const res = await (await fetch(APPSCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })).json();
                 btn.style.display = 'inline-flex'; loader.style.display = 'none';
                 if (res.success) {
+                    // Armazena no cache local como 'Em análise'
+                    statusCacheAnterior[res.codigoTemp] = "Em análise";
+                    localStorage.setItem('os_status_cache', JSON.stringify(statusCacheAnterior));
+                    
                     gerarComprovanteWhatsApp(payload, res.codigoTemp);
                 }
             } catch (err) {
