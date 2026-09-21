@@ -92,7 +92,7 @@
 
         #global-autocomplete { position: absolute; z-index: 9999; display: none; }
 
-        /* TALHÕES COM SUPORTE PARCIAL */
+        /* TALHÕES PARCIAIS */
         .talhoes-container { display: flex; flex-direction: column; gap: 0.6rem; padding: 0.8rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border-color); min-height: 48px; }
         .talhao-card { background: var(--bg-card); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
         .talhao-card.parcial-active { border-color: var(--warning); background: rgba(245, 158, 11, 0.05); }
@@ -142,6 +142,7 @@
     <!-- 2. MENU PRINCIPAL -->
     <div id="menu-screen" class="modal-screen" style="display: none;">
         <div class="modal-box">
+            <!-- BOTÕES DE AJUDA E CONFIGURAÇÕES DE VOLTA -->
             <div style="position: absolute; top: 1.2rem; right: 1.2rem; display: flex; gap: 8px;">
                 <button class="btn-icon-gear" title="Ajuda e Reportes" onclick="abrirModalAjuda()">❓</button>
                 <button class="btn-icon-gear" title="Configurações" onclick="abrirConfiguracoes()">⚙️</button>
@@ -154,6 +155,40 @@
                 <button class="btn btn-primary" style="padding: 1rem; font-size: 1rem;" onclick="iniciarAberturaOS()">🚜 ABERTURA DE OS</button>
                 <button class="btn btn-secondary" style="padding: 1rem; font-size: 1rem; border-color: var(--warning); color: var(--warning);" onclick="abrirModalApontamentoOS()">⏱️ APONTAMENTO DE OS</button>
                 <button class="btn btn-outline" style="padding: 1rem; font-size: 1rem; margin-top: 0.5rem;" onclick="abrirGestaoOS()">📋 GESTÃO DE OS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIGURAÇÕES -->
+    <div id="settings-modal" class="modal-screen" style="display: none;">
+        <div class="modal-box">
+            <h2>Configurações</h2>
+            <div style="display: flex; flex-direction: column; gap: 0.8rem; margin: 1.5rem 0;">
+                <div style="background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px; text-align: left;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">LOGIN ATIVO / SESSÃO</span>
+                    <div id="settings-user-display" style="font-weight: 700; color: var(--accent); font-size: 0.95rem; margin-top: 2px;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px;">
+                    <span style="font-weight: 600; font-size: 0.9rem;">Aparência do Sistema</span>
+                    <button class="btn btn-outline" onclick="alternarTema()" id="btn-toggle-theme">Modo Escuro</button>
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.8rem;">
+                <button class="btn btn-secondary" style="flex: 1;" onclick="fecharConfiguracoes()">Voltar</button>
+                <button class="btn btn-danger" style="flex: 1;" onclick="efetuarLogout()">Sair / Deslogar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE AJUDA -->
+    <div id="help-modal" class="modal-screen" style="display: none;">
+        <div class="modal-box">
+            <h2>Ajuda e Reportes</h2>
+            <div class="form-group"><label>Tipo de Reporte</label><select id="reporte-tipo"><option value="Erros">Erro / Falha no App</option><option value="Melhoria">Sugestão de Melhoria</option><option value="Sugestao">Outras Sugestões</option></select></div>
+            <div class="form-group" style="margin-top:1rem;"><label>Descrição do Caso</label><textarea id="reporte-descricao" rows="4" placeholder="Descreva aqui..."></textarea></div>
+            <div style="display: flex; gap: 0.8rem; margin-top: 1.5rem;">
+                <button class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('help-modal').style.display='none'">Voltar</button>
+                <button class="btn btn-primary" style="flex:1;" onclick="enviarReporte()">Enviar Reporte</button>
             </div>
         </div>
     </div>
@@ -192,19 +227,6 @@
                 <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="respostaProgramacao('NÃO')">CONFIRMAR E AVANÇAR</button>
             </div>
             <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem;" onclick="fecharModalProgramacao()">Cancelar Operação</button>
-        </div>
-    </div>
-
-    <!-- MODAL DE AJUDA -->
-    <div id="help-modal" class="modal-screen" style="display: none;">
-        <div class="modal-box">
-            <h2>Ajuda e Reportes</h2>
-            <div class="form-group"><label>Tipo</label><select id="reporte-tipo"><option>Erros</option><option>Melhoria</option><option>Sugestao</option></select></div>
-            <div class="form-group" style="margin-top:1rem;"><label>Descrição</label><textarea id="reporte-descricao" rows="4"></textarea></div>
-            <div style="display: flex; gap: 0.8rem; margin-top: 1.5rem;">
-                <button class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('help-modal').style.display='none'">Voltar</button>
-                <button class="btn btn-primary" style="flex:1;" onclick="enviarReporte()">Enviar</button>
-            </div>
         </div>
     </div>
 
@@ -304,7 +326,6 @@
                     <input type="text" id="frota-input" placeholder="Digite para buscar e adicionar..." autocomplete="off">
                     <div id="frota-autocomplete" class="autocomplete-list" style="position: relative;"></div>
                     
-                    <!-- TABELA DE EQUIPAMENTOS COM COLUNA B -->
                     <div class="table-responsive" id="box-table-equipamentos" style="margin-top: 0.8rem; display: none;">
                         <table>
                             <thead>
@@ -389,7 +410,28 @@
             await carregarDadosIniciais();
         });
 
-        // NAVEGAÇÃO E BOTÃO DE GESTÃO CORRIGIDO
+        function abrirConfiguracoes() { document.getElementById('settings-modal').style.display = 'flex'; }
+        function fecharConfiguracoes() { document.getElementById('settings-modal').style.display = 'none'; }
+        function abrirModalAjuda() { document.getElementById('help-modal').style.display = 'flex'; }
+
+        async function enviarReporte() {
+            const tipo = document.getElementById('reporte-tipo').value;
+            const desc = document.getElementById('reporte-descricao').value.trim();
+            if(!desc) { alert("Escreva a descrição."); return; }
+
+            try {
+                const res = await (await fetch(APPSCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'salvar_reporte', cracha: solicitanteCracha, nome: solicitanteLimpoDisplay, tipo: tipo, descricao: desc })
+                })).json();
+                if(res.success) {
+                    alert("Reporte enviado com sucesso!");
+                    document.getElementById('reporte-descricao').value = '';
+                    document.getElementById('help-modal').style.display = 'none';
+                }
+            } catch(e) { alert("Erro ao enviar reporte."); }
+        }
+
         function abrirGestaoOS() {
             document.getElementById('menu-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'none';
@@ -520,7 +562,7 @@
             document.getElementById('menu-screen').style.display = 'flex';
         }
 
-        // TALHÕES PARCIAIS + CARREADOR 6666
+        // TALHÕES PARCIAIS
         let fazendaSelecionada = null, talhoesAtivos = [];
         const inputFundo = document.getElementById('fundo-input'), listFundo = document.getElementById('fundo-autocomplete');
         const inputRangeTalhoes = document.getElementById('talhoes-range-input');
@@ -607,7 +649,7 @@
             if (t) {
                 let v = parseFloat(val) || 0;
                 if (v > t.maxArea) {
-                    alert(`🚨 A área parcial (${v} ha) não pode exceder a área cadastrada do talhão (${t.maxArea} ha)!`);
+                    alert(`🚨 A área parcial (${v} ha) não pode exceder a área do talhão (${t.maxArea} ha)!`);
                     v = t.maxArea;
                 }
                 if (v < 0) v = 0;
@@ -630,9 +672,7 @@
                 });
             }
 
-            // Remove 6666 anterior para re-ratear
             talhoesAtivos = talhoesAtivos.filter(x => x.num !== '6666 (Rateio)');
-            
             talhoesAtivos.forEach(t => { sumAreaSelecionada += t.areaParcial; });
 
             if (document.getElementById('check-carreador').checked && area6666Base > 0 && sumAreaSelecionada > 0 && sumAreaTotalFazendaSem6666 > 0) {
@@ -691,7 +731,7 @@
             document.querySelectorAll('.prod-dose').forEach(inp => { inp.dispatchEvent(new Event('input')); });
         }
 
-        // TABELA DE EQUIPAMENTOS COM COLUNA B (C.C EQUIPAMENTO)
+        // EQUIPAMENTOS
         const inputFrota = document.getElementById('frota-input'), listFrota = document.getElementById('frota-autocomplete');
         inputFrota.oninput = function() {
             if (modoVisualizacao) return;
@@ -733,7 +773,7 @@
             });
         }
 
-        // INSUMOS (COM BLOQUEIO DE DUPLICATAS)
+        // INSUMOS
         function adicionarLinhaProduto() { adicionarLinhaProdutoComDados("", "", "", "", ""); }
         function adicionarLinhaProdutoComDados(cod, desc, un, dose, total) {
             const tr = document.createElement('tr');
@@ -768,7 +808,6 @@
                     const div = document.createElement('div'); div.className = 'autocomplete-item';
                     div.innerHTML = `<strong>${p.cod}</strong> - ${p.desc}`;
                     div.onclick = () => {
-                        // VALIDAÇÃO ANTI-DUPLICADOS
                         const jaExiste = Array.from(document.querySelectorAll('#produtos-tbody .prod-cod'))
                             .some(inp => inp !== inCod && inp.value.trim() === p.cod);
 
