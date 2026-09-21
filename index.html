@@ -6,7 +6,6 @@
     <meta name="theme-color" content="#09090b">
     <title>Ordem de Serviço - Campo | Clealco</title>
     
-    <!-- FLATPICKR: Biblioteca para Calendário de Período (Range) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     
@@ -72,7 +71,6 @@
         .section-title { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .grid { display: grid; gap: 1.2rem; }
         .grid-2 { grid-template-columns: repeat(2, 1fr); }
-        .grid-3 { grid-template-columns: repeat(3, 1fr); }
 
         .form-group { display: flex; flex-direction: column; gap: 0.4rem; position: relative; text-align: left;}
         label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
@@ -92,13 +90,12 @@
         .autocomplete-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--bg-input); font-size: 0.85rem; }
         .autocomplete-item:hover { background-color: var(--bg-input); color: var(--accent); }
 
-        /* LISTA FLUTUANTE GLOBAL PARA INSUMOS */
-        #global-autocomplete { position: fixed; z-index: 9999; display: none; width: 300px; }
+        #global-autocomplete { position: absolute; z-index: 9999; display: none; }
 
-        .talhoes-container { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.8rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border-color); min-height: 48px; }
-        .talhao-chip { background: var(--bg-card); border: 1px solid var(--accent); padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
-        
-        .equip-chip { background: var(--accent); color: #fff; font-weight: 600; padding: 4px 10px; border-radius: 16px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; }
+        /* TALHÕES COM SUPORTE PARCIAL */
+        .talhoes-container { display: flex; flex-direction: column; gap: 0.6rem; padding: 0.8rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border-color); min-height: 48px; }
+        .talhao-card { background: var(--bg-card); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+        .talhao-card.parcial-active { border-color: var(--warning); background: rgba(245, 158, 11, 0.05); }
 
         .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 0.5rem; }
         table { width: 100%; border-collapse: collapse; min-width: 650px; }
@@ -109,17 +106,9 @@
         .badge-analise { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
         .badge-lancada { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
         .badge-rejeitado { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
-        
+
         .loader { border: 3px solid var(--border-color); border-top: 3px solid var(--accent); border-radius: 50%; width: 28px; height: 28px; animation: spin 0.8s linear infinite; margin: 0 auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        #toast-notification {
-            position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
-            width: 92%; max-width: 480px; z-index: 9999; display: none;
-            background: var(--bg-card); border-radius: 14px; padding: 1rem;
-            box-shadow: 0 12px 35px rgba(0,0,0,0.6); animation: slideDown 0.3s ease-out;
-        }
 
         .checkbox-container { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--accent); cursor: pointer; }
         .checkbox-container input { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
@@ -127,19 +116,7 @@
 </head>
 <body>
 
-    <!-- LISTA FLUTUANTE GLOBAL (INSUMOS) -->
     <div id="global-autocomplete" class="autocomplete-list"></div>
-
-    <!-- BANNER TOAST -->
-    <div id="toast-notification">
-        <div style="display: flex; align-items: flex-start; gap: 12px;">
-            <div style="flex: 1;">
-                <strong id="toast-title" style="font-size: 0.95rem; color: var(--text-main); display: block; margin-bottom: 3px;"></strong>
-                <p id="toast-body" style="font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.3;"></p>
-            </div>
-            <button onclick="fecharToast()" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; padding: 0 4px;">✕</button>
-        </div>
-    </div>
 
     <!-- 1. LOGIN -->
     <div id="login-screen" class="modal-screen">
@@ -198,7 +175,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE PROGRAMAÇÃO (APENAS ABERTURA) -->
+    <!-- MODAL DE PROGRAMAÇÃO -->
     <div id="prog-modal" class="modal-screen" style="display: none;">
         <div class="modal-box">
             <h2>Validação de Programação</h2>
@@ -218,17 +195,20 @@
         </div>
     </div>
 
-    <!-- MODAL DE AJUDA E CONFIGURAÇÕES OCULTADOS NESTE SNIPPET PARA MANTER FOCO... (São iguais ao anterior) -->
+    <!-- MODAL DE AJUDA -->
     <div id="help-modal" class="modal-screen" style="display: none;">
         <div class="modal-box">
             <h2>Ajuda e Reportes</h2>
             <div class="form-group"><label>Tipo</label><select id="reporte-tipo"><option>Erros</option><option>Melhoria</option><option>Sugestao</option></select></div>
             <div class="form-group" style="margin-top:1rem;"><label>Descrição</label><textarea id="reporte-descricao" rows="4"></textarea></div>
-            <div style="display: flex; gap: 0.8rem; margin-top: 1.5rem;"><button class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('help-modal').style.display='none'">Voltar</button><button class="btn btn-primary" style="flex:1;" onclick="enviarReporte()">Enviar</button></div>
+            <div style="display: flex; gap: 0.8rem; margin-top: 1.5rem;">
+                <button class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('help-modal').style.display='none'">Voltar</button>
+                <button class="btn btn-primary" style="flex:1;" onclick="enviarReporte()">Enviar</button>
+            </div>
         </div>
     </div>
 
-    <!-- 7. GESTÃO OS -->
+    <!-- GESTÃO OS -->
     <div class="container" id="gestao-app">
         <div class="header">
             <div class="logo-container"><img src="logo.png" class="logo-img"><div class="logo-text">CONTROLE<br>AGRICOLA</div></div>
@@ -236,7 +216,7 @@
         </div>
         <div class="table-responsive">
             <table>
-                <thead><tr><th>Cód. Temp / OS</th><th>Tipo</th><th>Fazenda / Operação</th><th>Progresso</th><th>Status</th></tr></thead>
+                <thead><tr><th>Cód. Temp / OS</th><th>Tipo</th><th>Fazenda / Operação</th><th>Área</th><th>Status</th></tr></thead>
                 <tbody id="gestao-tbody"></tbody>
             </table>
         </div>
@@ -252,7 +232,7 @@
         </div>
     </div>
 
-    <!-- FORMULÁRIO PRINCIPAL DE LANÇAMENTO DA OS -->
+    <!-- FORMULÁRIO PRINCIPAL -->
     <div class="container" id="main-app">
         <div class="header">
             <div class="logo-container"><img src="logo.png" alt="Clealco" class="logo-img"><div class="logo-text">CONTROLE<br>AGRICOLA</div></div>
@@ -276,7 +256,6 @@
                 </div>
             </div>
 
-            <!-- CHAVE DE ENCERRAMENTO (SÓ APARECE NO APONTAMENTO) -->
             <div id="box-encerramento" style="display: none; background: rgba(239, 68, 68, 0.1); padding: 1rem; border: 1px solid var(--danger); border-radius: 8px; margin-bottom: 2rem;">
                 <label class="checkbox-container" style="color: var(--danger);">
                     <input type="checkbox" id="check-encerrar-os">
@@ -298,11 +277,11 @@
                     <div class="form-group"><label>Tipo de Fazenda</label><input type="text" id="tipo-fazenda" readonly placeholder="Automático" style="font-weight: 700; color: var(--accent);"></div>
                 </div>
                 <div class="form-group" style="margin-top: 1rem;" id="group-digitar-talhoes">
-                    <label>Digitar Talhões (Ex: 1-9, 12, 15) <span style="color: var(--accent); font-weight: normal; font-size: 0.75rem;">(Gera automático ao digitar)</span></label>
+                    <label>Digitar Talhões (Ex: 1-9, 12, 15)</label>
                     <input type="text" id="talhoes-range-input" placeholder="Ex: 1-4, 8, 10" autocomplete="off">
                 </div>
                 <div class="form-group" style="margin-top: 1rem;">
-                    <label>Talhões Detectados</label>
+                    <label>Talhões Selecionados e Áreas Parciais</label>
                     <div id="talhoes-container" class="talhoes-container"></div>
                 </div>
                 <div class="grid grid-2" style="margin-top: 1rem;">
@@ -321,10 +300,23 @@
                     <div class="form-group"><label>Operação</label><select id="operacao"><option value="">Selecione o Centro de Custo</option></select></div>
                 </div>
                 <div class="form-group" style="margin-top: 1rem;">
-                    <label>Equipamentos / Frota</label>
-                    <input type="text" id="frota-input" placeholder="Digite para buscar..." autocomplete="off">
+                    <label>Buscar Equipamentos / Frota</label>
+                    <input type="text" id="frota-input" placeholder="Digite para buscar e adicionar..." autocomplete="off">
                     <div id="frota-autocomplete" class="autocomplete-list" style="position: relative;"></div>
-                    <div id="equipamentos-selecionados" class="talhoes-container" style="margin-top: 0.5rem;"></div>
+                    
+                    <!-- TABELA DE EQUIPAMENTOS COM COLUNA B -->
+                    <div class="table-responsive" id="box-table-equipamentos" style="margin-top: 0.8rem; display: none;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 55%;">Equipamento</th>
+                                    <th style="width: 35%;">C.C Equipamento</th>
+                                    <th style="width: 10%; text-align: center;">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="equipamentos-tbody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -361,7 +353,7 @@
 
             <div id="box-actions-lancar" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                 <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="voltarAoMenu()">CANCELAR</button>
-                <button type="button" class="btn btn-primary" style="flex: 2;" onclick="enviarDados()" id="btn-submit">🚀 VALIDAR E ENVIAR DADOS</button>
+                <button type="button" class="btn btn-primary" style="flex: 2;" onclick="enviarDados()" id="btn-submit">ENVIAR SOLICITAÇÃO</button>
             </div>
             <div id="box-actions-visualizar" style="display: none; margin-top: 1.5rem;">
                 <button type="button" class="btn btn-primary" style="width: 100%;" onclick="fecharVisualizacaoOS()">⬅️ VOLTAR PARA GESTÃO</button>
@@ -370,7 +362,6 @@
         </form>
     </div>
 
-    <!-- SCRIPT DO FLATPICKR PARA O SELETOR DE DATA -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 
@@ -388,7 +379,6 @@
         window.addEventListener('DOMContentLoaded', async () => {
             flatpickrInstancia = flatpickr("#data-execucao", { mode: "range", dateFormat: "Y-m-d", locale: "pt" });
             
-            // CONFIG FECHAR AUTOCOMPLETE FLUTUANTE AO CLICAR FORA
             document.addEventListener('click', (e) => {
                 if(inputInsumoAtivo && e.target !== inputInsumoAtivo && !document.getElementById('global-autocomplete').contains(e.target)) {
                     document.getElementById('global-autocomplete').style.display = 'none';
@@ -399,7 +389,14 @@
             await carregarDadosIniciais();
         });
 
-        // ------------------ FLUXO DO MENU ------------------ //
+        // NAVEGAÇÃO E BOTÃO DE GESTÃO CORRIGIDO
+        function abrirGestaoOS() {
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('gestao-app').style.display = 'block';
+            carregarEExibirGestaoOS();
+        }
+
         function iniciarAberturaOS() {
             modoOperacaoSelecionado = "LANCAMENTO";
             document.getElementById('os-origem-id').value = "";
@@ -474,7 +471,7 @@
             
             document.getElementById('badge-tipo-operacao').innerText = `MODO: APONTAMENTO DE OS`;
             document.getElementById('badge-tipo-operacao').className = 'badge badge-lancada';
-            document.getElementById('box-encerramento').style.display = 'block'; // CHAVE DE ENCERRAMENTO
+            document.getElementById('box-encerramento').style.display = 'block';
 
             document.getElementById('solicitante-display').value = solicitanteLimpoDisplay;
             document.getElementById('data-solicitacao-display').value = new Date().toLocaleString('pt-BR');
@@ -494,7 +491,7 @@
         function respostaProgramacao(resp) {
             if (resp === 'NÃO') {
                 const txt = document.getElementById('justificativa-texto').value.trim();
-                if (!txt) { alert("⚠️ JUSTIFICATIVA OBRIGATÓRIA!\n\nVocê precisa explicar o motivo da quebra de programação para liberar o formulário."); return; }
+                if (!txt) { alert("⚠️ JUSTIFICATIVA OBRIGATÓRIA!"); return; }
                 carreadorTexto = txt;
             }
             programacaoStatus = resp;
@@ -523,7 +520,7 @@
             document.getElementById('menu-screen').style.display = 'flex';
         }
 
-        // ------------------ TALHÕES E CARREADOR ------------------ //
+        // TALHÕES PARCIAIS + CARREADOR 6666
         let fazendaSelecionada = null, talhoesAtivos = [];
         const inputFundo = document.getElementById('fundo-input'), listFundo = document.getElementById('fundo-autocomplete');
         const inputRangeTalhoes = document.getElementById('talhoes-range-input');
@@ -539,14 +536,13 @@
                     fazendaSelecionada = f; inputFundo.value = f.descricao;
                     document.getElementById('tipo-fazenda').value = (parseInt(f.codigo, 10) < 300000) ? "PRÓPRIA" : "FORNECEDORES";
                     listFundo.style.display = 'none';
-                    processarEntradaTalhoes(); // Recalcula se trocar de fazenda
+                    processarEntradaTalhoes();
                 };
                 listFundo.appendChild(div);
             });
             listFundo.style.display = 'block';
         };
 
-        // Escuta o input de talhões a cada tecla (Sem precisar de enter)
         inputRangeTalhoes.addEventListener('input', processarEntradaTalhoes);
 
         function expandirIntervalos(texto) {
@@ -572,33 +568,82 @@
         function processarEntradaTalhoes() {
             if (!fazendaSelecionada) return;
             const nums = expandirIntervalos(inputRangeTalhoes.value);
-            talhoesAtivos = [];
             
-            let sumAreaSelecionada = 0;
-            let sumAreaTotalFazendaSem6666 = 0;
-            let area6666Base = 0;
-
-            // Mapeamento e Somas
+            let novosTalhoesAtivos = [];
             fazendaSelecionada.talhoes.forEach(t => {
                 const numT = parseInt(t.talhao, 10);
-                const area = parseFloat(t.area) || 0;
+                const areaMax = parseFloat(t.area) || 0;
                 
-                if (numT === 6666) {
-                    area6666Base = area;
-                } else {
-                    sumAreaTotalFazendaSem6666 += area;
-                    if (nums.includes(numT)) {
-                        talhoesAtivos.push({ num: String(numT), areaParcial: area });
-                        sumAreaSelecionada += area;
+                if (numT !== 6666 && nums.includes(numT)) {
+                    const existente = talhoesAtivos.find(x => x.num === String(numT));
+                    if (existente) {
+                        novosTalhoesAtivos.push(existente);
+                    } else {
+                        novosTalhoesAtivos.push({
+                            num: String(numT),
+                            maxArea: areaMax,
+                            areaParcial: areaMax,
+                            isParcial: false
+                        });
                     }
                 }
             });
 
-            // Lógica de Rateio do Carreador
+            talhoesAtivos = novosTalhoesAtivos;
+            recalcularAreasE6666();
+        }
+
+        function toggleParcial(num) {
+            const t = talhoesAtivos.find(x => x.num === String(num));
+            if (t) {
+                t.isParcial = !t.isParcial;
+                if (!t.isParcial) { t.areaParcial = t.maxArea; }
+                recalcularAreasE6666();
+            }
+        }
+
+        function alterarAreaParcial(num, val) {
+            const t = talhoesAtivos.find(x => x.num === String(num));
+            if (t) {
+                let v = parseFloat(val) || 0;
+                if (v > t.maxArea) {
+                    alert(`🚨 A área parcial (${v} ha) não pode exceder a área cadastrada do talhão (${t.maxArea} ha)!`);
+                    v = t.maxArea;
+                }
+                if (v < 0) v = 0;
+                t.areaParcial = v;
+                recalcularAreasE6666();
+            }
+        }
+
+        function recalcularAreasE6666() {
+            let sumAreaSelecionada = 0;
+            let sumAreaTotalFazendaSem6666 = 0;
+            let area6666Base = 0;
+
+            if (fazendaSelecionada && fazendaSelecionada.talhoes) {
+                fazendaSelecionada.talhoes.forEach(t => {
+                    const numT = parseInt(t.talhao, 10);
+                    const area = parseFloat(t.area) || 0;
+                    if (numT === 6666) area6666Base = area;
+                    else sumAreaTotalFazendaSem6666 += area;
+                });
+            }
+
+            // Remove 6666 anterior para re-ratear
+            talhoesAtivos = talhoesAtivos.filter(x => x.num !== '6666 (Rateio)');
+            
+            talhoesAtivos.forEach(t => { sumAreaSelecionada += t.areaParcial; });
+
             if (document.getElementById('check-carreador').checked && area6666Base > 0 && sumAreaSelecionada > 0 && sumAreaTotalFazendaSem6666 > 0) {
                 const proporcao = sumAreaSelecionada / sumAreaTotalFazendaSem6666;
                 const area6666Rateada = area6666Base * proporcao;
-                talhoesAtivos.push({ num: '6666 (Rateio)', areaParcial: area6666Rateada });
+                talhoesAtivos.push({
+                    num: '6666 (Rateio)',
+                    maxArea: area6666Rateada,
+                    areaParcial: area6666Rateada,
+                    isParcial: false
+                });
             }
 
             renderizerTalhoesSelecionados();
@@ -607,20 +652,46 @@
         function renderizerTalhoesSelecionados() {
             const container = document.getElementById('talhoes-container'); container.innerHTML = '';
             let tot = 0;
+
             talhoesAtivos.forEach(t => {
                 tot += t.areaParcial;
-                // Removido o botão de excluir
-                container.innerHTML += `<div class="talhao-chip">T. ${t.num} <span style="color:var(--text-muted); font-size:0.75rem;">(${t.areaParcial.toFixed(2)}ha)</span></div>`;
+                const isCarreador = t.num.includes('6666');
+                
+                const div = document.createElement('div');
+                div.className = `talhao-card ${t.isParcial ? 'parcial-active' : ''}`;
+                
+                let inputHtml = '';
+                if (t.isParcial && !isCarreador) {
+                    inputHtml = `<input type="number" step="0.01" max="${t.maxArea}" value="${t.areaParcial}" 
+                        style="width: 100px; padding: 2px 6px; font-size: 0.85rem;" 
+                        onchange="alterarAreaParcial('${t.num}', this.value)">`;
+                }
+
+                let btnParcialHtml = '';
+                if (!isCarreador) {
+                    btnParcialHtml = `<button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.75rem;" 
+                        onclick="toggleParcial('${t.num}')">${t.isParcial ? 'Restaurar Total' : 'Parcial'}</button>`;
+                }
+
+                div.innerHTML = `
+                    <div>
+                        <strong>Talhão ${t.num}</strong> 
+                        <span style="color:var(--text-muted); font-size:0.8rem; margin-left: 6px;">(Máx: ${t.maxArea.toFixed(2)} ha)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap: 8px;">
+                        ${inputHtml}
+                        <strong style="color: var(--accent);">${t.areaParcial.toFixed(2)} ha</strong>
+                        ${btnParcialHtml}
+                    </div>
+                `;
+                container.appendChild(div);
             });
+
             document.getElementById('area-total').value = tot.toFixed(2);
-            
-            // Reflete a dosagem automática nos insumos se a área mudar
-            document.querySelectorAll('.prod-dose').forEach(inp => {
-                inp.dispatchEvent(new Event('input'));
-            });
+            document.querySelectorAll('.prod-dose').forEach(inp => { inp.dispatchEvent(new Event('input')); });
         }
 
-        // ------------------ EQUIPAMENTOS E INSUMOS ------------------ //
+        // TABELA DE EQUIPAMENTOS COM COLUNA B (C.C EQUIPAMENTO)
         const inputFrota = document.getElementById('frota-input'), listFrota = document.getElementById('frota-autocomplete');
         inputFrota.oninput = function() {
             if (modoVisualizacao) return;
@@ -628,7 +699,7 @@
             if (!val) { listFrota.style.display = 'none'; return; }
             dbEquipamentos.filter(e => e.nome.toLowerCase().includes(val)).forEach(e => {
                 const div = document.createElement('div'); div.className = 'autocomplete-item';
-                div.innerHTML = `<strong>${e.nome}</strong> (${e.propriedade})`;
+                div.innerHTML = `<strong>${e.nome}</strong> | C.C: ${e.colB || '-'}`;
                 div.onclick = () => {
                     if (!equipamentosSelecionados.some(x => x.nome === e.nome)) equipamentosSelecionados.push(e);
                     renderizerEquipamentos(); inputFrota.value = ''; listFrota.style.display = 'none';
@@ -639,12 +710,30 @@
         };
 
         function renderizerEquipamentos() {
-            const container = document.getElementById('equipamentos-selecionados'); container.innerHTML = '';
+            const container = document.getElementById('box-table-equipamentos');
+            const tbody = document.getElementById('equipamentos-tbody');
+            tbody.innerHTML = '';
+
+            if (equipamentosSelecionados.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'block';
             equipamentosSelecionados.forEach((e, i) => {
-                container.innerHTML += `<div class="equip-chip"><span>${e.nome}</span><button type="button" onclick="equipamentosSelecionados.splice(${i},1);renderizerEquipamentos();" style="background:none;border:none;color:#fff;font-weight:bold;cursor:pointer;">×</button></div>`;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${e.nome}</strong> (${e.propriedade || 'PRÓPRIO'})</td>
+                    <td><span style="color: var(--accent); font-weight: 600;">${e.colB || '-'}</span></td>
+                    <td style="text-align: center;">
+                        <button type="button" class="btn btn-danger" style="padding: 2px 8px;" onclick="equipamentosSelecionados.splice(${i},1);renderizerEquipamentos();">×</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
             });
         }
 
+        // INSUMOS (COM BLOQUEIO DE DUPLICATAS)
         function adicionarLinhaProduto() { adicionarLinhaProdutoComDados("", "", "", "", ""); }
         function adicionarLinhaProdutoComDados(cod, desc, un, dose, total) {
             const tr = document.createElement('tr');
@@ -662,7 +751,6 @@
 
             const inCod = tr.querySelector('.prod-cod'), inDose = tr.querySelector('.prod-dose'), warnDose = tr.querySelector('.dose-warning');
             
-            // LISTA FLUTUANTE GLOBAL QUE PASSA POR CIMA DO OVERFLOW
             inCod.oninput = function() {
                 const val = this.value.toLowerCase();
                 const globalList = document.getElementById('global-autocomplete');
@@ -672,19 +760,27 @@
                 inputInsumoAtivo = this;
 
                 const rect = this.getBoundingClientRect();
-                globalList.style.top = (rect.bottom + 4) + 'px';
-                globalList.style.left = rect.left + 'px';
+                globalList.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+                globalList.style.left = (rect.left + window.scrollX) + 'px';
                 globalList.style.width = rect.width + 'px';
 
                 dbInsumos.filter(p => p.full.toLowerCase().includes(val)).forEach(p => {
                     const div = document.createElement('div'); div.className = 'autocomplete-item';
                     div.innerHTML = `<strong>${p.cod}</strong> - ${p.desc}`;
                     div.onclick = () => {
+                        // VALIDAÇÃO ANTI-DUPLICADOS
+                        const jaExiste = Array.from(document.querySelectorAll('#produtos-tbody .prod-cod'))
+                            .some(inp => inp !== inCod && inp.value.trim() === p.cod);
+
+                        if (jaExiste) {
+                            alert(`❌ O insumo [${p.cod} - ${p.desc}] já foi adicionado nesta Ordem de Serviço!`);
+                            return;
+                        }
+
                         tr.querySelector('.prod-cod').value = p.cod;
                         tr.querySelector('.prod-desc').value = p.desc;
                         tr.querySelector('.prod-un').value = p.un;
                         
-                        // Reseta a dosagem para revalidar e recalculate
                         inDose.value = '';
                         inDose.dispatchEvent(new Event('input'));
                         
@@ -696,7 +792,6 @@
                 globalList.style.display = 'block';
             };
 
-            // VALIDAÇÃO DE DOSAGEM (MIN E MAX) E CÁLCULO
             inDose.oninput = function() {
                 const area = parseFloat(document.getElementById('area-total').value) || 0;
                 const vDose = parseFloat(this.value) || 0;
@@ -714,20 +809,18 @@
             document.getElementById('produtos-tbody').appendChild(tr);
         }
 
-        // ------------------ DADOS GERAIS, ENVIOS E VALIDAÇÃO ------------------ //
         async function enviarDados() {
             if (modoVisualizacao) return;
 
-            // VALIDAÇÕES OBRIGATÓRIAS BLINDADAS
-            if (!fazendaSelecionada) { alert("⚠️ FALTAM DADOS: Selecione a Fazenda/Fundo Agrícola válido na lista."); return; }
-            if (talhoesAtivos.length === 0) { alert("⚠️ FALTAM DADOS: Digite pelo menos um Talhão válido que pertença à fazenda."); return; }
+            if (!fazendaSelecionada) { alert("⚠️ FALTAM DADOS: Selecione a Fazenda/Fundo Agrícola."); return; }
+            if (talhoesAtivos.length === 0) { alert("⚠️ FALTAM DADOS: Digite os Talhões."); return; }
             
             const selectedDates = flatpickrInstancia.selectedDates;
-            if (selectedDates.length === 0) { alert("⚠️ FALTAM DADOS: Selecione o período de Data de Execução."); return; }
+            if (selectedDates.length === 0) { alert("⚠️ FALTAM DADOS: Selecione a Data de Execução."); return; }
             
             const ccVal = document.getElementById('centro-custo').value, opVal = document.getElementById('operacao').value;
-            if (!ccVal || !opVal) { alert("⚠️ FALTAM DADOS: Selecione o Centro de Custo e a Operação."); return; }
-            if (equipamentosSelecionados.length === 0) { alert("⚠️ FALTAM DADOS: Adicione ao menos um Equipamento à frota."); return; }
+            if (!ccVal || !opVal) { alert("⚠️ FALTAM DADOS: Selecione o Centro de Custo e Operação."); return; }
+            if (equipamentosSelecionados.length === 0) { alert("⚠️ FALTAM DADOS: Adicione ao menos um Equipamento."); return; }
             
             let temInsumo = false;
             let produtosEnvio = [];
@@ -742,14 +835,12 @@
                     });
                 }
             });
-            if (!temInsumo) { alert("⚠️ FALTAM DADOS: É obrigatório adicionar ao menos 1 insumo na tabela."); return; }
+            if (!temInsumo) { alert("⚠️ FALTAM DADOS: Adicione ao menos 1 insumo."); return; }
 
             const stringEquipamentosFormatados = equipamentosSelecionados.map(e => e.colB ? `${e.nome} [${e.colB}]` : e.nome).join(', ');
-            
             const dtStart = selectedDates[0] ? selectedDates[0].toISOString().split('T')[0] : "";
-            const dtEnd = selectedDates[1] ? selectedDates[1].toISOString().split('T')[0] : dtStart; // Se for range vazio, copia início
+            const dtEnd = selectedDates[1] ? selectedDates[1].toISOString().split('T')[0] : dtStart;
             
-            // Verifica o Switch de Encerramento (SÓ SE APLICARÁ SE ESTIVER NO MODO APONTAMENTO INICIALMENTE)
             let modoEfetivo = modoOperacaoSelecionado;
             if (modoOperacaoSelecionado === 'APONTAMENTO' && document.getElementById('check-encerrar-os').checked) {
                 modoEfetivo = 'ENCERRAMENTO';
@@ -768,7 +859,7 @@
                 observacao: document.getElementById('observacao').value,
                 pea: document.getElementById('pea-input').value,
                 area_total: document.getElementById('area-total').value,
-                talhoes: talhoesAtivos.map(t => t.num.split(' ')[0]).join(', '), // Limpa " (Rateio)" se tiver
+                talhoes: talhoesAtivos.map(t => `${t.num}:${t.areaParcial.toFixed(2)}ha`).join(', '),
                 frota: stringEquipamentosFormatados,
                 produtos: produtosEnvio
             };
@@ -784,7 +875,7 @@
                 } else { alert("Falha na nuvem: " + res.error); }
             } catch (err) {
                 btn.style.display = 'inline-flex'; loader.style.display = 'none';
-                alert("Falha na conexão de rede.");
+                alert("Falha de conexão.");
             }
         }
 
@@ -803,7 +894,29 @@
         }
         function enviarWhatsApp() { window.open(linkWhatsApp, '_blank'); }
 
-        // MÉTODOS BASEADOS NO CACHE LOCAL PARA START O MAIS RÁPIDO POSSIVEL (Config e Init idênticos as versões anteriores)
+        async function carregarEExibirGestaoOS() {
+            const tbody = document.getElementById('gestao-tbody');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem;">Carregando Ordens de Serviço...</td></tr>';
+            try {
+                const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`)).json();
+                if (res.success && res.dados) {
+                    listaOSCache = res.dados;
+                    tbody.innerHTML = '';
+                    listaOSCache.forEach(os => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td><strong>${os.codigoOS || os.codigoTemp}</strong></td>
+                            <td><span class="badge badge-analise">${os.tipo_registro}</span></td>
+                            <td>${os.fa_codigo} - ${os.descricao_fazenda}<br><small style="color:var(--text-muted);">${os.operacao}</small></td>
+                            <td>${os.area_total} ha</td>
+                            <td><span class="badge badge-lancada">${os.status_aprovacao || 'Em análise'}</span></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Erro ao carregar do servidor.</td></tr>'; }
+        }
+
         async function executarLogin() {
             const u = document.getElementById('login-user').value.trim(), p = document.getElementById('login-pass').value.trim();
             if(!u || !p) return;
