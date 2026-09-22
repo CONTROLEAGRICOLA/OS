@@ -6,6 +6,9 @@
     <meta name="theme-color" content="#09090b">
     <title>Ordem de Serviço - Campo | Clealco</title>
     
+    <!-- PWA MANIFEST INLINE -->
+    <link rel="manifest" href='data:application/json,{"name":"Controle Agricola Clealco","short_name":"OS Clealco","start_url":"./","display":"standalone","background_color":"#09090b","theme_color":"#09090b","icons":[{"src":"logo.png","sizes":"192x192","type":"image/png"}]}'>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     
@@ -111,15 +114,28 @@
         .badge-analise { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
         .badge-lancada { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
         .badge-rejeitado { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge-pending-sync { background: rgba(245, 158, 11, 0.25); color: var(--warning); border: 1px dashed var(--warning); }
 
         .loader { border: 3px solid var(--border-color); border-top: 3px solid var(--accent); border-radius: 50%; width: 28px; height: 28px; animation: spin 0.8s linear infinite; margin: 0 auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .checkbox-container { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--accent); cursor: pointer; }
         .checkbox-container input { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
+
+        .net-status-pill {
+            position: fixed; bottom: 12px; right: 12px; z-index: 9999;
+            padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 800;
+            display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .net-online { background: #10b981; color: #fff; }
+        .net-offline { background: #ef4444; color: #fff; }
     </style>
 </head>
 <body>
+
+    <div id="net-indicator" class="net-status-pill net-online">
+        <span id="net-dot">●</span> <span id="net-text">ONLINE</span>
+    </div>
 
     <div id="global-autocomplete" class="autocomplete-list"></div>
 
@@ -172,6 +188,13 @@
                     <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">LOGIN ATIVO / SESSÃO</span>
                     <div id="settings-user-display" style="font-weight: 700; color: var(--accent); font-size: 0.95rem; margin-top: 2px;"></div>
                 </div>
+                
+                <div style="background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px; text-align: left; display: flex; flex-direction: column; gap: 6px;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">BANCO DE DADOS OFFLINE</span>
+                    <button type="button" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.6rem 1rem;" onclick="baixarEAtualizarDadosOffline(true)">🔄 Baixar / Atualizar Dados OFFLINE</button>
+                    <small id="settings-offline-date" style="color: var(--text-muted); font-size: 0.72rem; text-align: center;">Última atualização: Não baixado</small>
+                </div>
+
                 <div style="background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px; text-align: left; display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-size: 0.85rem; font-weight: 600;">Aparência / Tema</span>
                     <button type="button" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="alternarTema()">☀️ / 🌙 Alternar Modo</button>
@@ -401,6 +424,17 @@
     <script>
         const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQZWlJ8xGg-VqRLvWWPuowCQ2QUJg-CEXjW8oM_tEo7fqVsGOov2UZxU85snQtvyLp/exec';
 
+        // REGISTRO DE SERVICE WORKER PARA SUPORTE PWA OFFLINE
+        if ('serviceWorker' in navigator) {
+            const swContent = `
+                const CACHE_NAME = 'clealco-os-cache-v1';
+                self.addEventListener('install', e => e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['./']))));
+                self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
+            `;
+            const blob = new Blob([swContent], { type: 'application/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+        }
+
         let dbFazendas = [], dbInsumos = [], dbEquipamentos = [], dbOperacoes = [];
         let solicitanteCracha = "", solicitanteNome = "", solicitanteLimpoDisplay = "";
         let programacaoStatus = "SIM", carreadorTexto = "", equipamentosSelecionados = [], modoVisualizacao = false, listaOSCache = [];
@@ -422,9 +456,30 @@
                 }
             });
 
+            window.addEventListener('online', atualizarIndicadorRede);
+            window.addEventListener('offline', atualizarIndicadorRede);
+            atualizarIndicadorRede();
+
             verificarSessaoSalva();
             await carregarDadosIniciais();
         });
+
+        function atualizarIndicadorRede() {
+            const pill = document.getElementById('net-indicator');
+            const dot = document.getElementById('net-dot');
+            const text = document.getElementById('net-text');
+
+            if (navigator.onLine) {
+                pill.className = 'net-status-pill net-online';
+                dot.innerText = '●';
+                text.innerText = 'ONLINE';
+                sincronizarFilaOffline();
+            } else {
+                pill.className = 'net-status-pill net-offline';
+                dot.innerText = '⚠️';
+                text.innerText = 'OFFLINE';
+            }
+        }
 
         function alternarTema() {
             const current = document.documentElement.getAttribute('data-theme') || 'dark';
@@ -435,10 +490,16 @@
 
         function abrirConfiguracoes() {
             document.getElementById('settings-user-display').innerText = `${solicitanteCracha} - ${solicitanteLimpoDisplay}`;
+            atualizarDataOfflineDisplay();
             document.getElementById('settings-modal').style.display = 'flex';
         }
         function fecharConfiguracoes() { document.getElementById('settings-modal').style.display = 'none'; }
         function abrirModalAjuda() { document.getElementById('help-modal').style.display = 'flex'; }
+
+        function atualizarDataOfflineDisplay() {
+            const dt = localStorage.getItem('db_offline_timestamp');
+            document.getElementById('settings-offline-date').innerText = dt ? `Última atualização: ${dt}` : 'Última atualização: Não baixado';
+        }
 
         function efetuarLogout() {
             localStorage.clear();
@@ -454,6 +515,54 @@
             const mm = String(agora.getMinutes()).padStart(2, '0');
             const ss = String(agora.getSeconds()).padStart(2, '0');
             return `${d}${m}${y}-${hh}${mm}${ss}`;
+        }
+
+        async function baixarEAtualizarDadosOffline(exibirAlerta = true) {
+            if (!navigator.onLine) {
+                if (exibirAlerta) alert("⚠️ Você está sem conexão com a internet no momento!");
+                return;
+            }
+
+            try {
+                const res = await (await fetch(`${APPSCRIPT_URL}?action=init`)).json();
+                if (res.success) {
+                    dbFazendas = res.dados.fazendas || [];
+                    dbInsumos = res.dados.insumos || [];
+                    dbEquipamentos = res.dados.equipamentos || [];
+                    dbOperacoes = res.dados.operacoes || [];
+
+                    localStorage.setItem('db_offline_master', JSON.stringify(res.dados));
+                    const dataStr = new Date().toLocaleString('pt-BR');
+                    localStorage.setItem('db_offline_timestamp', dataStr);
+
+                    popularCentrosDeCusto();
+                    atualizarDataOfflineDisplay();
+
+                    if (exibirAlerta) alert("✅ Banco de dados baixado e atualizado com sucesso para uso OFFLINE!");
+                }
+            } catch(e) {
+                if (exibirAlerta) alert("Erro ao sincronizar com o servidor.");
+            }
+        }
+
+        async function carregarDadosIniciais() {
+            // Tenta carregar do cache offline local em primeiro lugar
+            const cached = localStorage.getItem('db_offline_master');
+            if (cached) {
+                try {
+                    const dados = JSON.parse(cached);
+                    dbFazendas = dados.fazendas || [];
+                    dbInsumos = dados.insumos || [];
+                    dbEquipamentos = dados.equipamentos || [];
+                    dbOperacoes = dados.operacoes || [];
+                    popularCentrosDeCusto();
+                } catch(e) {}
+            }
+
+            // Se tiver rede, atualiza silenciosamente em segundo plano
+            if (navigator.onLine) {
+                await baixarEAtualizarDadosOffline(false);
+            }
         }
 
         async function enviarReporte() {
@@ -484,62 +593,79 @@
         async function carregarEExibirGestaoOS() {
             const tbody = document.getElementById('gestao-tbody');
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem;">Carregando Ordens de Serviço...</td></tr>';
-            try {
-                const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`)).json();
-                if (res.success && res.dados) {
-                    listaOSCache = res.dados;
-                    tbody.innerHTML = '';
-
-                    const aberturas = listaOSCache.filter(o => o.tipo_registro === 'LANCAMENTO');
-                    const apontamentos = listaOSCache.filter(o => o.tipo_registro !== 'LANCAMENTO');
-
-                    if (aberturas.length === 0 && apontamentos.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1.5rem;">Nenhuma OS cadastrada.</td></tr>';
-                        return;
+            
+            let listaRemota = [];
+            if (navigator.onLine) {
+                try {
+                    const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`)).json();
+                    if (res.success && res.dados) {
+                        listaRemota = res.dados;
+                        localStorage.setItem('os_cache_gestao', JSON.stringify(listaRemota));
                     }
+                } catch(e) {}
+            } else {
+                listaRemota = JSON.parse(localStorage.getItem('os_cache_gestao') || '[]');
+            }
 
-                    aberturas.forEach(osPai => {
-                        const filhos = apontamentos.filter(a => a.os_origem === osPai.codigoTemp);
-                        const areaApontada = filhos.reduce((acc, curr) => acc + (parseFloat(curr.area_total) || 0), 0);
-                        const pct = osPai.area_total > 0 ? Math.min(100, Math.round((areaApontada / osPai.area_total) * 100)) : 0;
-                        const hasFilhos = filhos.length > 0;
+            const filaOffline = JSON.parse(localStorage.getItem('os_fila_offline') || '[]');
+            
+            // Mescla itens da nuvem + itens salvos offline
+            const tempCodesFila = filaOffline.map(x => x.codigoTemp);
+            listaOSCache = [...filaOffline, ...listaRemota.filter(r => !tempCodesFila.includes(r.codigoTemp))];
 
-                        const displayOS = osPai.codigoOS || osPai.codigoTemp;
+            tbody.innerHTML = '';
 
-                        const trPai = document.createElement('tr');
-                        trPai.style.cursor = 'pointer';
-                        trPai.innerHTML = `
-                            <td style="text-align: center;" onclick="event.stopPropagation(); toggleChildren('${osPai.codigoTemp}')">
-                                ${hasFilhos ? `<button id="btn-expand-${osPai.codigoTemp}" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--accent); width:24px; height:24px; border-radius:4px; cursor:pointer; font-weight:bold;">+</button>` : ''}
-                            </td>
-                            <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${displayOS}</strong></td>
-                            <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><span class="badge badge-analise">${osPai.tipo_registro}</span></td>
-                            <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')">${osPai.fa_codigo} - ${osPai.descricao_fazenda}<br><small style="color:var(--text-muted);">${osPai.operacao}</small></td>
-                            <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${osPai.area_total} ha</strong> <span style="color:var(--accent); font-weight:700;">(${pct}%)</span></td>
-                            <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><span class="badge ${getBadgeClass(osPai.status_aprovacao)}">${osPai.status_aprovacao || 'Em análise'}</span></td>
-                        `;
-                        tbody.appendChild(trPai);
+            const aberturas = listaOSCache.filter(o => o.tipo_registro === 'LANCAMENTO');
+            const apontamentos = listaOSCache.filter(o => o.tipo_registro !== 'LANCAMENTO');
 
-                        filhos.forEach(osFilho => {
-                            const displayFilhoOS = osFilho.codigoOS || osFilho.codigoTemp;
-                            const trFilho = document.createElement('tr');
-                            trFilho.className = `child-row-${osPai.codigoTemp}`;
-                            trFilho.style.display = 'none';
-                            trFilho.style.background = 'rgba(255,255,255,0.02)';
-                            trFilho.style.cursor = 'pointer';
-                            trFilho.innerHTML = `
-                                <td></td>
-                                <td style="padding-left: 1.5rem;" onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">↳ <strong>${displayFilhoOS}</strong></td>
-                                <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')"><span class="badge badge-lancada">${osFilho.tipo_registro}</span></td>
-                                <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">${osFilho.fa_codigo} - ${osFilho.descricao_fazenda}<br><small style="color:var(--text-muted);">${osFilho.operacao}</small></td>
-                                <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">${osFilho.area_total} ha</td>
-                                <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')"><span class="badge ${getBadgeClass(osFilho.status_aprovacao)}">${osFilho.status_aprovacao || 'Em análise'}</span></td>
-                            `;
-                            tbody.appendChild(trFilho);
-                        });
-                    });
-                }
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Erro ao carregar dados.</td></tr>'; }
+            if (aberturas.length === 0 && apontamentos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1.5rem;">Nenhuma OS cadastrada.</td></tr>';
+                return;
+            }
+
+            aberturas.forEach(osPai => {
+                const filhos = apontamentos.filter(a => a.os_origem === osPai.codigoTemp);
+                const areaApontada = filhos.reduce((acc, curr) => acc + (parseFloat(curr.area_total) || 0), 0);
+                const pct = osPai.area_total > 0 ? Math.min(100, Math.round((areaApontada / osPai.area_total) * 100)) : 0;
+                const hasFilhos = filhos.length > 0;
+
+                const displayOS = osPai.codigoOS || osPai.codigoTemp;
+                const isPendingSync = osPai.status_aprovacao === '⚠️ OS NÃO SINCRONIZADA';
+
+                const trPai = document.createElement('tr');
+                trPai.style.cursor = 'pointer';
+                trPai.innerHTML = `
+                    <td style="text-align: center;" onclick="event.stopPropagation(); toggleChildren('${osPai.codigoTemp}')">
+                        ${hasFilhos ? `<button id="btn-expand-${osPai.codigoTemp}" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--accent); width:24px; height:24px; border-radius:4px; cursor:pointer; font-weight:bold;">+</button>` : ''}
+                    </td>
+                    <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${displayOS}</strong></td>
+                    <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><span class="badge badge-analise">${osPai.tipo_registro}</span></td>
+                    <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')">${osPai.fa_codigo} - ${osPai.descricao_fazenda}<br><small style="color:var(--text-muted);">${osPai.operacao}</small></td>
+                    <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${osPai.area_total} ha</strong> <span style="color:var(--accent); font-weight:700;">(${pct}%)</span></td>
+                    <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><span class="badge ${isPendingSync ? 'badge-pending-sync' : getBadgeClass(osPai.status_aprovacao)}">${osPai.status_aprovacao || 'Em análise'}</span></td>
+                `;
+                tbody.appendChild(trPai);
+
+                filhos.forEach(osFilho => {
+                    const displayFilhoOS = osFilho.codigoOS || osFilho.codigoTemp;
+                    const isPendingSyncF = osFilho.status_aprovacao === '⚠️ OS NÃO SINCRONIZADA';
+
+                    const trFilho = document.createElement('tr');
+                    trFilho.className = `child-row-${osPai.codigoTemp}`;
+                    trFilho.style.display = 'none';
+                    trFilho.style.background = 'rgba(255,255,255,0.02)';
+                    trFilho.style.cursor = 'pointer';
+                    trFilho.innerHTML = `
+                        <td></td>
+                        <td style="padding-left: 1.5rem;" onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">↳ <strong>${displayFilhoOS}</strong></td>
+                        <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')"><span class="badge badge-lancada">${osFilho.tipo_registro}</span></td>
+                        <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">${osFilho.fa_codigo} - ${osFilho.descricao_fazenda}<br><small style="color:var(--text-muted);">${osFilho.operacao}</small></td>
+                        <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">${osFilho.area_total} ha</td>
+                        <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')"><span class="badge ${isPendingSyncF ? 'badge-pending-sync' : getBadgeClass(osFilho.status_aprovacao)}">${osFilho.status_aprovacao || 'Em análise'}</span></td>
+                    `;
+                    tbody.appendChild(trFilho);
+                });
+            });
         }
 
         function toggleChildren(codigoTemp) {
@@ -671,18 +797,24 @@
             
             const select = document.getElementById('select-os-origem');
             select.innerHTML = '<option value="">Carregando Ordens de Serviço...</option>';
-            try {
-                const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`)).json();
-                if (res.success && res.dados) {
-                    listaOSCache = res.dados;
-                    const osLancadas = res.dados.filter(o => o.tipo_registro === 'LANCAMENTO');
-                    select.innerHTML = '<option value="">Selecione a OS Original...</option>';
-                    osLancadas.forEach(o => {
-                        const displayOS = o.codigoOS || o.codigoTemp;
-                        select.innerHTML += `<option value="${o.codigoTemp}">${displayOS} - ${o.fa_codigo} (${o.operacao})</option>`;
-                    });
-                }
-            } catch(e) { select.innerHTML = '<option value="">Erro ao carregar</option>'; }
+            
+            let resLista = [];
+            if (navigator.onLine) {
+                try {
+                    const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`)).json();
+                    if (res.success && res.dados) resLista = res.dados;
+                } catch(e) {}
+            } else {
+                resLista = JSON.parse(localStorage.getItem('os_cache_gestao') || '[]');
+            }
+
+            listaOSCache = resLista;
+            const osLancadas = resLista.filter(o => o.tipo_registro === 'LANCAMENTO');
+            select.innerHTML = '<option value="">Selecione a OS Original...</option>';
+            osLancadas.forEach(o => {
+                const displayOS = o.codigoOS || o.codigoTemp;
+                select.innerHTML += `<option value="${o.codigoTemp}">${displayOS} - ${o.fa_codigo} (${o.operacao})</option>`;
+            });
         }
 
         function fecharModalSelecaoOS() {
@@ -1131,12 +1263,10 @@
                 modoEfetivo = 'ENCERRAMENTO';
             }
 
-            // Chave Única Temp (DDMMYYYY-HHMMSS)
             const chaveTempEnvio = isEditandoRejeitada 
                 ? document.getElementById('os-codigo-temp-atual').value 
                 : gerarChaveUnicaTemp();
 
-            // HERDA O MESMO CÓDIGO DE OS DA MÃE SE FOR APONTAMENTO
             const codigoOSHerdada = (osOrigemObjeto && (modoOperacaoSelecionado === 'APONTAMENTO' || modoEfetivo === 'ENCERRAMENTO'))
                 ? (osOrigemObjeto.codigoOS || '')
                 : '';
@@ -1144,7 +1274,7 @@
             const payload = {
                 action: isEditandoRejeitada ? 'editar_rejeitada' : 'salvar_os',
                 codigoTemp: chaveTempEnvio,
-                codigoOS: codigoOSHerdada, // USA O MESMO CÓDIGO DA OS PRINCIPAL
+                codigoOS: codigoOSHerdada,
                 status_aprovacao: 'Em análise',
                 tipo_registro: modoEfetivo,
                 os_origem: document.getElementById('os-origem-id').value,
@@ -1164,6 +1294,12 @@
             };
 
             const btn = document.getElementById('btn-submit'), loader = document.getElementById('submit-loader');
+
+            if (!navigator.onLine) {
+                salvarFilaOffline(payload);
+                return;
+            }
+
             btn.style.display = 'none'; loader.style.display = 'block';
 
             try {
@@ -1176,7 +1312,46 @@
                 } else { alert("Falha na nuvem: " + res.error); }
             } catch (err) {
                 btn.style.display = 'inline-flex'; loader.style.display = 'none';
-                alert("Falha de conexão.");
+                salvarFilaOffline(payload);
+            }
+        }
+
+        function salvarFilaOffline(payload) {
+            let fila = JSON.parse(localStorage.getItem('os_fila_offline') || '[]');
+            payload.status_aprovacao = '⚠️ OS NÃO SINCRONIZADA';
+            
+            const existingIdx = fila.findIndex(x => x.codigoTemp === payload.codigoTemp);
+            if (existingIdx >= 0) fila[existingIdx] = payload;
+            else fila.push(payload);
+
+            localStorage.setItem('os_fila_offline', JSON.stringify(fila));
+            
+            document.getElementById('btn-submit').style.display = 'inline-flex';
+            document.getElementById('submit-loader').style.display = 'none';
+            
+            alert("📶 Sem conexão no momento!\n\nA OS foi SALVA OFFLINE na memória do celular. Assim que conectar à internet, ela será enviada e entrará EM ANÁLISE automaticamente.");
+            gerarComprovanteWhatsApp(payload, payload.codigoTemp);
+        }
+
+        async function sincronizarFilaOffline() {
+            let fila = JSON.parse(localStorage.getItem('os_fila_offline') || '[]');
+            if (fila.length === 0) return;
+
+            let novaFila = [];
+            for (let item of fila) {
+                item.status_aprovacao = 'Em análise'; // Altera para EM ANÁLISE ao enviar!
+                try {
+                    const res = await (await fetch(APPSCRIPT_URL, { method: 'POST', body: JSON.stringify(item) })).json();
+                    if (!res.success) novaFila.push(item);
+                } catch(e) {
+                    item.status_aprovacao = '⚠️ OS NÃO SINCRONIZADA';
+                    novaFila.push(item);
+                }
+            }
+
+            localStorage.setItem('os_fila_offline', JSON.stringify(novaFila));
+            if (document.getElementById('gestao-app').style.display === 'block') {
+                carregarEExibirGestaoOS();
             }
         }
 
@@ -1189,6 +1364,7 @@
 
             let texto = `*OPERAÇÃO REGISTRADA COM SUCESSO*\n\n`;
             texto += `*Tipo:* ${p.tipo_registro}\n*OS:* ${displayOSFinal}\n`;
+            texto += `*Status:* ${p.status_aprovacao}\n`;
             texto += `*Fazenda:* ${p.fa_codigo} - ${p.descricao_fazenda}\n*Operação:* ${p.operacao}\n*Área Executada:* ${p.area_total} ha\n*Talhões:* ${p.talhoes}\n`;
             texto += `*Solicitante:* ${solicitanteLimpoDisplay}`;
 
@@ -1200,13 +1376,27 @@
         async function executarLogin() {
             const u = document.getElementById('login-user').value.trim(), p = document.getElementById('login-pass').value.trim();
             if(!u || !p) return;
+
+            if (!navigator.onLine && localStorage.getItem('logged_cracha')) {
+                efetuarLoginSucesso(localStorage.getItem('logged_cracha'), localStorage.getItem('logged_nome'));
+                return;
+            }
+
             document.getElementById('login-loader').style.display = 'block';
             try {
                 const res = await (await fetch(`${APPSCRIPT_URL}?action=validar_login&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`)).json();
                 if(res.success) { localStorage.setItem('permanecer_logado', 'true'); efetuarLoginSucesso(res.cracha, res.solicitante); }
                 else { document.getElementById('login-error').innerText = res.error; document.getElementById('login-error').style.display = 'block'; }
-            } catch(e) {} finally { document.getElementById('login-loader').style.display = 'none'; }
+            } catch(e) {
+                if (localStorage.getItem('logged_cracha')) {
+                    efetuarLoginSucesso(localStorage.getItem('logged_cracha'), localStorage.getItem('logged_nome'));
+                } else {
+                    document.getElementById('login-error').innerText = "Sem conexão para primeiro login.";
+                    document.getElementById('login-error').style.display = 'block';
+                }
+            } finally { document.getElementById('login-loader').style.display = 'none'; }
         }
+
         function efetuarLoginSucesso(cracha, nome) {
             solicitanteCracha = cracha; solicitanteNome = nome;
             solicitanteLimpoDisplay = (nome || cracha).replace(new RegExp('^' + cracha + '\\s*-\\s*', 'i'), '').trim();
@@ -1218,16 +1408,6 @@
             if (localStorage.getItem('logged_cracha') && localStorage.getItem('logged_nome') && localStorage.getItem('permanecer_logado') === 'true') {
                 efetuarLoginSucesso(localStorage.getItem('logged_cracha'), localStorage.getItem('logged_nome'));
             }
-        }
-        async function carregarDadosIniciais() {
-            try {
-                const res = await (await fetch(`${APPSCRIPT_URL}?action=init`)).json();
-                if (res.success) {
-                    dbFazendas = res.dados.fazendas || []; dbInsumos = res.dados.insumos || [];
-                    dbEquipamentos = res.dados.equipamentos || []; dbOperacoes = res.dados.operacoes || [];
-                    popularCentrosDeCusto();
-                }
-            } catch(e) {}
         }
         function popularCentrosDeCusto() {
             const s = document.getElementById('centro-custo'); s.innerHTML = '<option value="">Selecione...</option>';
