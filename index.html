@@ -83,8 +83,6 @@
         input[readonly], select[disabled], textarea[readonly] { opacity: 0.8; cursor: not-allowed; }
 
         .badge-prog-status { padding: 0.75rem; border-radius: 8px; font-weight: 700; text-align: center; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; height: 44px; }
-        .badge-prog-sim { background: rgba(16, 185, 129, 0.12); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
-        .badge-prog-nao { background: rgba(239, 68, 68, 0.12); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
 
         .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; z-index: 999; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; max-height: 200px; overflow-y: auto; display: none; box-shadow: 0 10px 25px var(--shadow-color); }
         .autocomplete-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--bg-input); font-size: 0.85rem; }
@@ -92,7 +90,6 @@
 
         #global-autocomplete { position: absolute; z-index: 9999; display: none; }
 
-        /* TALHÕES PARCIAIS */
         .talhoes-container { display: flex; flex-direction: column; gap: 0.6rem; padding: 0.8rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border-color); min-height: 48px; }
         .talhao-card { background: var(--bg-card); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
         .talhao-card.parcial-active { border-color: var(--warning); background: rgba(245, 158, 11, 0.05); }
@@ -142,7 +139,6 @@
     <!-- 2. MENU PRINCIPAL -->
     <div id="menu-screen" class="modal-screen" style="display: none;">
         <div class="modal-box">
-            <!-- BOTÕES DE AJUDA E CONFIGURAÇÕES DE VOLTA -->
             <div style="position: absolute; top: 1.2rem; right: 1.2rem; display: flex; gap: 8px;">
                 <button class="btn-icon-gear" title="Ajuda e Reportes" onclick="abrirModalAjuda()">❓</button>
                 <button class="btn-icon-gear" title="Configurações" onclick="abrirConfiguracoes()">⚙️</button>
@@ -167,10 +163,6 @@
                 <div style="background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px; text-align: left;">
                     <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">LOGIN ATIVO / SESSÃO</span>
                     <div id="settings-user-display" style="font-weight: 700; color: var(--accent); font-size: 0.95rem; margin-top: 2px;"></div>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px;">
-                    <span style="font-weight: 600; font-size: 0.9rem;">Aparência do Sistema</span>
-                    <button class="btn btn-outline" onclick="alternarTema()" id="btn-toggle-theme">Modo Escuro</button>
                 </div>
             </div>
             <div style="display: flex; gap: 0.8rem;">
@@ -230,7 +222,7 @@
         </div>
     </div>
 
-    <!-- GESTÃO OS -->
+    <!-- GESTÃO OS (COM AGRUPAMENTO / ÁRVORE E PROGRESSO %) -->
     <div class="container" id="gestao-app">
         <div class="header">
             <div class="logo-container"><img src="logo.png" class="logo-img"><div class="logo-text">CONTROLE<br>AGRICOLA</div></div>
@@ -238,7 +230,16 @@
         </div>
         <div class="table-responsive">
             <table>
-                <thead><tr><th>Cód. Temp / OS</th><th>Tipo</th><th>Fazenda / Operação</th><th>Área</th><th>Status</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th style="width: 30px;"></th>
+                        <th>Cód. Temp / OS</th>
+                        <th>Tipo</th>
+                        <th>Fazenda / Operação</th>
+                        <th>Área Exec. (%)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
                 <tbody id="gestao-tbody"></tbody>
             </table>
         </div>
@@ -264,9 +265,7 @@
             </div>
         </div>
 
-        <div id="view-mode-banner" style="background: rgba(6, 182, 212, 0.12); border: 1px solid var(--accent); color: var(--accent); padding: 0.6rem 1rem; border-radius: 8px; font-weight: 700; margin-bottom: 1.5rem; display: none;">
-            🔍 MODO VISUALIZAÇÃO: Este registro já foi cadastrado no sistema.
-        </div>
+        <div id="view-mode-banner" style="background: rgba(6, 182, 212, 0.12); border: 1px solid var(--accent); color: var(--accent); padding: 0.8rem 1rem; border-radius: 8px; font-weight: 700; margin-bottom: 1.5rem; display: none;"></div>
 
         <form id="os-form">
             <input type="hidden" id="os-origem-id">
@@ -299,8 +298,8 @@
                     <div class="form-group"><label>Tipo de Fazenda</label><input type="text" id="tipo-fazenda" readonly placeholder="Automático" style="font-weight: 700; color: var(--accent);"></div>
                 </div>
                 <div class="form-group" style="margin-top: 1rem;" id="group-digitar-talhoes">
-                    <label>Digitar Talhões (Ex: 1-9, 12, 15)</label>
-                    <input type="text" id="talhoes-range-input" placeholder="Ex: 1-4, 8, 10" autocomplete="off">
+                    <label>Digitar Talhões (Ex: 1-9, 12, 15 ou 6666)</label>
+                    <input type="text" id="talhoes-range-input" placeholder="Ex: 1-4, 8, 6666" autocomplete="off">
                 </div>
                 <div class="form-group" style="margin-top: 1rem;">
                     <label>Talhões Selecionados e Áreas Parciais</label>
@@ -358,7 +357,7 @@
                         <tbody id="produtos-tbody"></tbody>
                     </table>
                 </div>
-                <button type="button" class="btn btn-outline" style="margin-top: 0.8rem;" onclick="adicionarLinhaProduto()">+ Adicionar Insumo</button>
+                <button type="button" class="btn btn-outline" style="margin-top: 0.8rem;" id="btn-add-produto" onclick="adicionarLinhaProduto()">+ Adicionar Insumo</button>
             </div>
 
             <div class="section" style="border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
@@ -377,7 +376,7 @@
                 <button type="button" class="btn btn-primary" style="flex: 2;" onclick="enviarDados()" id="btn-submit">ENVIAR SOLICITAÇÃO</button>
             </div>
             <div id="box-actions-visualizar" style="display: none; margin-top: 1.5rem;">
-                <button type="button" class="btn btn-primary" style="width: 100%;" onclick="fecharVisualizacaoOS()">⬅️ VOLTAR PARA GESTÃO</button>
+                <button type="button" class="btn btn-primary" style="width: 100%;" id="btn-voltar-gestao" onclick="fecharVisualizacaoOS()">⬅️ VOLTAR PARA GESTÃO DE OS</button>
             </div>
             <div id="submit-loader" class="loader" style="margin-top: 1rem;"></div>
         </form>
@@ -410,9 +409,17 @@
             await carregarDadosIniciais();
         });
 
-        function abrirConfiguracoes() { document.getElementById('settings-modal').style.display = 'flex'; }
+        function abrirConfiguracoes() {
+            document.getElementById('settings-user-display').innerText = `${solicitanteCracha} - ${solicitanteLimpoDisplay}`;
+            document.getElementById('settings-modal').style.display = 'flex';
+        }
         function fecharConfiguracoes() { document.getElementById('settings-modal').style.display = 'none'; }
         function abrirModalAjuda() { document.getElementById('help-modal').style.display = 'flex'; }
+
+        function efetuarLogout() {
+            localStorage.clear();
+            location.reload();
+        }
 
         async function enviarReporte() {
             const tipo = document.getElementById('reporte-tipo').value;
@@ -432,6 +439,7 @@
             } catch(e) { alert("Erro ao enviar reporte."); }
         }
 
+        // --- GESTÃO DE OS COM AGRUPAMENTO ÁRVORE + PORCENTAGEM % ---
         function abrirGestaoOS() {
             document.getElementById('menu-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'none';
@@ -439,6 +447,169 @@
             carregarEExibirGestaoOS();
         }
 
+        async function carregarEExibirGestaoOS() {
+            const tbody = document.getElementById('gestao-tbody');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem;">Carregando Ordens de Serviço...</td></tr>';
+            try {
+                const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`)).json();
+                if (res.success && res.dados) {
+                    listaOSCache = res.dados;
+                    tbody.innerHTML = '';
+
+                    const aberturas = listaOSCache.filter(o => o.tipo_registro === 'LANCAMENTO');
+                    const apontamentos = listaOSCache.filter(o => o.tipo_registro !== 'LANCAMENTO');
+
+                    if (aberturas.length === 0 && apontamentos.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1.5rem;">Nenhuma OS cadastrada.</td></tr>';
+                        return;
+                    }
+
+                    aberturas.forEach(osPai => {
+                        const filhos = apontamentos.filter(a => a.os_origem === osPai.codigoTemp);
+                        const areaApontada = filhos.reduce((acc, curr) => acc + (parseFloat(curr.area_total) || 0), 0);
+                        const pct = osPai.area_total > 0 ? Math.min(100, Math.round((areaApontada / osPai.area_total) * 100)) : 0;
+                        const hasFilhos = filhos.length > 0;
+
+                        const trPai = document.createElement('tr');
+                        trPai.style.cursor = 'pointer';
+                        trPai.innerHTML = `
+                            <td style="text-align: center;" onclick="event.stopPropagation(); toggleChildren('${osPai.codigoTemp}')">
+                                ${hasFilhos ? `<button id="btn-expand-${osPai.codigoTemp}" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--accent); width:24px; height:24px; border-radius:4px; cursor:pointer; font-weight:bold;">+</button>` : ''}
+                            </td>
+                            <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${osPai.codigoOS ? 'OS ' + osPai.codigoOS : osPai.codigoTemp}</strong></td>
+                            <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><span class="badge badge-analise">${osPai.tipo_registro}</span></td>
+                            <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')">${osPai.fa_codigo} - ${osPai.descricao_fazenda}<br><small style="color:var(--text-muted);">${osPai.operacao}</small></td>
+                            <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${osPai.area_total} ha</strong> <span style="color:var(--accent); font-weight:700;">(${pct}%)</span></td>
+                            <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><span class="badge ${getBadgeClass(osPai.status_aprovacao)}">${osPai.status_aprovacao || 'Em análise'}</span></td>
+                        `;
+                        tbody.appendChild(trPai);
+
+                        filhos.forEach(osFilho => {
+                            const trFilho = document.createElement('tr');
+                            trFilho.className = `child-row-${osPai.codigoTemp}`;
+                            trFilho.style.display = 'none';
+                            trFilho.style.background = 'rgba(255,255,255,0.02)';
+                            trFilho.style.cursor = 'pointer';
+                            trFilho.innerHTML = `
+                                <td></td>
+                                <td style="padding-left: 1.5rem;" onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">↳ <strong>${osFilho.codigoOS ? 'OS ' + osFilho.codigoOS : osFilho.codigoTemp}</strong></td>
+                                <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')"><span class="badge badge-lancada">${osFilho.tipo_registro}</span></td>
+                                <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">${osFilho.fa_codigo} - ${osFilho.descricao_fazenda}<br><small style="color:var(--text-muted);">${osFilho.operacao}</small></td>
+                                <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">${osFilho.area_total} ha</td>
+                                <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')"><span class="badge ${getBadgeClass(osFilho.status_aprovacao)}">${osFilho.status_aprovacao || 'Em análise'}</span></td>
+                            `;
+                            tbody.appendChild(trFilho);
+                        });
+                    });
+                }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Erro ao carregar dados.</td></tr>'; }
+        }
+
+        function toggleChildren(codigoTemp) {
+            const rows = document.querySelectorAll(`.child-row-${codigoTemp}`);
+            const btn = document.getElementById(`btn-expand-${codigoTemp}`);
+            rows.forEach(r => {
+                if (r.style.display === 'none') {
+                    r.style.display = 'table-row';
+                    if (btn) btn.innerText = '-';
+                } else {
+                    r.style.display = 'none';
+                    if (btn) btn.innerText = '+';
+                }
+            });
+        }
+
+        function getBadgeClass(st) {
+            if (st === 'OS Lançada') return 'badge-lancada';
+            if (st === 'Rejeitado') return 'badge-rejeitado';
+            return 'badge-analise';
+        }
+
+        // --- ABRIR OS NO MESMO LAYOUT (VISUALIZAÇÃO OU EDIÇÃO SE REJEITADA) ---
+        function abrirOSParaVisualizacaoOuEdicao(codigoTemp) {
+            const osObj = listaOSCache.find(x => x.codigoTemp === codigoTemp);
+            if (!osObj) return;
+
+            document.getElementById('gestao-app').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+
+            const isRejeitada = (osObj.status_aprovacao === 'Rejeitado');
+            modoVisualizacao = !isRejeitada;
+
+            document.getElementById('os-origem-id').value = osObj.os_origem || osObj.codigoTemp;
+            document.getElementById('pea-input').value = osObj.pea || "";
+            document.getElementById('fundo-input').value = `${osObj.fa_codigo} - ${osObj.descricao_fazenda}`;
+            document.getElementById('tipo-fazenda').value = osObj.tipo_fazenda || "";
+            fazendaSelecionada = dbFazendas.find(f => String(f.codigo).trim() === String(osObj.fa_codigo).trim());
+
+            document.getElementById('centro-custo').value = osObj.centro_custo;
+            document.getElementById('operacao').innerHTML = `<option value="${osObj.operacao}">${osObj.operacao}</option>`;
+            document.getElementById('observacao').value = osObj.observacao || "";
+            
+            if (osObj.data_prevista_inicio) {
+                flatpickrInstancia.setDate([osObj.data_prevista_inicio, osObj.data_prevista_fim || osObj.data_prevista_inicio]);
+            }
+
+            document.getElementById('talhoes-range-input').value = osObj.talhoes ? osObj.talhoes.split(',').map(t => t.split(':')[0].trim()).join(', ') : "";
+            processarEntradaTalhoes();
+
+            equipamentosSelecionados = [];
+            (osObj.equipamentos || "").split(',').forEach(eStr => {
+                const nomeLimpo = eStr.split('[')[0].trim();
+                const colBVal = eStr.includes('[') ? eStr.split('[')[1].replace(']', '').trim() : '';
+                const eq = dbEquipamentos.find(x => x.nome === nomeLimpo);
+                if (eq) equipamentosSelecionados.push(eq);
+                else if (nomeLimpo) equipamentosSelecionados.push({ nome: nomeLimpo, colB: colBVal, propriedade: 'PRÓPRIO' });
+            });
+            renderizerEquipamentos();
+
+            document.getElementById('produtos-tbody').innerHTML = '';
+            (osObj.produtos || []).forEach(p => { adicionarLinhaProdutoComDados(p.cod, p.desc, p.un, p.dose, p.total); });
+
+            const banner = document.getElementById('view-mode-banner');
+            const boxLancar = document.getElementById('box-actions-lancar');
+            const boxVisualizar = document.getElementById('box-actions-visualizar');
+
+            if (isRejeitada) {
+                banner.style.display = 'block';
+                banner.style.background = 'rgba(239, 68, 68, 0.12)';
+                banner.style.borderColor = 'var(--danger)';
+                banner.style.color = 'var(--danger)';
+                banner.innerHTML = `⚠️ <strong>OS REJEITADA PELO CONTROLE AGRÍCOLA!</strong><br>Edite os campos necessários e reenvie a solicitação corrigida.`;
+
+                boxLancar.style.display = 'flex';
+                boxVisualizar.style.display = 'none';
+                setFormFieldsDisabled(false);
+                document.getElementById('btn-submit').innerText = "ENVIAR REVISÃO DA OS";
+            } else {
+                banner.style.display = 'block';
+                banner.style.background = 'rgba(6, 182, 212, 0.12)';
+                banner.style.borderColor = 'var(--accent)';
+                banner.style.color = 'var(--accent)';
+                banner.innerHTML = `🔍 <strong>MODO VISUALIZAÇÃO</strong> | OS Oficial: ${osObj.codigoOS || 'Não gerada'} | Status: ${osObj.status_aprovacao || 'Em análise'}`;
+
+                boxLancar.style.display = 'none';
+                boxVisualizar.style.display = 'block';
+                setFormFieldsDisabled(true);
+            }
+        }
+
+        function fecharVisualizacaoOS() {
+            setFormFieldsDisabled(false);
+            document.getElementById('view-mode-banner').style.display = 'none';
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('gestao-app').style.display = 'block';
+        }
+
+        function setFormFieldsDisabled(disabled) {
+            document.querySelectorAll('#os-form input, #os-form select, #os-form textarea, #os-form button:not(#btn-voltar-gestao)').forEach(el => {
+                if (el.id !== 'solicitante-display' && el.id !== 'data-solicitacao-display') {
+                    el.disabled = disabled;
+                }
+            });
+        }
+
+        // --- FLUXOS DE ABERTURA E APONTAMENTO ---
         function iniciarAberturaOS() {
             modoOperacaoSelecionado = "LANCAMENTO";
             document.getElementById('os-origem-id').value = "";
@@ -491,7 +662,7 @@
                 document.getElementById('centro-custo').value = osOrigemObjeto.centro_custo;
                 document.getElementById('operacao').innerHTML = `<option value="${osOrigemObjeto.operacao}">${osOrigemObjeto.operacao}</option>`;
                 
-                document.getElementById('talhoes-range-input').value = osOrigemObjeto.talhoes || "";
+                document.getElementById('talhoes-range-input').value = osOrigemObjeto.talhoes ? osOrigemObjeto.talhoes.split(',').map(t => t.split(':')[0].trim()).join(', ') : "";
                 processarEntradaTalhoes();
 
                 equipamentosSelecionados = [];
@@ -562,7 +733,7 @@
             document.getElementById('menu-screen').style.display = 'flex';
         }
 
-        // TALHÕES PARCIAIS
+        // --- TALHÕES, CARREADOR 6666 E BLOQUEIO DE TALHÕES DUPLICADOS/LANCADOS ---
         let fazendaSelecionada = null, talhoesAtivos = [];
         const inputFundo = document.getElementById('fundo-input'), listFundo = document.getElementById('fundo-autocomplete');
         const inputRangeTalhoes = document.getElementById('talhoes-range-input');
@@ -588,7 +759,7 @@
         inputRangeTalhoes.addEventListener('input', processarEntradaTalhoes);
 
         function expandirIntervalos(texto) {
-            const resultado = new Set();
+            const resultado = new Set(); // Remove duplicados na própria digitação automaticamente
             if (!texto) return Array.from(resultado);
             texto.split(',').forEach(parte => {
                 const p = parte.trim();
@@ -610,13 +781,39 @@
         function processarEntradaTalhoes() {
             if (!fazendaSelecionada) return;
             const nums = expandirIntervalos(inputRangeTalhoes.value);
+            const carreadorChecked = document.getElementById('check-carreador').checked;
+
+            // Busca talhões já apontados anteriormente nesta OS se estiver no MODO APONTAMENTO
+            let talhoesJaApontados = [];
+            if (modoOperacaoSelecionado === 'APONTAMENTO' && osOrigemObjeto) {
+                const apontamentosAnteriores = listaOSCache.filter(o => o.os_origem === osOrigemObjeto.codigoTemp);
+                apontamentosAnteriores.forEach(ap => {
+                    if (ap.talhoes) {
+                        ap.talhoes.split(',').forEach(tStr => {
+                            const numOnly = parseInt(tStr.split(':')[0].trim(), 10);
+                            if (!isNaN(numOnly)) talhoesJaApontados.push(numOnly);
+                        });
+                    }
+                });
+            }
             
             let novosTalhoesAtivos = [];
+            let bloqueadosAnteriores = [];
+
             fazendaSelecionada.talhoes.forEach(t => {
                 const numT = parseInt(t.talhao, 10);
                 const areaMax = parseFloat(t.area) || 0;
-                
-                if (numT !== 6666 && nums.includes(numT)) {
+
+                if (nums.includes(numT)) {
+                    // Se for 6666 e o rateio estiver marcado, pula pois irá para o rateio
+                    if (numT === 6666 && carreadorChecked) return;
+
+                    // TRAVA DE TALHÃO JÁ APONTADO ANTERIORMENTE
+                    if (talhoesJaApontados.includes(numT)) {
+                        bloqueadosAnteriores.push(numT);
+                        return;
+                    }
+
                     const existente = talhoesAtivos.find(x => x.num === String(numT));
                     if (existente) {
                         novosTalhoesAtivos.push(existente);
@@ -630,6 +827,10 @@
                     }
                 }
             });
+
+            if (bloqueadosAnteriores.length > 0) {
+                alert(`⚠️ TRAVA DE APONTAMENTO:\n\nO(s) talhão(ões) [${bloqueadosAnteriores.join(', ')}] JÁ FOI LANCEADO em apontamentos anteriores desta OS e não pode ser duplicado!`);
+            }
 
             talhoesAtivos = novosTalhoesAtivos;
             recalcularAreasE6666();
@@ -672,10 +873,15 @@
                 });
             }
 
-            talhoesAtivos = talhoesAtivos.filter(x => x.num !== '6666 (Rateio)');
+            const carreadorChecked = document.getElementById('check-carreador').checked;
+
+            if (carreadorChecked) {
+                talhoesAtivos = talhoesAtivos.filter(x => x.num !== '6666 (Rateio)' && x.num !== '6666');
+            }
+
             talhoesAtivos.forEach(t => { sumAreaSelecionada += t.areaParcial; });
 
-            if (document.getElementById('check-carreador').checked && area6666Base > 0 && sumAreaSelecionada > 0 && sumAreaTotalFazendaSem6666 > 0) {
+            if (carreadorChecked && area6666Base > 0 && sumAreaSelecionada > 0 && sumAreaTotalFazendaSem6666 > 0) {
                 const proporcao = sumAreaSelecionada / sumAreaTotalFazendaSem6666;
                 const area6666Rateada = area6666Base * proporcao;
                 talhoesAtivos.push({
@@ -695,20 +901,20 @@
 
             talhoesAtivos.forEach(t => {
                 tot += t.areaParcial;
-                const isCarreador = t.num.includes('6666');
+                const isCarreadorRateio = t.num.includes('Rateio');
                 
                 const div = document.createElement('div');
                 div.className = `talhao-card ${t.isParcial ? 'parcial-active' : ''}`;
                 
                 let inputHtml = '';
-                if (t.isParcial && !isCarreador) {
+                if (t.isParcial && !isCarreadorRateio) {
                     inputHtml = `<input type="number" step="0.01" max="${t.maxArea}" value="${t.areaParcial}" 
                         style="width: 100px; padding: 2px 6px; font-size: 0.85rem;" 
                         onchange="alterarAreaParcial('${t.num}', this.value)">`;
                 }
 
                 let btnParcialHtml = '';
-                if (!isCarreador) {
+                if (!isCarreadorRateio) {
                     btnParcialHtml = `<button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.75rem;" 
                         onclick="toggleParcial('${t.num}')">${t.isParcial ? 'Restaurar Total' : 'Parcial'}</button>`;
                 }
@@ -731,7 +937,7 @@
             document.querySelectorAll('.prod-dose').forEach(inp => { inp.dispatchEvent(new Event('input')); });
         }
 
-        // EQUIPAMENTOS
+        // --- EQUIPAMENTOS ---
         const inputFrota = document.getElementById('frota-input'), listFrota = document.getElementById('frota-autocomplete');
         inputFrota.oninput = function() {
             if (modoVisualizacao) return;
@@ -773,7 +979,7 @@
             });
         }
 
-        // INSUMOS
+        // --- INSUMOS APLICADOS ---
         function adicionarLinhaProduto() { adicionarLinhaProdutoComDados("", "", "", "", ""); }
         function adicionarLinhaProdutoComDados(cod, desc, un, dose, total) {
             const tr = document.createElement('tr');
@@ -848,6 +1054,7 @@
             document.getElementById('produtos-tbody').appendChild(tr);
         }
 
+        // --- SUBMIT E ENVIOS ---
         async function enviarDados() {
             if (modoVisualizacao) return;
 
@@ -932,29 +1139,6 @@
             linkWhatsApp = `https://wa.me/?text=${encodeURIComponent(texto)}`;
         }
         function enviarWhatsApp() { window.open(linkWhatsApp, '_blank'); }
-
-        async function carregarEExibirGestaoOS() {
-            const tbody = document.getElementById('gestao-tbody');
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem;">Carregando Ordens de Serviço...</td></tr>';
-            try {
-                const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`)).json();
-                if (res.success && res.dados) {
-                    listaOSCache = res.dados;
-                    tbody.innerHTML = '';
-                    listaOSCache.forEach(os => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td><strong>${os.codigoOS || os.codigoTemp}</strong></td>
-                            <td><span class="badge badge-analise">${os.tipo_registro}</span></td>
-                            <td>${os.fa_codigo} - ${os.descricao_fazenda}<br><small style="color:var(--text-muted);">${os.operacao}</small></td>
-                            <td>${os.area_total} ha</td>
-                            <td><span class="badge badge-lancada">${os.status_aprovacao || 'Em análise'}</span></td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Erro ao carregar do servidor.</td></tr>'; }
-        }
 
         async function executarLogin() {
             const u = document.getElementById('login-user').value.trim(), p = document.getElementById('login-pass').value.trim();
