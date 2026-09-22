@@ -569,7 +569,6 @@
             document.getElementById('gestao-app').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
 
-            // Só habilita edição SE estiver REJEITADA. Se estiver Em Análise, fica travado!
             const isRejeitada = (osObj.status_aprovacao === 'Rejeitado');
             modoVisualizacao = !isRejeitada;
             isEditandoRejeitada = isRejeitada;
@@ -1132,15 +1131,21 @@
                 modoEfetivo = 'ENCERRAMENTO';
             }
 
-            // Se for novo lançamento, gera Chave Única Temp (DDMMYYYY-HHMMSS)
+            // Chave Única Temp (DDMMYYYY-HHMMSS)
             const chaveTempEnvio = isEditandoRejeitada 
                 ? document.getElementById('os-codigo-temp-atual').value 
                 : gerarChaveUnicaTemp();
 
+            // HERDA O MESMO CÓDIGO DE OS DA MÃE SE FOR APONTAMENTO
+            const codigoOSHerdada = (osOrigemObjeto && (modoOperacaoSelecionado === 'APONTAMENTO' || modoEfetivo === 'ENCERRAMENTO'))
+                ? (osOrigemObjeto.codigoOS || '')
+                : '';
+
             const payload = {
                 action: isEditandoRejeitada ? 'editar_rejeitada' : 'salvar_os',
                 codigoTemp: chaveTempEnvio,
-                status_aprovacao: 'Em análise', // Ao reenviar, status SEMPRE volta para Em análise e TRAVA!
+                codigoOS: codigoOSHerdada, // USA O MESMO CÓDIGO DA OS PRINCIPAL
+                status_aprovacao: 'Em análise',
                 tipo_registro: modoEfetivo,
                 os_origem: document.getElementById('os-origem-id').value,
                 programacao: programacaoStatus, carreador: carreadorTexto,
@@ -1180,8 +1185,10 @@
             document.getElementById('main-app').style.display = 'none';
             document.getElementById('receipt-modal').style.display = 'flex';
 
+            const displayOSFinal = p.codigoOS || codTemp;
+
             let texto = `*OPERAÇÃO REGISTRADA COM SUCESSO*\n\n`;
-            texto += `*Tipo:* ${p.tipo_registro}\n*OS / Ref:* ${codTemp}\n`;
+            texto += `*Tipo:* ${p.tipo_registro}\n*OS:* ${displayOSFinal}\n`;
             texto += `*Fazenda:* ${p.fa_codigo} - ${p.descricao_fazenda}\n*Operação:* ${p.operacao}\n*Área Executada:* ${p.area_total} ha\n*Talhões:* ${p.talhoes}\n`;
             texto += `*Solicitante:* ${solicitanteLimpoDisplay}`;
 
