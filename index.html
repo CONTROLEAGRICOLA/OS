@@ -222,7 +222,7 @@
         </div>
     </div>
 
-    <!-- GESTÃO OS (COM AGRUPAMENTO / ÁRVORE E PROGRESSO %) -->
+    <!-- GESTÃO OS -->
     <div class="container" id="gestao-app">
         <div class="header">
             <div class="logo-container"><img src="logo.png" class="logo-img"><div class="logo-text">CONTROLE<br>AGRICOLA</div></div>
@@ -265,10 +265,11 @@
             </div>
         </div>
 
-        <div id="view-mode-banner" style="background: rgba(6, 182, 212, 0.12); border: 1px solid var(--accent); color: var(--accent); padding: 0.8rem 1rem; border-radius: 8px; font-weight: 700; margin-bottom: 1.5rem; display: none;"></div>
+        <div id="view-mode-banner" style="display: none; padding: 0.8rem 1rem; border-radius: 8px; font-weight: 700; margin-bottom: 1.5rem;"></div>
 
         <form id="os-form">
             <input type="hidden" id="os-origem-id">
+            <input type="hidden" id="os-codigo-temp-atual">
 
             <div class="section">
                 <div class="grid grid-2">
@@ -392,6 +393,7 @@
         let solicitanteCracha = "", solicitanteNome = "", solicitanteLimpoDisplay = "";
         let programacaoStatus = "SIM", carreadorTexto = "", equipamentosSelecionados = [], modoVisualizacao = false, listaOSCache = [];
         let modoOperacaoSelecionado = "LANCAMENTO";
+        let isEditandoRejeitada = false;
         let osOrigemObjeto = null;
         let flatpickrInstancia = null;
         let inputInsumoAtivo = null;
@@ -439,7 +441,6 @@
             } catch(e) { alert("Erro ao enviar reporte."); }
         }
 
-        // --- GESTÃO DE OS COM AGRUPAMENTO ÁRVORE + PORCENTAGEM % ---
         function abrirGestaoOS() {
             document.getElementById('menu-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'none';
@@ -525,7 +526,6 @@
             return 'badge-analise';
         }
 
-        // --- ABRIR OS NO MESMO LAYOUT (VISUALIZAÇÃO OU EDIÇÃO SE REJEITADA) ---
         function abrirOSParaVisualizacaoOuEdicao(codigoTemp) {
             const osObj = listaOSCache.find(x => x.codigoTemp === codigoTemp);
             if (!osObj) return;
@@ -535,7 +535,9 @@
 
             const isRejeitada = (osObj.status_aprovacao === 'Rejeitado');
             modoVisualizacao = !isRejeitada;
+            isEditandoRejeitada = isRejeitada;
 
+            document.getElementById('os-codigo-temp-atual').value = osObj.codigoTemp;
             document.getElementById('os-origem-id').value = osObj.os_origem || osObj.codigoTemp;
             document.getElementById('pea-input').value = osObj.pea || "";
             document.getElementById('fundo-input').value = `${osObj.fa_codigo} - ${osObj.descricao_fazenda}`;
@@ -573,7 +575,7 @@
             if (isRejeitada) {
                 banner.style.display = 'block';
                 banner.style.background = 'rgba(239, 68, 68, 0.12)';
-                banner.style.borderColor = 'var(--danger)';
+                banner.style.border = '1px solid var(--danger)';
                 banner.style.color = 'var(--danger)';
                 banner.innerHTML = `⚠️ <strong>OS REJEITADA PELO CONTROLE AGRÍCOLA!</strong><br>Edite os campos necessários e reenvie a solicitação corrigida.`;
 
@@ -584,7 +586,7 @@
             } else {
                 banner.style.display = 'block';
                 banner.style.background = 'rgba(6, 182, 212, 0.12)';
-                banner.style.borderColor = 'var(--accent)';
+                banner.style.border = '1px solid var(--accent)';
                 banner.style.color = 'var(--accent)';
                 banner.innerHTML = `🔍 <strong>MODO VISUALIZAÇÃO</strong> | OS Oficial: ${osObj.codigoOS || 'Não gerada'} | Status: ${osObj.status_aprovacao || 'Em análise'}`;
 
@@ -596,6 +598,7 @@
 
         function fecharVisualizacaoOS() {
             setFormFieldsDisabled(false);
+            isEditandoRejeitada = false;
             document.getElementById('view-mode-banner').style.display = 'none';
             document.getElementById('main-app').style.display = 'none';
             document.getElementById('gestao-app').style.display = 'block';
@@ -609,10 +612,12 @@
             });
         }
 
-        // --- FLUXOS DE ABERTURA E APONTAMENTO ---
         function iniciarAberturaOS() {
             modoOperacaoSelecionado = "LANCAMENTO";
+            isEditandoRejeitada = false;
             document.getElementById('os-origem-id').value = "";
+            document.getElementById('os-codigo-temp-atual').value = "";
+            document.getElementById('view-mode-banner').style.display = 'none';
             osOrigemObjeto = null;
             document.getElementById('menu-screen').style.display = 'none';
             document.getElementById('prog-modal').style.display = 'flex';
@@ -623,6 +628,8 @@
 
         async function abrirModalApontamentoOS() {
             modoOperacaoSelecionado = "APONTAMENTO";
+            isEditandoRejeitada = false;
+            document.getElementById('view-mode-banner').style.display = 'none';
             document.getElementById('menu-screen').style.display = 'none';
             document.getElementById('select-os-modal').style.display = 'flex';
             
@@ -727,13 +734,14 @@
         }
 
         function voltarAoMenu() {
+            document.getElementById('view-mode-banner').style.display = 'none';
+            isEditandoRejeitada = false;
             document.getElementById('main-app').style.display = 'none';
             document.getElementById('gestao-app').style.display = 'none';
             document.getElementById('receipt-modal').style.display = 'none';
             document.getElementById('menu-screen').style.display = 'flex';
         }
 
-        // --- TALHÕES, CARREADOR 6666 E BLOQUEIO DE TALHÕES DUPLICADOS/LANCADOS ---
         let fazendaSelecionada = null, talhoesAtivos = [];
         const inputFundo = document.getElementById('fundo-input'), listFundo = document.getElementById('fundo-autocomplete');
         const inputRangeTalhoes = document.getElementById('talhoes-range-input');
@@ -759,7 +767,7 @@
         inputRangeTalhoes.addEventListener('input', processarEntradaTalhoes);
 
         function expandirIntervalos(texto) {
-            const resultado = new Set(); // Remove duplicados na própria digitação automaticamente
+            const resultado = new Set();
             if (!texto) return Array.from(resultado);
             texto.split(',').forEach(parte => {
                 const p = parte.trim();
@@ -783,7 +791,6 @@
             const nums = expandirIntervalos(inputRangeTalhoes.value);
             const carreadorChecked = document.getElementById('check-carreador').checked;
 
-            // Busca talhões já apontados anteriormente nesta OS se estiver no MODO APONTAMENTO
             let talhoesJaApontados = [];
             if (modoOperacaoSelecionado === 'APONTAMENTO' && osOrigemObjeto) {
                 const apontamentosAnteriores = listaOSCache.filter(o => o.os_origem === osOrigemObjeto.codigoTemp);
@@ -805,10 +812,8 @@
                 const areaMax = parseFloat(t.area) || 0;
 
                 if (nums.includes(numT)) {
-                    // Se for 6666 e o rateio estiver marcado, pula pois irá para o rateio
                     if (numT === 6666 && carreadorChecked) return;
 
-                    // TRAVA DE TALHÃO JÁ APONTADO ANTERIORMENTE
                     if (talhoesJaApontados.includes(numT)) {
                         bloqueadosAnteriores.push(numT);
                         return;
@@ -937,7 +942,6 @@
             document.querySelectorAll('.prod-dose').forEach(inp => { inp.dispatchEvent(new Event('input')); });
         }
 
-        // --- EQUIPAMENTOS ---
         const inputFrota = document.getElementById('frota-input'), listFrota = document.getElementById('frota-autocomplete');
         inputFrota.oninput = function() {
             if (modoVisualizacao) return;
@@ -979,7 +983,6 @@
             });
         }
 
-        // --- INSUMOS APLICADOS ---
         function adicionarLinhaProduto() { adicionarLinhaProdutoComDados("", "", "", "", ""); }
         function adicionarLinhaProdutoComDados(cod, desc, un, dose, total) {
             const tr = document.createElement('tr');
@@ -1054,7 +1057,6 @@
             document.getElementById('produtos-tbody').appendChild(tr);
         }
 
-        // --- SUBMIT E ENVIOS ---
         async function enviarDados() {
             if (modoVisualizacao) return;
 
@@ -1092,7 +1094,10 @@
                 modoEfetivo = 'ENCERRAMENTO';
             }
 
+            // SE ESTIVER REENVIANDO UMA REJEITADA, USA 'editar_rejeitada' PARA REUTILIZAR A MESMA LINHA
             const payload = {
+                action: isEditandoRejeitada ? 'editar_rejeitada' : 'salvar_os',
+                codigoTemp: document.getElementById('os-codigo-temp-atual').value,
                 tipo_registro: modoEfetivo,
                 os_origem: document.getElementById('os-origem-id').value,
                 programacao: programacaoStatus, carreador: carreadorTexto,
@@ -1117,7 +1122,9 @@
                 const res = await (await fetch(APPSCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })).json();
                 btn.style.display = 'inline-flex'; loader.style.display = 'none';
                 if (res.success) {
-                    gerarComprovanteWhatsApp(payload, res.codigoTemp);
+                    document.getElementById('view-mode-banner').style.display = 'none';
+                    isEditandoRejeitada = false;
+                    gerarComprovanteWhatsApp(payload, res.codigoTemp || payload.codigoTemp);
                 } else { alert("Falha na nuvem: " + res.error); }
             } catch (err) {
                 btn.style.display = 'inline-flex'; loader.style.display = 'none';
