@@ -6,24 +6,13 @@
     <meta name="theme-color" content="#09090b">
     <title>Ordem de Serviço - Campo | Clealco</title>
     
-    <!-- PWA MANIFEST INLINE -->
+    <!-- PWA MANIFEST INLINE PARA INSTALAÇÃO -->
     <link rel="manifest" href='data:application/json,{"name":"Controle Agricola Clealco","short_name":"OS Clealco","start_url":"./","display":"standalone","background_color":"#09090b","theme_color":"#09090b","icons":[{"src":"logo.png","sizes":"192x192","type":"image/png"}]}'>
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+    
     <style>
-        /* FLATPICKR BASE CSS INLINED (OFFLINE TOTAL) */
-        .flatpickr-calendar{background:transparent;opacity:0;display:none;text-align:center;visibility:hidden;padding:0;animation:none;direction:ltr;border:0;font-size:14px;line-height:24px;border-radius:5px;position:absolute;width:307.875px;box-sizing:border-box;touch-action:manipulation;background:#18181b;border:1px solid #3f3f46;box-shadow:1px 0 0 #3f3f46,-1px 0 0 #3f3f46,0 1px 0 #3f3f46,0 -1px 0 #3f3f46,0 3px 13px rgba(0,0,0,0.8)}
-        .flatpickr-calendar.open{opacity:1;max-height:640px;visibility:visible;display:inline-block;z-index:99999}
-        .flatpickr-calendar.animate.open{animation:fpFadeInDown 300ms cubic-bezier(.23,1,.32,1)}
-        .flatpickr-day{background:none;border:1px solid transparent;border-radius:150px;box-sizing:border-box;color:#f4f4f5;cursor:pointer;font-weight:400;width:14.2857143%;flex-basis:14.2857143%;max-width:39px;height:39px;line-height:39px;margin:0;inline-size:14.2857143%;display:inline-block;position:relative;justify-content:center;text-align:center}
-        .flatpickr-day.selected,.flatpickr-day.startRange,.flatpickr-day.endRange{background:#06b6d4;color:#fff;border-color:#06b6d4}
-        .flatpickr-day:hover{background:#27272a}
-        .flatpickr-months{display:flex;align-items:center;justify-content:space-between;padding:10px;color:#f4f4f5}
-        .flatpickr-month{color:#f4f4f5;fill:#f4f4f5;height:34px;line-height:1;text-align:center;position:relative;user-select:none;overflow:hidden;flex:1}
-        .flatpickr-current-month{font-size:135%;line-height:inherit;font-weight:700;color:inherit;position:absolute;width:75%;left:12.5%;padding:7.48px 0 0 0;line-height:1;height:34px;display:inline-block;text-align:center}
-        .flatpickr-weekdays{background:transparent;text-align:center;overflow:hidden;width:100%;display:flex;align-items:center;height:28px}
-        span.flatpickr-weekday{cursor:default;font-size:90%;background:transparent;color:#a1a1aa;line-height:1;margin:0;text-align:center;display:block;flex:1;font-weight:bold}
-        .dayContainer{padding:0;outline:0;text-align:left;width:307.875px;min-width:307.875px;max-width:307.875px;box-sizing:border-box;display:flex;flex-wrap:wrap;justify-content:space-around;transform:translate3d(0,0,0)}
-
         :root[data-theme="dark"] {
             --bg-page: #09090b; --bg-card: #18181b; --bg-input: #27272a;
             --border-color: #3f3f46; --text-main: #f4f4f5; --text-muted: #a1a1aa;
@@ -153,7 +142,7 @@
     <!-- 1. LOGIN -->
     <div id="login-screen" class="modal-screen">
         <div class="modal-box">
-            <img src="logo.png" alt="Clealco" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'40\' viewBox=\'0 0 100 40\'><rect width=\'100\' height=\'40\' fill=\'%2306b6d4\'/><text x=\'50%\' y=\'55%\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'white\' font-weight=\'bold\'>CLEALCO</text></svg>'" style="height: 56px; margin: 0 auto 1.2rem auto; display: block; object-fit: contain;">
+            <img src="logo.png" alt="Clealco" style="height: 56px; margin: 0 auto 1.2rem auto; display: block; object-fit: contain;" onerror="this.style.display='none'">
             <h2>Controle Agrícola</h2>
             <form id="login-form" onsubmit="event.preventDefault(); executarLogin();">
                 <div class="form-group" style="margin-bottom: 1rem;">
@@ -178,7 +167,7 @@
                 <button class="btn-icon-gear" title="Ajuda e Reportes" onclick="abrirModalAjuda()">❓</button>
                 <button class="btn-icon-gear" title="Configurações" onclick="abrirConfiguracoes()">⚙️</button>
             </div>
-            <img src="logo.png" alt="Clealco" onerror="this.style.display='none'" style="height: 48px; margin: 0 auto 1rem auto; display: block; object-fit: contain;">
+            <img src="logo.png" alt="Clealco" style="height: 48px; margin: 0 auto 1rem auto; display: block; object-fit: contain;" onerror="this.style.display='none'">
             <h2>Painel Principal</h2>
             <p id="menu-user-name" style="color: var(--text-muted); font-weight: 600; margin-bottom: 1.8rem; font-size: 0.95rem;"></p>
             
@@ -199,9 +188,14 @@
                     <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">LOGIN ATIVO / SESSÃO</span>
                     <div id="settings-user-display" style="font-weight: 700; color: var(--accent); font-size: 0.95rem; margin-top: 2px;"></div>
                 </div>
+
+                <div style="background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px; text-align: left; display: flex; flex-direction: column; gap: 6px;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">INSTALAÇÃO / ATALHO</span>
+                    <button type="button" class="btn btn-outline" style="font-size: 0.85rem; padding: 0.6rem 1rem;" onclick="criarAtalhoApp()">📲 Criar Atalho na Tela Inicial</button>
+                </div>
                 
                 <div style="background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px; text-align: left; display: flex; flex-direction: column; gap: 6px;">
-                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">BANCO DE DADOS OFFLINE</span>
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">BANCO DE DADOS & APP OFFLINE</span>
                     <button type="button" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.6rem 1rem;" onclick="baixarEAtualizarDadosOffline(true)">🔄 Baixar / Atualizar Dados OFFLINE</button>
                     <small id="settings-offline-date" style="color: var(--text-muted); font-size: 0.72rem; text-align: center;">Última atualização: Não baixado</small>
                 </div>
@@ -271,7 +265,7 @@
     <!-- GESTÃO OS -->
     <div class="container" id="gestao-app">
         <div class="header">
-            <div class="logo-container"><img src="logo.png" onerror="this.style.display='none'" class="logo-img"><div class="logo-text">CONTROLE<br>AGRICOLA</div></div>
+            <div class="logo-container"><img src="logo.png" class="logo-img" onerror="this.style.display='none'"><div class="logo-text">CONTROLE<br>AGRICOLA</div></div>
             <button class="btn btn-secondary" onclick="voltarAoMenu()">Voltar ao Menu</button>
         </div>
         <div class="table-responsive">
@@ -304,7 +298,7 @@
     <!-- FORMULÁRIO PRINCIPAL -->
     <div class="container" id="main-app">
         <div class="header">
-            <div class="logo-container"><img src="logo.png" alt="Clealco" onerror="this.style.display='none'" class="logo-img"><div class="logo-text">CONTROLE<br>AGRICOLA</div></div>
+            <div class="logo-container"><img src="logo.png" alt="Clealco" class="logo-img" onerror="this.style.display='none'"><div class="logo-text">CONTROLE<br>AGRICOLA</div></div>
             <div>
                 <h1 style="font-size: 1.2rem; color: var(--accent);" id="main-app-title">Lançamento de OS</h1>
                 <span id="badge-tipo-operacao" class="badge badge-analise" style="margin-top: 4px;">MODO: ABERTURA DE OS</span>
@@ -429,31 +423,80 @@
         </form>
     </div>
 
-    <!-- INLINED FLATPICKR JS FOR 100% OFFLINE EXECUTION -->
-    <script>
-        // Flatpickr Core & PT Localization Inline Safeguard
-        !function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):(e=e||self).flatpickr=t()}(this,function(){"use strict";var e=function(e,t){return function(n){return new(n=n||e)(t)}};var flatpickr=function(node,config){
-            this.element=node; this.selectedDates=[]; this.config=config||{};
-            this.clear=function(){if(node)node.value=''; this.selectedDates=[];};
-            this.setDate=function(dates){if(dates&&dates[0]&&node)node.value=Array.isArray(dates)?dates.join(' a '):dates;};
-            return this;
-        }; return flatpickr; });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 
     <script>
         const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQZWlJ8xGg-VqRLvWWPuowCQ2QUJg-CEXjW8oM_tEo7fqVsGOov2UZxU85snQtvyLp/exec';
 
-        // REGISTRO DE SERVICE WORKER PARA SUPORTE PWA OFFLINE
+        // CAPTURA DO PROMPT DE INSTALAÇÃO DO ATALHO PWA
+        let deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        async function criarAtalhoApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    alert('✅ Atalho instalado com sucesso na sua tela inicial!');
+                }
+                deferredPrompt = null;
+            } else {
+                alert('📲 PARA SALVAR O ATALHO NO CELULAR:\n\n1. No Android / Chrome: Toque nos três pontinhos (⋮) no topo do navegador e selecione "Adicionar à tela inicial" ou "Instalar aplicativo".\n2. No iPhone / Safari: Toque no botão Compartilhar (⎘) e selecione "Adicionar à Tela de Início".');
+            }
+        }
+
+        // REGISTRO DO SERVICE WORKER ROBUSTO PARA FUNCIONAMENTO 100% OFFLINE
         if ('serviceWorker' in navigator) {
-            try {
-                const swContent = `
-                    const CACHE_NAME = 'clealco-os-cache-v2';
-                    self.addEventListener('install', e => e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['./']))));
-                    self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
-                `;
-                const blob = new Blob([swContent], { type: 'application/javascript' });
-                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
-            } catch(e) {}
+            const swCode = `
+                const CACHE_NAME = 'clealco-app-cache-v3';
+                const ASSETS = [
+                    './',
+                    'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
+                    'https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css',
+                    'https://cdn.jsdelivr.net/npm/flatpickr',
+                    'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js'
+                ];
+
+                self.addEventListener('install', e => {
+                    self.skipWaiting();
+                    e.waitUntil(
+                        caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS).catch(() => {}))
+                    );
+                });
+
+                self.addEventListener('activate', e => {
+                    e.waitUntil(
+                        caches.keys().then(keys => Promise.all(
+                            keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+                        )).then(() => self.clients.claim())
+                    );
+                });
+
+                self.addEventListener('fetch', e => {
+                    e.respondWith(
+                        caches.match(e.request).then(cached => {
+                            if (cached) return cached;
+                            return fetch(e.request).then(response => {
+                                if (response && response.status === 200 && e.request.method === 'GET') {
+                                    const respClone = response.clone();
+                                    caches.open(CACHE_NAME).then(cache => cache.put(e.request, respClone));
+                                }
+                                return response;
+                            }).catch(() => {
+                                if (e.request.mode === 'navigate') {
+                                    return caches.match('./') || caches.match(location.href);
+                                }
+                            });
+                        })
+                    );
+                });
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
         }
 
         let dbFazendas = [], dbInsumos = [], dbEquipamentos = [], dbOperacoes = [];
@@ -469,25 +512,8 @@
             const savedTheme = localStorage.getItem('app_theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
 
-            // Inicialização ultra-segura do seletor de data
-            try {
-                if (typeof flatpickr !== 'undefined') {
-                    flatpickrInstancia = new flatpickr(document.getElementById("data-execucao"), { mode: "range", dateFormat: "Y-m-d" });
-                }
-            } catch(e) {}
-
-            if (!flatpickrInstancia) {
-                const dtInput = document.getElementById('data-execucao');
-                flatpickrInstancia = {
-                    selectedDates: [],
-                    clear: () => { dtInput.value = ''; flatpickrInstancia.selectedDates = []; },
-                    setDate: (dates) => { if (dates && dates[0]) dtInput.value = dates.join(' a '); }
-                };
-                dtInput.addEventListener('input', () => {
-                    if (dtInput.value) flatpickrInstancia.selectedDates = [new Date()];
-                });
-            }
-
+            flatpickrInstancia = flatpickr("#data-execucao", { mode: "range", dateFormat: "Y-m-d", locale: "pt" });
+            
             document.addEventListener('click', (e) => {
                 if(inputInsumoAtivo && e.target !== inputInsumoAtivo && !document.getElementById('global-autocomplete').contains(e.target)) {
                     document.getElementById('global-autocomplete').style.display = 'none';
@@ -562,6 +588,20 @@
             }
 
             try {
+                // SALVA A ESTRUTURA DO APP E ASSETS NO CACHE
+                if ('caches' in window) {
+                    const cache = await caches.open('clealco-app-cache-v3');
+                    await cache.addAll([
+                        location.href,
+                        './',
+                        'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
+                        'https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css',
+                        'https://cdn.jsdelivr.net/npm/flatpickr',
+                        'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js'
+                    ]).catch(() => {});
+                }
+
+                // BAIXA E GRAVA OS DADOS NO LOCALSTORAGE
                 const res = await (await fetch(`${APPSCRIPT_URL}?action=init`)).json();
                 if (res.success) {
                     dbFazendas = res.dados.fazendas || [];
@@ -576,7 +616,7 @@
                     popularCentrosDeCusto();
                     atualizarDataOfflineDisplay();
 
-                    if (exibirAlerta) alert("✅ Banco de dados baixado e atualizado com sucesso para uso OFFLINE!");
+                    if (exibirAlerta) alert("✅ Aplicativo e Banco de Dados baixados e salvos com sucesso para uso 100% OFFLINE!");
                 }
             } catch(e) {
                 if (exibirAlerta) alert("Erro ao sincronizar com o servidor.");
