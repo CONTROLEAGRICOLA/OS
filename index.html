@@ -18,6 +18,14 @@
             --shadow-color: rgba(0, 0, 0, 0.4); --tr-hover: #27272a;
         }
 
+        :root[data-theme="light"] {
+            --bg-page: #f4f4f5; --bg-card: #ffffff; --bg-input: #e4e4e7;
+            --border-color: #d4d4d8; --text-main: #18181b; --text-muted: #71717a;
+            --accent: #0284c7; --accent-hover: #0369a1; --accent-glow: rgba(2, 132, 199, 0.25);
+            --danger: #dc2626; --warning: #d97706; --success: #059669;
+            --shadow-color: rgba(0, 0, 0, 0.08); --tr-hover: #f4f4f5;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
 
         body {
@@ -164,6 +172,10 @@
                     <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">LOGIN ATIVO / SESSÃO</span>
                     <div id="settings-user-display" style="font-weight: 700; color: var(--accent); font-size: 0.95rem; margin-top: 2px;"></div>
                 </div>
+                <div style="background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px; text-align: left; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.85rem; font-weight: 600;">Aparência / Tema</span>
+                    <button type="button" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="alternarTema()">☀️ / 🌙 Alternar Modo</button>
+                </div>
             </div>
             <div style="display: flex; gap: 0.8rem;">
                 <button class="btn btn-secondary" style="flex: 1;" onclick="fecharConfiguracoes()">Voltar</button>
@@ -233,7 +245,7 @@
                 <thead>
                     <tr>
                         <th style="width: 30px;"></th>
-                        <th>Cód. Temp / OS</th>
+                        <th>OS</th>
                         <th>Tipo</th>
                         <th>Fazenda / Operação</th>
                         <th>Área Exec. (%)</th>
@@ -399,6 +411,9 @@
         let inputInsumoAtivo = null;
 
         window.addEventListener('DOMContentLoaded', async () => {
+            const savedTheme = localStorage.getItem('app_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+
             flatpickrInstancia = flatpickr("#data-execucao", { mode: "range", dateFormat: "Y-m-d", locale: "pt" });
             
             document.addEventListener('click', (e) => {
@@ -411,6 +426,13 @@
             await carregarDadosIniciais();
         });
 
+        function alternarTema() {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('app_theme', next);
+        }
+
         function abrirConfiguracoes() {
             document.getElementById('settings-user-display').innerText = `${solicitanteCracha} - ${solicitanteLimpoDisplay}`;
             document.getElementById('settings-modal').style.display = 'flex';
@@ -421,6 +443,17 @@
         function efetuarLogout() {
             localStorage.clear();
             location.reload();
+        }
+
+        function gerarChaveUnicaTemp() {
+            const agora = new Date();
+            const d = String(agora.getDate()).padStart(2, '0');
+            const m = String(agora.getMonth() + 1).padStart(2, '0');
+            const y = agora.getFullYear();
+            const hh = String(agora.getHours()).padStart(2, '0');
+            const mm = String(agora.getMinutes()).padStart(2, '0');
+            const ss = String(agora.getSeconds()).padStart(2, '0');
+            return `${d}${m}${y}-${hh}${mm}${ss}`;
         }
 
         async function enviarReporte() {
@@ -471,13 +504,15 @@
                         const pct = osPai.area_total > 0 ? Math.min(100, Math.round((areaApontada / osPai.area_total) * 100)) : 0;
                         const hasFilhos = filhos.length > 0;
 
+                        const displayOS = osPai.codigoOS || osPai.codigoTemp;
+
                         const trPai = document.createElement('tr');
                         trPai.style.cursor = 'pointer';
                         trPai.innerHTML = `
                             <td style="text-align: center;" onclick="event.stopPropagation(); toggleChildren('${osPai.codigoTemp}')">
                                 ${hasFilhos ? `<button id="btn-expand-${osPai.codigoTemp}" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--accent); width:24px; height:24px; border-radius:4px; cursor:pointer; font-weight:bold;">+</button>` : ''}
                             </td>
-                            <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${osPai.codigoOS ? 'OS ' + osPai.codigoOS : osPai.codigoTemp}</strong></td>
+                            <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${displayOS}</strong></td>
                             <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><span class="badge badge-analise">${osPai.tipo_registro}</span></td>
                             <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')">${osPai.fa_codigo} - ${osPai.descricao_fazenda}<br><small style="color:var(--text-muted);">${osPai.operacao}</small></td>
                             <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${osPai.area_total} ha</strong> <span style="color:var(--accent); font-weight:700;">(${pct}%)</span></td>
@@ -486,6 +521,7 @@
                         tbody.appendChild(trPai);
 
                         filhos.forEach(osFilho => {
+                            const displayFilhoOS = osFilho.codigoOS || osFilho.codigoTemp;
                             const trFilho = document.createElement('tr');
                             trFilho.className = `child-row-${osPai.codigoTemp}`;
                             trFilho.style.display = 'none';
@@ -493,7 +529,7 @@
                             trFilho.style.cursor = 'pointer';
                             trFilho.innerHTML = `
                                 <td></td>
-                                <td style="padding-left: 1.5rem;" onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">↳ <strong>${osFilho.codigoOS ? 'OS ' + osFilho.codigoOS : osFilho.codigoTemp}</strong></td>
+                                <td style="padding-left: 1.5rem;" onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">↳ <strong>${displayFilhoOS}</strong></td>
                                 <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')"><span class="badge badge-lancada">${osFilho.tipo_registro}</span></td>
                                 <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">${osFilho.fa_codigo} - ${osFilho.descricao_fazenda}<br><small style="color:var(--text-muted);">${osFilho.operacao}</small></td>
                                 <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">${osFilho.area_total} ha</td>
@@ -533,6 +569,7 @@
             document.getElementById('gestao-app').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
 
+            // Só habilita edição SE estiver REJEITADA. Se estiver Em Análise, fica travado!
             const isRejeitada = (osObj.status_aprovacao === 'Rejeitado');
             modoVisualizacao = !isRejeitada;
             isEditandoRejeitada = isRejeitada;
@@ -588,7 +625,7 @@
                 banner.style.background = 'rgba(6, 182, 212, 0.12)';
                 banner.style.border = '1px solid var(--accent)';
                 banner.style.color = 'var(--accent)';
-                banner.innerHTML = `🔍 <strong>MODO VISUALIZAÇÃO</strong> | OS Oficial: ${osObj.codigoOS || 'Não gerada'} | Status: ${osObj.status_aprovacao || 'Em análise'}`;
+                banner.innerHTML = `🔍 <strong>MODO VISUALIZAÇÃO</strong> | OS: ${osObj.codigoOS || osObj.codigoTemp} | Status: ${osObj.status_aprovacao || 'Em análise'}`;
 
                 boxLancar.style.display = 'none';
                 boxVisualizar.style.display = 'block';
@@ -642,7 +679,8 @@
                     const osLancadas = res.dados.filter(o => o.tipo_registro === 'LANCAMENTO');
                     select.innerHTML = '<option value="">Selecione a OS Original...</option>';
                     osLancadas.forEach(o => {
-                        select.innerHTML += `<option value="${o.codigoTemp}">${o.codigoOS ? 'OS ' + o.codigoOS : o.codigoTemp} - ${o.fa_codigo} (${o.operacao})</option>`;
+                        const displayOS = o.codigoOS || o.codigoTemp;
+                        select.innerHTML += `<option value="${o.codigoTemp}">${displayOS} - ${o.fa_codigo} (${o.operacao})</option>`;
                     });
                 }
             } catch(e) { select.innerHTML = '<option value="">Erro ao carregar</option>'; }
@@ -1094,10 +1132,15 @@
                 modoEfetivo = 'ENCERRAMENTO';
             }
 
-            // SE ESTIVER REENVIANDO UMA REJEITADA, USA 'editar_rejeitada' PARA REUTILIZAR A MESMA LINHA
+            // Se for novo lançamento, gera Chave Única Temp (DDMMYYYY-HHMMSS)
+            const chaveTempEnvio = isEditandoRejeitada 
+                ? document.getElementById('os-codigo-temp-atual').value 
+                : gerarChaveUnicaTemp();
+
             const payload = {
                 action: isEditandoRejeitada ? 'editar_rejeitada' : 'salvar_os',
-                codigoTemp: document.getElementById('os-codigo-temp-atual').value,
+                codigoTemp: chaveTempEnvio,
+                status_aprovacao: 'Em análise', // Ao reenviar, status SEMPRE volta para Em análise e TRAVA!
                 tipo_registro: modoEfetivo,
                 os_origem: document.getElementById('os-origem-id').value,
                 programacao: programacaoStatus, carreador: carreadorTexto,
@@ -1138,7 +1181,7 @@
             document.getElementById('receipt-modal').style.display = 'flex';
 
             let texto = `*OPERAÇÃO REGISTRADA COM SUCESSO*\n\n`;
-            texto += `*Tipo:* ${p.tipo_registro}\n*Cód. Temp:* ${codTemp}\n`;
+            texto += `*Tipo:* ${p.tipo_registro}\n*OS / Ref:* ${codTemp}\n`;
             texto += `*Fazenda:* ${p.fa_codigo} - ${p.descricao_fazenda}\n*Operação:* ${p.operacao}\n*Área Executada:* ${p.area_total} ha\n*Talhões:* ${p.talhoes}\n`;
             texto += `*Solicitante:* ${solicitanteLimpoDisplay}`;
 
