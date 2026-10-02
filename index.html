@@ -75,6 +75,7 @@
         .net-status-pill { position: fixed; bottom: 12px; right: 12px; z-index: 9999; padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
         .net-online { background: #10b981; color: #fff; }
         .net-offline { background: #ef4444; color: #fff; }
+        #dash-tbody td:nth-child(2), #dash-tbody td:nth-child(3) { white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -1458,12 +1459,14 @@
                 efetuarLoginSucesso(localStorage.getItem('logged_cracha'), localStorage.getItem('logged_nome'));
             }
         }
+        const ordenarTexto = (a, b) => String(a).localeCompare(String(b), 'pt-BR', { numeric: true, sensitivity: 'base' });
+
         function popularCentrosDeCusto() {
             const s = document.getElementById('centro-custo'); s.innerHTML = '<option value="">Selecione...</option>';
-            [...new Set(dbOperacoes.map(o => o.centroCusto))].filter(Boolean).forEach(cc => s.innerHTML += `<option value="${cc}">${cc}</option>`);
+            [...new Set(dbOperacoes.map(o => o.centroCusto))].filter(Boolean).sort(ordenarTexto).forEach(cc => s.innerHTML += `<option value="${cc}">${cc}</option>`);
             s.onchange = function() {
                 const s2 = document.getElementById('operacao'); s2.innerHTML = '<option value="">Selecione...</option>';
-                [...new Set(dbOperacoes.filter(o => o.centroCusto === this.value).map(o => o.operacao))].filter(Boolean).forEach(op => s2.innerHTML += `<option value="${op}">${op}</option>`);
+                [...new Set(dbOperacoes.filter(o => o.centroCusto === this.value).map(o => o.operacao))].filter(Boolean).sort(ordenarTexto).forEach(op => s2.innerHTML += `<option value="${op}">${op}</option>`);
             };
         }
     </script>
