@@ -5,13 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#09090b">
     <title>Ordem de Serviço - Campo | Clealco</title>
-    
-    <!-- PWA MANIFEST INLINE PARA INSTALAÇÃO -->
-    if('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js') .then(() => console.log('Service Worker registrado com sucesso!')) .catch(err => console.error('Erro ao registrar Service Worker:', err));}
-    
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
-    
     <style>
         :root[data-theme="dark"] {
             --bg-page: #09090b; --bg-card: #18181b; --bg-input: #27272a;
@@ -20,7 +16,6 @@
             --danger: #ef4444; --warning: #f59e0b; --success: #10b981;
             --shadow-color: rgba(0, 0, 0, 0.4); --tr-hover: #27272a;
         }
-
         :root[data-theme="light"] {
             --bg-page: #f4f4f5; --bg-card: #ffffff; --bg-input: #e4e4e7;
             --border-color: #d4d4d8; --text-main: #18181b; --text-muted: #71717a;
@@ -28,22 +23,9 @@
             --danger: #dc2626; --warning: #d97706; --success: #059669;
             --shadow-color: rgba(0, 0, 0, 0.08); --tr-hover: #f4f4f5;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
-
-        body {
-            background-color: var(--bg-page); color: var(--text-main);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            display: flex; justify-content: center; min-height: 100vh;
-        }
-
-        button, .btn {
-            appearance: none; border: 1px solid transparent; outline: none; font-family: inherit;
-            cursor: pointer; border-radius: 8px; padding: 0.75rem 1.25rem; font-weight: 600;
-            font-size: 0.9rem; display: inline-flex; align-items: center; justify-content: center;
-            gap: 8px; transition: all 0.2s; text-decoration: none; user-select: none;
-        }
-
+        body { background-color: var(--bg-page); color: var(--text-main); font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; min-height: 100vh; }
+        button, .btn { appearance: none; border: 1px solid transparent; outline: none; font-family: inherit; cursor: pointer; border-radius: 8px; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; text-decoration: none; user-select: none; }
         .btn-primary { background-color: var(--accent); color: #fff; box-shadow: 0 2px 8px var(--accent-glow); }
         .btn-primary:hover { background-color: var(--accent-hover); transform: translateY(-1px); }
         .btn-secondary { background-color: var(--bg-input); color: var(--text-main); border-color: var(--border-color); }
@@ -51,82 +33,46 @@
         .btn-outline { background-color: transparent; color: var(--text-main); border-color: var(--border-color); }
         .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
         .btn-danger { background-color: rgba(239, 68, 68, 0.12); color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
-
         .btn-icon-gear { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); width: 42px; height: 42px; padding: 0; border-radius: 50%; font-size: 1.1rem; }
-
-        .modal-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(9, 9, 11, 0.85); backdrop-filter: blur(12px);
-            display: flex; justify-content: center; align-items: center; z-index: 1000;
-        }
-
-        .modal-box {
-            background: var(--bg-card); padding: 2.2rem; border-radius: 16px;
-            border: 1px solid var(--border-color); box-shadow: 0 20px 40px var(--shadow-color);
-            width: 90%; max-width: 460px; text-align: center; position: relative;
-        }
+        .modal-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 9, 11, 0.85); backdrop-filter: blur(12px); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background: var(--bg-card); padding: 2.2rem; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 20px 40px var(--shadow-color); width: 90%; max-width: 460px; text-align: center; position: relative; }
         .modal-box h2 { color: var(--accent); margin-bottom: 1.2rem; font-size: 1.3rem; }
-
-        .container {
-            background-color: var(--bg-card); max-width: 1100px; width: 100%; padding: 2rem;
-            border-radius: 16px; border: 1px solid var(--border-color); margin: 1.5rem; display: none;
-            box-shadow: 0 10px 30px var(--shadow-color);
-        }
-
+        .container { background-color: var(--bg-card); max-width: 1100px; width: 100%; padding: 2rem; border-radius: 16px; border: 1px solid var(--border-color); margin: 1.5rem; display: none; box-shadow: 0 10px 30px var(--shadow-color); }
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1.2rem; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 1rem; }
         .logo-container { display: flex; align-items: center; gap: 12px; }
         .logo-img { height: 46px; width: auto; object-fit: contain; }
         .logo-text { font-weight: 700; font-size: 1.05rem; color: var(--text-main); line-height: 1.2; }
-
         .section { margin-bottom: 2rem; }
         .section-title { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .grid { display: grid; gap: 1.2rem; }
         .grid-2 { grid-template-columns: repeat(2, 1fr); }
-
         .form-group { display: flex; flex-direction: column; gap: 0.4rem; position: relative; text-align: left;}
         label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
-
-        input[type="text"], input[type="password"], input[type="number"], textarea, select {
-            width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-color);
-            color: var(--text-main); padding: 0.75rem 1rem; border-radius: 8px; outline: none; font-size: 0.95rem;
-        }
+        input[type="text"], input[type="password"], input[type="number"], textarea, select { width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.75rem 1rem; border-radius: 8px; outline: none; font-size: 0.95rem; }
         input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
         input[readonly], select[disabled], textarea[readonly] { opacity: 0.8; cursor: not-allowed; }
-
         .badge-prog-status { padding: 0.75rem; border-radius: 8px; font-weight: 700; text-align: center; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; height: 44px; }
-
         .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; z-index: 999; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; max-height: 200px; overflow-y: auto; display: none; box-shadow: 0 10px 25px var(--shadow-color); }
         .autocomplete-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--bg-input); font-size: 0.85rem; }
         .autocomplete-item:hover { background-color: var(--bg-input); color: var(--accent); }
-
         #global-autocomplete { position: absolute; z-index: 9999; display: none; }
-
         .talhoes-container { display: flex; flex-direction: column; gap: 0.6rem; padding: 0.8rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border-color); min-height: 48px; }
         .talhao-card { background: var(--bg-card); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
         .talhao-card.parcial-active { border-color: var(--warning); background: rgba(245, 158, 11, 0.05); }
-
         .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 0.5rem; }
         table { width: 100%; border-collapse: collapse; min-width: 650px; }
         th { background-color: var(--bg-input); color: var(--text-muted); font-size: 0.8rem; padding: 0.75rem; text-align: left; }
         td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; position: relative; }
-
         .badge { padding: 6px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
         .badge-analise { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
         .badge-lancada { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
         .badge-rejeitado { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
         .badge-pending-sync { background: rgba(245, 158, 11, 0.25); color: var(--warning); border: 1px dashed var(--warning); }
-
         .loader { border: 3px solid var(--border-color); border-top: 3px solid var(--accent); border-radius: 50%; width: 28px; height: 28px; animation: spin 0.8s linear infinite; margin: 0 auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         .checkbox-container { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--accent); cursor: pointer; }
         .checkbox-container input { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
-
-        .net-status-pill {
-            position: fixed; bottom: 12px; right: 12px; z-index: 9999;
-            padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 800;
-            display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-        }
+        .net-status-pill { position: fixed; bottom: 12px; right: 12px; z-index: 9999; padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
         .net-online { background: #10b981; color: #fff; }
         .net-offline { background: #ef4444; color: #fff; }
     </style>
@@ -170,7 +116,6 @@
             <img src="logo.png" alt="Clealco" style="height: 48px; margin: 0 auto 1rem auto; display: block; object-fit: contain;" onerror="this.style.display='none'">
             <h2>Painel Principal</h2>
             <p id="menu-user-name" style="color: var(--text-muted); font-weight: 600; margin-bottom: 1.8rem; font-size: 0.95rem;"></p>
-            
             <div style="display: flex; flex-direction: column; gap: 0.9rem;">
                 <button class="btn btn-primary" style="padding: 1rem; font-size: 1rem;" onclick="iniciarAberturaOS()">🚜 ABERTURA DE OS</button>
                 <button class="btn btn-secondary" style="padding: 1rem; font-size: 1rem; border-color: var(--warning); color: var(--warning);" onclick="abrirModalApontamentoOS()">⏱️ APONTAMENTO DE OS</button>
@@ -188,18 +133,15 @@
                     <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">LOGIN ATIVO / SESSÃO</span>
                     <div id="settings-user-display" style="font-weight: 700; color: var(--accent); font-size: 0.95rem; margin-top: 2px;"></div>
                 </div>
-
                 <div style="background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px; text-align: left; display: flex; flex-direction: column; gap: 6px;">
                     <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">INSTALAÇÃO / ATALHO</span>
                     <button type="button" class="btn btn-outline" style="font-size: 0.85rem; padding: 0.6rem 1rem;" onclick="criarAtalhoApp()">📲 Criar Atalho na Tela Inicial</button>
                 </div>
-                
                 <div style="background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px; text-align: left; display: flex; flex-direction: column; gap: 6px;">
                     <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">BANCO DE DADOS & APP OFFLINE</span>
                     <button type="button" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.6rem 1rem;" onclick="baixarEAtualizarDadosOffline(true)">🔄 Baixar / Atualizar Dados OFFLINE</button>
                     <small id="settings-offline-date" style="color: var(--text-muted); font-size: 0.72rem; text-align: center;">Última atualização: Não baixado</small>
                 </div>
-
                 <div style="background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px; text-align: left; display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-size: 0.85rem; font-weight: 600;">Aparência / Tema</span>
                     <button type="button" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="alternarTema()">☀️ / 🌙 Alternar Modo</button>
@@ -365,7 +307,6 @@
                     <label>Buscar Equipamentos / Frota</label>
                     <input type="text" id="frota-input" placeholder="Digite para buscar e adicionar..." autocomplete="off">
                     <div id="frota-autocomplete" class="autocomplete-list" style="position: relative;"></div>
-                    
                     <div class="table-responsive" id="box-table-equipamentos" style="margin-top: 0.8rem; display: none;">
                         <table>
                             <thead>
@@ -429,7 +370,12 @@
     <script>
         const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQZWlJ8xGg-VqRLvWWPuowCQ2QUJg-CEXjW8oM_tEo7fqVsGOov2UZxU85snQtvyLp/exec';
 
-        // CAPTURA DO PROMPT DE INSTALAÇÃO DO ATALHO PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(() => console.log('Service Worker registrado com sucesso!'))
+                .catch(err => console.error('Erro ao registrar Service Worker:', err));
+        }
+
         let deferredPrompt = null;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
@@ -449,56 +395,6 @@
             }
         }
 
-        // REGISTRO DO SERVICE WORKER ROBUSTO PARA FUNCIONAMENTO 100% OFFLINE
-        if ('serviceWorker' in navigator) {
-            const swCode = `
-                const CACHE_NAME = 'clealco-app-cache-v3';
-                const ASSETS = [
-                    './',
-                    'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
-                    'https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css',
-                    'https://cdn.jsdelivr.net/npm/flatpickr',
-                    'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js'
-                ];
-
-                self.addEventListener('install', e => {
-                    self.skipWaiting();
-                    e.waitUntil(
-                        caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS).catch(() => {}))
-                    );
-                });
-
-                self.addEventListener('activate', e => {
-                    e.waitUntil(
-                        caches.keys().then(keys => Promise.all(
-                            keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-                        )).then(() => self.clients.claim())
-                    );
-                });
-
-                self.addEventListener('fetch', e => {
-                    e.respondWith(
-                        caches.match(e.request).then(cached => {
-                            if (cached) return cached;
-                            return fetch(e.request).then(response => {
-                                if (response && response.status === 200 && e.request.method === 'GET') {
-                                    const respClone = response.clone();
-                                    caches.open(CACHE_NAME).then(cache => cache.put(e.request, respClone));
-                                }
-                                return response;
-                            }).catch(() => {
-                                if (e.request.mode === 'navigate') {
-                                    return caches.match('./') || caches.match(location.href);
-                                }
-                            });
-                        })
-                    );
-                });
-            `;
-            const blob = new Blob([swCode], { type: 'application/javascript' });
-            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
-        }
-
         let dbFazendas = [], dbInsumos = [], dbEquipamentos = [], dbOperacoes = [];
         let solicitanteCracha = "", solicitanteNome = "", solicitanteLimpoDisplay = "";
         let programacaoStatus = "SIM", carreadorTexto = "", equipamentosSelecionados = [], modoVisualizacao = false, listaOSCache = [];
@@ -511,9 +407,8 @@
         window.addEventListener('DOMContentLoaded', async () => {
             const savedTheme = localStorage.getItem('app_theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
-
             flatpickrInstancia = flatpickr("#data-execucao", { mode: "range", dateFormat: "Y-m-d", locale: "pt" });
-            
+
             document.addEventListener('click', (e) => {
                 if(inputInsumoAtivo && e.target !== inputInsumoAtivo && !document.getElementById('global-autocomplete').contains(e.target)) {
                     document.getElementById('global-autocomplete').style.display = 'none';
@@ -532,7 +427,6 @@
             const pill = document.getElementById('net-indicator');
             const dot = document.getElementById('net-dot');
             const text = document.getElementById('net-text');
-
             if (navigator.onLine) {
                 pill.className = 'net-status-pill net-online';
                 dot.innerText = '●';
@@ -565,10 +459,7 @@
             document.getElementById('settings-offline-date').innerText = dt ? `Última atualização: ${dt}` : 'Última atualização: Não baixado';
         }
 
-        function efetuarLogout() {
-            localStorage.clear();
-            location.reload();
-        }
+        function efetuarLogout() { localStorage.clear(); location.reload(); }
 
         function gerarChaveUnicaTemp() {
             const agora = new Date();
@@ -586,36 +477,28 @@
                 if (exibirAlerta) alert("⚠️ Você está sem conexão com a internet no momento!");
                 return;
             }
-
             try {
-                // SALVA A ESTRUTURA DO APP E ASSETS NO CACHE
                 if ('caches' in window) {
-                    const cache = await caches.open('clealco-app-cache-v3');
+                    const cache = await caches.open('clealco-os-v5');
                     await cache.addAll([
-                        location.href,
-                        './',
+                        location.href, './', './app_lancamento.html', './manifest.json',
                         'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
                         'https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css',
                         'https://cdn.jsdelivr.net/npm/flatpickr',
                         'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js'
                     ]).catch(() => {});
                 }
-
-                // BAIXA E GRAVA OS DADOS NO LOCALSTORAGE
                 const res = await (await fetch(`${APPSCRIPT_URL}?action=init`)).json();
                 if (res.success) {
                     dbFazendas = res.dados.fazendas || [];
                     dbInsumos = res.dados.insumos || [];
                     dbEquipamentos = res.dados.equipamentos || [];
                     dbOperacoes = res.dados.operacoes || [];
-
                     localStorage.setItem('db_offline_master', JSON.stringify(res.dados));
                     const dataStr = new Date().toLocaleString('pt-BR');
                     localStorage.setItem('db_offline_timestamp', dataStr);
-
                     popularCentrosDeCusto();
                     atualizarDataOfflineDisplay();
-
                     if (exibirAlerta) alert("✅ Aplicativo e Banco de Dados baixados e salvos com sucesso para uso 100% OFFLINE!");
                 }
             } catch(e) {
@@ -635,17 +518,13 @@
                     popularCentrosDeCusto();
                 } catch(e) {}
             }
-
-            if (navigator.onLine) {
-                await baixarEAtualizarDadosOffline(false);
-            }
+            if (navigator.onLine) { await baixarEAtualizarDadosOffline(false); }
         }
 
         async function enviarReporte() {
             const tipo = document.getElementById('reporte-tipo').value;
             const desc = document.getElementById('reporte-descricao').value.trim();
             if(!desc) { alert("Escreva a descrição."); return; }
-
             try {
                 const res = await (await fetch(APPSCRIPT_URL, {
                     method: 'POST',
@@ -669,7 +548,6 @@
         async function carregarEExibirGestaoOS() {
             const tbody = document.getElementById('gestao-tbody');
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem;">Carregando Ordens de Serviço...</td></tr>';
-            
             let listaRemota = [];
             if (navigator.onLine) {
                 try {
@@ -682,31 +560,23 @@
             } else {
                 listaRemota = JSON.parse(localStorage.getItem('os_cache_gestao') || '[]');
             }
-
             const filaOffline = JSON.parse(localStorage.getItem('os_fila_offline') || '[]');
-            
             const tempCodesFila = filaOffline.map(x => x.codigoTemp);
             listaOSCache = [...filaOffline, ...listaRemota.filter(r => !tempCodesFila.includes(r.codigoTemp))];
-
             tbody.innerHTML = '';
-
             const aberturas = listaOSCache.filter(o => o.tipo_registro === 'LANCAMENTO');
             const apontamentos = listaOSCache.filter(o => o.tipo_registro !== 'LANCAMENTO');
-
             if (aberturas.length === 0 && apontamentos.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1.5rem;">Nenhuma OS cadastrada.</td></tr>';
                 return;
             }
-
             aberturas.forEach(osPai => {
                 const filhos = apontamentos.filter(a => a.os_origem === osPai.codigoTemp);
                 const areaApontada = filhos.reduce((acc, curr) => acc + (parseFloat(curr.area_total) || 0), 0);
                 const pct = osPai.area_total > 0 ? Math.min(100, Math.round((areaApontada / osPai.area_total) * 100)) : 0;
                 const hasFilhos = filhos.length > 0;
-
                 const displayOS = osPai.codigoOS || osPai.codigoTemp;
                 const isPendingSync = osPai.status_aprovacao === '⚠️ OS NÃO SINCRONIZADA';
-
                 const trPai = document.createElement('tr');
                 trPai.style.cursor = 'pointer';
                 trPai.innerHTML = `
@@ -720,11 +590,9 @@
                     <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><span class="badge ${isPendingSync ? 'badge-pending-sync' : getBadgeClass(osPai.status_aprovacao)}">${osPai.status_aprovacao || 'Em análise'}</span></td>
                 `;
                 tbody.appendChild(trPai);
-
                 filhos.forEach(osFilho => {
                     const displayFilhoOS = osFilho.codigoOS || osFilho.codigoTemp;
                     const isPendingSyncF = osFilho.status_aprovacao === '⚠️ OS NÃO SINCRONIZADA';
-
                     const trFilho = document.createElement('tr');
                     trFilho.className = `child-row-${osPai.codigoTemp}`;
                     trFilho.style.display = 'none';
@@ -747,13 +615,8 @@
             const rows = document.querySelectorAll(`.child-row-${codigoTemp}`);
             const btn = document.getElementById(`btn-expand-${codigoTemp}`);
             rows.forEach(r => {
-                if (r.style.display === 'none') {
-                    r.style.display = 'table-row';
-                    if (btn) btn.innerText = '-';
-                } else {
-                    r.style.display = 'none';
-                    if (btn) btn.innerText = '+';
-                }
+                if (r.style.display === 'none') { r.style.display = 'table-row'; if (btn) btn.innerText = '-'; }
+                else { r.style.display = 'none'; if (btn) btn.innerText = '+'; }
             });
         }
 
@@ -774,6 +637,8 @@
             modoVisualizacao = !isRejeitada;
             isEditandoRejeitada = isRejeitada;
 
+            modoOperacaoSelecionado = (osObj.tipo_registro === 'LANCAMENTO') ? 'LANCAMENTO' : 'APONTAMENTO';
+
             document.getElementById('os-codigo-temp-atual').value = osObj.codigoTemp;
             document.getElementById('os-origem-id').value = osObj.os_origem || osObj.codigoTemp;
             document.getElementById('pea-input').value = osObj.pea || "";
@@ -784,7 +649,7 @@
             document.getElementById('centro-custo').value = osObj.centro_custo;
             document.getElementById('operacao').innerHTML = `<option value="${osObj.operacao}">${osObj.operacao}</option>`;
             document.getElementById('observacao').value = osObj.observacao || "";
-            
+
             if (osObj.data_prevista_inicio) {
                 flatpickrInstancia.setDate([osObj.data_prevista_inicio, osObj.data_prevista_fim || osObj.data_prevista_inicio]);
             }
@@ -805,6 +670,9 @@
             document.getElementById('produtos-tbody').innerHTML = '';
             (osObj.produtos || []).forEach(p => { adicionarLinhaProdutoComDados(p.cod, p.desc, p.un, p.dose, p.total); });
 
+            document.querySelectorAll('.prod-dose').forEach(inp => inp.dispatchEvent(new Event('input')));
+            document.querySelectorAll('.prod-total').forEach(inp => inp.dispatchEvent(new Event('input')));
+
             const banner = document.getElementById('view-mode-banner');
             const boxLancar = document.getElementById('box-actions-lancar');
             const boxVisualizar = document.getElementById('box-actions-visualizar');
@@ -815,7 +683,6 @@
                 banner.style.border = '1px solid var(--danger)';
                 banner.style.color = 'var(--danger)';
                 banner.innerHTML = `⚠️ <strong>OS REJEITADA PELO CONTROLE AGRÍCOLA!</strong><br>Edite os campos necessários e reenvie a solicitação corrigida.`;
-
                 boxLancar.style.display = 'flex';
                 boxVisualizar.style.display = 'none';
                 setFormFieldsDisabled(false);
@@ -826,7 +693,6 @@
                 banner.style.border = '1px solid var(--accent)';
                 banner.style.color = 'var(--accent)';
                 banner.innerHTML = `🔍 <strong>MODO VISUALIZAÇÃO</strong> | OS: ${osObj.codigoOS || osObj.codigoTemp} | Status: ${osObj.status_aprovacao || 'Em análise'}`;
-
                 boxLancar.style.display = 'none';
                 boxVisualizar.style.display = 'block';
                 setFormFieldsDisabled(true);
@@ -869,10 +735,10 @@
             document.getElementById('view-mode-banner').style.display = 'none';
             document.getElementById('menu-screen').style.display = 'none';
             document.getElementById('select-os-modal').style.display = 'flex';
-            
+
             const select = document.getElementById('select-os-origem');
             select.innerHTML = '<option value="">Carregando Ordens de Serviço...</option>';
-            
+
             let resLista = [];
             if (navigator.onLine) {
                 try {
@@ -900,10 +766,10 @@
         function avancarApontamentoOS() {
             const codTemp = document.getElementById('select-os-origem').value;
             if(!codTemp) { alert("Selecione uma OS da lista."); return; }
-            
+
             document.getElementById('os-origem-id').value = codTemp;
             osOrigemObjeto = listaOSCache.find(x => x.codigoTemp === codTemp);
-            
+
             if (osOrigemObjeto) {
                 document.getElementById('pea-input').value = osOrigemObjeto.pea || "";
                 document.getElementById('fundo-input').value = `${osOrigemObjeto.fa_codigo} - ${osOrigemObjeto.descricao_fazenda}`;
@@ -912,7 +778,7 @@
 
                 document.getElementById('centro-custo').value = osOrigemObjeto.centro_custo;
                 document.getElementById('operacao').innerHTML = `<option value="${osOrigemObjeto.operacao}">${osOrigemObjeto.operacao}</option>`;
-                
+
                 document.getElementById('talhoes-range-input').value = osOrigemObjeto.talhoes ? osOrigemObjeto.talhoes.split(',').map(t => t.split(':')[0].trim()).join(', ') : "";
                 processarEntradaTalhoes();
 
@@ -927,12 +793,15 @@
 
                 document.getElementById('produtos-tbody').innerHTML = '';
                 (osOrigemObjeto.produtos || []).forEach(p => { adicionarLinhaProdutoComDados(p.cod, p.desc, p.un, p.dose, p.total); });
+
+                document.querySelectorAll('.prod-dose').forEach(inp => inp.dispatchEvent(new Event('input')));
+                document.querySelectorAll('.prod-total').forEach(inp => inp.dispatchEvent(new Event('input')));
             }
 
             programacaoStatus = "SIM"; carreadorTexto = "";
             document.getElementById('select-os-modal').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
-            
+
             document.getElementById('badge-tipo-operacao').innerText = `MODO: APONTAMENTO DE OS`;
             document.getElementById('badge-tipo-operacao').className = 'badge badge-lancada';
             document.getElementById('box-encerramento').style.display = 'block';
@@ -965,7 +834,7 @@
             document.getElementById('badge-tipo-operacao').innerText = `MODO: ABERTURA DE OS`;
             document.getElementById('badge-tipo-operacao').className = 'badge badge-analise';
             document.getElementById('box-encerramento').style.display = 'none';
-            
+
             document.getElementById('os-form').reset();
             document.getElementById('produtos-tbody').innerHTML = '';
             equipamentosSelecionados = []; renderizerEquipamentos();
@@ -989,7 +858,7 @@
         let fazendaSelecionada = null, talhoesAtivos = [];
         const inputFundo = document.getElementById('fundo-input'), listFundo = document.getElementById('fundo-autocomplete');
         const inputRangeTalhoes = document.getElementById('talhoes-range-input');
-        
+
         inputFundo.oninput = function() {
             if (modoVisualizacao) return;
             const val = this.value.toLowerCase(); listFundo.innerHTML = '';
@@ -1035,21 +904,30 @@
             const nums = expandirIntervalos(inputRangeTalhoes.value);
             const carreadorChecked = document.getElementById('check-carreador').checked;
 
-            let talhoesJaApontados = [];
+            const areaJaApontadaPorTalhao = {};
             if (modoOperacaoSelecionado === 'APONTAMENTO' && osOrigemObjeto) {
-                const apontamentosAnteriores = listaOSCache.filter(o => o.os_origem === osOrigemObjeto.codigoTemp);
+                const apontamentosAnteriores = listaOSCache.filter(o =>
+                    o.os_origem === osOrigemObjeto.codigoTemp &&
+                    o.status_aprovacao !== 'Rejeitado'
+                );
                 apontamentosAnteriores.forEach(ap => {
                     if (ap.talhoes) {
                         ap.talhoes.split(',').forEach(tStr => {
-                            const numOnly = parseInt(tStr.split(':')[0].trim(), 10);
-                            if (!isNaN(numOnly)) talhoesJaApontados.push(numOnly);
+                            const partes = tStr.trim().split(':');
+                            const numOnly = parseInt(partes[0].trim(), 10);
+                            const areaVal = parseFloat((partes[1] || '').replace('ha', '').replace(',', '.').trim()) || 0;
+                            if (!isNaN(numOnly)) {
+                                if (!areaJaApontadaPorTalhao[numOnly]) areaJaApontadaPorTalhao[numOnly] = 0;
+                                areaJaApontadaPorTalhao[numOnly] += areaVal;
+                            }
                         });
                     }
                 });
             }
-            
+
             let novosTalhoesAtivos = [];
             let bloqueadosAnteriores = [];
+            let parciaisRestantes = [];
 
             fazendaSelecionada.talhoes.forEach(t => {
                 const numT = parseInt(t.talhao, 10);
@@ -1058,19 +936,28 @@
                 if (nums.includes(numT)) {
                     if (numT === 6666 && carreadorChecked) return;
 
-                    if (talhoesJaApontados.includes(numT)) {
+                    const jaApontada = areaJaApontadaPorTalhao[numT] || 0;
+                    const restante = areaMax - jaApontada;
+
+                    if (restante <= 0.001) {
                         bloqueadosAnteriores.push(numT);
                         return;
                     }
 
+                    if (jaApontada > 0.001 && restante > 0.001) {
+                        parciaisRestantes.push(`${numT} (falta ${restante.toFixed(2)} ha)`);
+                    }
+
                     const existente = talhoesAtivos.find(x => x.num === String(numT));
                     if (existente) {
+                        existente.maxArea = restante;
+                        if (existente.areaParcial > restante) existente.areaParcial = restante;
                         novosTalhoesAtivos.push(existente);
                     } else {
                         novosTalhoesAtivos.push({
                             num: String(numT),
-                            maxArea: areaMax,
-                            areaParcial: areaMax,
+                            maxArea: restante,
+                            areaParcial: restante,
                             isParcial: false
                         });
                     }
@@ -1078,7 +965,7 @@
             });
 
             if (bloqueadosAnteriores.length > 0) {
-                alert(`⚠️ TRAVA DE APONTAMENTO:\n\nO(s) talhão(ões) [${bloqueadosAnteriores.join(', ')}] JÁ FOI LANCEADO em apontamentos anteriores desta OS e não pode ser duplicado!`);
+                alert(`⚠️ TRAVA DE APONTAMENTO:\n\nO(s) talhão(ões) [${bloqueadosAnteriores.join(', ')}] já está(ão) 100% executado(s) em apontamentos anteriores desta OS.`);
             }
 
             talhoesAtivos = novosTalhoesAtivos;
@@ -1099,7 +986,7 @@
             if (t) {
                 let v = parseFloat(val) || 0;
                 if (v > t.maxArea) {
-                    alert(`🚨 A área parcial (${v} ha) não pode exceder a área do talhão (${t.maxArea} ha)!`);
+                    alert(`🚨 A área parcial (${v} ha) não pode exceder a área restante do talhão (${t.maxArea} ha)!`);
                     v = t.maxArea;
                 }
                 if (v < 0) v = 0;
@@ -1151,27 +1038,27 @@
             talhoesAtivos.forEach(t => {
                 tot += t.areaParcial;
                 const isCarreadorRateio = t.num.includes('Rateio');
-                
+
                 const div = document.createElement('div');
                 div.className = `talhao-card ${t.isParcial ? 'parcial-active' : ''}`;
-                
+
                 let inputHtml = '';
                 if (t.isParcial && !isCarreadorRateio) {
-                    inputHtml = `<input type="number" step="0.01" max="${t.maxArea}" value="${t.areaParcial}" 
-                        style="width: 100px; padding: 2px 6px; font-size: 0.85rem;" 
+                    inputHtml = `<input type="number" step="0.01" max="${t.maxArea}" value="${t.areaParcial}"
+                        style="width: 100px; padding: 2px 6px; font-size: 0.85rem;"
                         onchange="alterarAreaParcial('${t.num}', this.value)">`;
                 }
 
                 let btnParcialHtml = '';
                 if (!isCarreadorRateio) {
-                    btnParcialHtml = `<button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.75rem;" 
+                    btnParcialHtml = `<button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.75rem;"
                         onclick="toggleParcial('${t.num}')">${t.isParcial ? 'Restaurar Total' : 'Parcial'}</button>`;
                 }
 
                 div.innerHTML = `
                     <div>
-                        <strong>Talhão ${t.num}</strong> 
-                        <span style="color:var(--text-muted); font-size:0.8rem; margin-left: 6px;">(Máx: ${t.maxArea.toFixed(2)} ha)</span>
+                        <strong>Talhão ${t.num}</strong>
+                        <span style="color:var(--text-muted); font-size:0.8rem; margin-left: 6px;">(Disp: ${t.maxArea.toFixed(2)} ha)</span>
                     </div>
                     <div style="display:flex; align-items:center; gap: 8px;">
                         ${inputHtml}
@@ -1184,6 +1071,7 @@
 
             document.getElementById('area-total').value = tot.toFixed(2);
             document.querySelectorAll('.prod-dose').forEach(inp => { inp.dispatchEvent(new Event('input')); });
+            document.querySelectorAll('.prod-total').forEach(inp => { inp.dispatchEvent(new Event('input')); });
         }
 
         const inputFrota = document.getElementById('frota-input'), listFrota = document.getElementById('frota-autocomplete');
@@ -1207,12 +1095,7 @@
             const container = document.getElementById('box-table-equipamentos');
             const tbody = document.getElementById('equipamentos-tbody');
             tbody.innerHTML = '';
-
-            if (equipamentosSelecionados.length === 0) {
-                container.style.display = 'none';
-                return;
-            }
-
+            if (equipamentosSelecionados.length === 0) { container.style.display = 'none'; return; }
             container.style.display = 'block';
             equipamentosSelecionados.forEach((e, i) => {
                 const tr = document.createElement('tr');
@@ -1228,27 +1111,32 @@
         }
 
         function adicionarLinhaProduto() { adicionarLinhaProdutoComDados("", "", "", "", ""); }
+
         function adicionarLinhaProdutoComDados(cod, desc, un, dose, total) {
+            const isApontamento = (modoOperacaoSelecionado === 'APONTAMENTO');
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><input type="text" class="prod-cod" value="${cod}" placeholder="Cód/Nome..." autocomplete="off"></td>
                 <td><input type="text" class="prod-desc" value="${desc}" readonly></td>
                 <td><input type="text" class="prod-un" value="${un}" readonly style="width: 45px; padding:0.5rem; text-align:center;"></td>
                 <td style="position: relative;">
-                    <input type="number" step="0.001" class="prod-dose" value="${dose}" placeholder="0.00">
+                    <input type="number" step="0.001" class="prod-dose" value="${dose}" placeholder="0.00" ${isApontamento ? 'readonly' : ''}>
                     <span class="dose-warning" style="color: var(--danger); font-size: 0.65rem; font-weight: bold; position: absolute; bottom: -12px; left: 0;"></span>
                 </td>
-                <td><input type="number" step="0.01" class="prod-total" value="${total}" readonly placeholder="0.00"></td>
+                <td><input type="number" step="0.01" class="prod-total" value="${total}" placeholder="0.00" ${isApontamento ? '' : 'readonly'}></td>
                 <td style="text-align: center;"><button type="button" class="btn btn-danger" style="padding: 2px 8px;" onclick="this.closest('tr').remove();">×</button></td>
             `;
 
-            const inCod = tr.querySelector('.prod-cod'), inDose = tr.querySelector('.prod-dose'), warnDose = tr.querySelector('.dose-warning');
-            
+            const inCod = tr.querySelector('.prod-cod');
+            const inDose = tr.querySelector('.prod-dose');
+            const inTotal = tr.querySelector('.prod-total');
+            const warnDose = tr.querySelector('.dose-warning');
+
             inCod.oninput = function() {
                 const val = this.value.toLowerCase();
                 const globalList = document.getElementById('global-autocomplete');
                 globalList.innerHTML = '';
-                
                 if (!val) { globalList.style.display = 'none'; inputInsumoAtivo = null; return; }
                 inputInsumoAtivo = this;
 
@@ -1263,19 +1151,19 @@
                     div.onclick = () => {
                         const jaExiste = Array.from(document.querySelectorAll('#produtos-tbody .prod-cod'))
                             .some(inp => inp !== inCod && inp.value.trim() === p.cod);
-
                         if (jaExiste) {
                             alert(`❌ O insumo [${p.cod} - ${p.desc}] já foi adicionado nesta Ordem de Serviço!`);
                             return;
                         }
-
                         tr.querySelector('.prod-cod').value = p.cod;
                         tr.querySelector('.prod-desc').value = p.desc;
                         tr.querySelector('.prod-un').value = p.un;
-                        
+
                         inDose.value = '';
+                        inTotal.value = '';
                         inDose.dispatchEvent(new Event('input'));
-                        
+                        inTotal.dispatchEvent(new Event('input'));
+
                         globalList.style.display = 'none';
                         inputInsumoAtivo = null;
                     };
@@ -1284,18 +1172,36 @@
                 globalList.style.display = 'block';
             };
 
-            inDose.oninput = function() {
-                const area = parseFloat(document.getElementById('area-total').value) || 0;
-                const vDose = parseFloat(this.value) || 0;
-                tr.querySelector('.prod-total').value = (vDose * area).toFixed(2);
-
+            const validarDoseRange = () => {
                 const cCode = tr.querySelector('.prod-cod').value;
+                const vDose = parseFloat(inDose.value) || 0;
                 const ref = dbInsumos.find(i => i.cod === cCode);
                 warnDose.innerText = '';
-                if(ref && vDose > 0) {
+                if (ref && vDose > 0) {
                     if (ref.min > 0 && vDose < ref.min) warnDose.innerText = `Min: ${ref.min}`;
                     if (ref.max > 0 && vDose > ref.max) warnDose.innerText = `Máx: ${ref.max}`;
                 }
+            };
+
+            inDose.oninput = function() {
+                const area = parseFloat(document.getElementById('area-total').value) || 0;
+                const vDose = parseFloat(this.value) || 0;
+
+                if (!isApontamento) {
+                    inTotal.value = (vDose * area).toFixed(2);
+                }
+                validarDoseRange();
+            };
+
+            inTotal.oninput = function() {
+                const area = parseFloat(document.getElementById('area-total').value) || 0;
+                const vTotal = parseFloat(this.value) || 0;
+
+                if (isApontamento) {
+                    const novaDose = area > 0 ? (vTotal / area) : 0;
+                    inDose.value = novaDose.toFixed(3);
+                }
+                validarDoseRange();
             };
 
             document.getElementById('produtos-tbody').appendChild(tr);
@@ -1306,14 +1212,14 @@
 
             if (!fazendaSelecionada) { alert("⚠️ FALTAM DADOS: Selecione a Fazenda/Fundo Agrícola."); return; }
             if (talhoesAtivos.length === 0) { alert("⚠️ FALTAM DADOS: Digite os Talhões."); return; }
-            
+
             const selectedDates = flatpickrInstancia.selectedDates;
             if (selectedDates.length === 0) { alert("⚠️ FALTAM DADOS: Selecione a Data de Execução."); return; }
-            
+
             const ccVal = document.getElementById('centro-custo').value, opVal = document.getElementById('operacao').value;
             if (!ccVal || !opVal) { alert("⚠️ FALTAM DADOS: Selecione o Centro de Custo e Operação."); return; }
             if (equipamentosSelecionados.length === 0) { alert("⚠️ FALTAM DADOS: Adicione ao menos um Equipamento."); return; }
-            
+
             let temInsumo = false;
             let produtosEnvio = [];
             document.querySelectorAll('#produtos-tbody tr').forEach(tr => {
@@ -1322,7 +1228,8 @@
                     temInsumo = true;
                     produtosEnvio.push({
                         cod: cod, desc: tr.querySelector('.prod-desc').value,
-                        un: tr.querySelector('.prod-un').value, dose: tr.querySelector('.prod-dose').value,
+                        un: tr.querySelector('.prod-un').value,
+                        dose: tr.querySelector('.prod-dose').value,
                         total: tr.querySelector('.prod-total').value
                     });
                 }
@@ -1332,14 +1239,14 @@
             const stringEquipamentosFormatados = equipamentosSelecionados.map(e => e.colB ? `${e.nome} [${e.colB}]` : e.nome).join(', ');
             const dtStart = selectedDates[0] ? selectedDates[0].toISOString().split('T')[0] : "";
             const dtEnd = selectedDates[1] ? selectedDates[1].toISOString().split('T')[0] : dtStart;
-            
+
             let modoEfetivo = modoOperacaoSelecionado;
             if (modoOperacaoSelecionado === 'APONTAMENTO' && document.getElementById('check-encerrar-os').checked) {
                 modoEfetivo = 'ENCERRAMENTO';
             }
 
-            const chaveTempEnvio = isEditandoRejeitada 
-                ? document.getElementById('os-codigo-temp-atual').value 
+            const chaveTempEnvio = isEditandoRejeitada
+                ? document.getElementById('os-codigo-temp-atual').value
                 : gerarChaveUnicaTemp();
 
             const codigoOSHerdada = (osOrigemObjeto && (modoOperacaoSelecionado === 'APONTAMENTO' || modoEfetivo === 'ENCERRAMENTO'))
@@ -1370,10 +1277,7 @@
 
             const btn = document.getElementById('btn-submit'), loader = document.getElementById('submit-loader');
 
-            if (!navigator.onLine) {
-                salvarFilaOffline(payload);
-                return;
-            }
+            if (!navigator.onLine) { salvarFilaOffline(payload); return; }
 
             btn.style.display = 'none'; loader.style.display = 'block';
 
@@ -1394,16 +1298,12 @@
         function salvarFilaOffline(payload) {
             let fila = JSON.parse(localStorage.getItem('os_fila_offline') || '[]');
             payload.status_aprovacao = '⚠️ OS NÃO SINCRONIZADA';
-            
             const existingIdx = fila.findIndex(x => x.codigoTemp === payload.codigoTemp);
             if (existingIdx >= 0) fila[existingIdx] = payload;
             else fila.push(payload);
-
             localStorage.setItem('os_fila_offline', JSON.stringify(fila));
-            
             document.getElementById('btn-submit').style.display = 'inline-flex';
             document.getElementById('submit-loader').style.display = 'none';
-            
             alert("📶 Sem conexão no momento!\n\nA OS foi SALVA OFFLINE na memória do celular. Assim que conectar à internet, ela será enviada e entrará EM ANÁLISE automaticamente.");
             gerarComprovanteWhatsApp(payload, payload.codigoTemp);
         }
@@ -1411,7 +1311,6 @@
         async function sincronizarFilaOffline() {
             let fila = JSON.parse(localStorage.getItem('os_fila_offline') || '[]');
             if (fila.length === 0) return;
-
             let novaFila = [];
             for (let item of fila) {
                 item.status_aprovacao = 'Em análise';
@@ -1423,7 +1322,6 @@
                     novaFila.push(item);
                 }
             }
-
             localStorage.setItem('os_fila_offline', JSON.stringify(novaFila));
             if (document.getElementById('gestao-app').style.display === 'block') {
                 carregarEExibirGestaoOS();
@@ -1434,15 +1332,12 @@
         function gerarComprovanteWhatsApp(p, codTemp) {
             document.getElementById('main-app').style.display = 'none';
             document.getElementById('receipt-modal').style.display = 'flex';
-
             const displayOSFinal = p.codigoOS || codTemp;
-
             let texto = `*OPERAÇÃO REGISTRADA COM SUCESSO*\n\n`;
             texto += `*Tipo:* ${p.tipo_registro}\n*OS:* ${displayOSFinal}\n`;
             texto += `*Status:* ${p.status_aprovacao}\n`;
             texto += `*Fazenda:* ${p.fa_codigo} - ${p.descricao_fazenda}\n*Operação:* ${p.operacao}\n*Área Executada:* ${p.area_total} ha\n*Talhões:* ${p.talhoes}\n`;
             texto += `*Solicitante:* ${solicitanteLimpoDisplay}`;
-
             document.getElementById('receipt-content').innerText = texto;
             linkWhatsApp = `https://wa.me/?text=${encodeURIComponent(texto)}`;
         }
@@ -1451,12 +1346,10 @@
         async function executarLogin() {
             const u = document.getElementById('login-user').value.trim(), p = document.getElementById('login-pass').value.trim();
             if(!u || !p) return;
-
             if (!navigator.onLine && localStorage.getItem('logged_cracha')) {
                 efetuarLoginSucesso(localStorage.getItem('logged_cracha'), localStorage.getItem('logged_nome'));
                 return;
             }
-
             document.getElementById('login-loader').style.display = 'block';
             try {
                 const res = await (await fetch(`${APPSCRIPT_URL}?action=validar_login&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`)).json();
