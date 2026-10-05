@@ -75,7 +75,6 @@
         .net-status-pill { position: fixed; bottom: 12px; right: 12px; z-index: 9999; padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
         .net-online { background: #10b981; color: #fff; }
         .net-offline { background: #ef4444; color: #fff; }
-        #dash-tbody td:nth-child(2), #dash-tbody td:nth-child(3) { white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -290,7 +289,6 @@
             <div class="section">
                 <div class="section-title">
                     Localização e Talhões
-                    <label class="checkbox-container"><input type="checkbox" id="check-carreador" onchange="processarEntradaTalhoes()"> Ratear Carreador (6666)</label>
                 </div>
                 <div class="grid grid-2">
                     <div class="form-group">
@@ -301,7 +299,7 @@
                     <div class="form-group"><label>Tipo de Fazenda</label><input type="text" id="tipo-fazenda" readonly placeholder="Automático" style="font-weight: 700; color: var(--accent);"></div>
                 </div>
                 <div class="form-group" style="margin-top: 1rem;" id="group-digitar-talhoes">
-                    <label>Digitar Talhões (Ex: 1-9, 12, 15 ou 6666)</label>
+                    <label>Digitar Talhões (Ex: 1-9, 12, 15) — inclua 6666 para ratear o carreador</label>
                     <input type="text" id="talhoes-range-input" placeholder="Ex: 1-4, 8, 6666" autocomplete="off">
                 </div>
                 <div class="form-group" style="margin-top: 1rem;">
@@ -385,7 +383,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsde   livr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 
     <script>
         const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQZWlJ8xGg-VqRLvWWPuowCQ2QUJg-CEXjW8oM_tEo7fqVsGOov2UZxU85snQtvyLp/exec';
@@ -919,10 +917,15 @@
             return Array.from(resultado);
         }
 
+        function modoRateioCarreador() {
+            const nums = expandirIntervalos(inputRangeTalhoes.value);
+            return nums.includes(6666) && nums.some(n => n !== 6666);
+        }
+
         function processarEntradaTalhoes() {
             if (!fazendaSelecionada) return;
             const nums = expandirIntervalos(inputRangeTalhoes.value);
-            const carreadorChecked = document.getElementById('check-carreador').checked;
+            const carreadorChecked = modoRateioCarreador();
 
             const areaJaApontadaPorTalhao = {};
             if (modoOperacaoSelecionado === 'APONTAMENTO' && osOrigemObjeto) {
@@ -1029,7 +1032,7 @@
                 });
             }
 
-            const carreadorChecked = document.getElementById('check-carreador').checked;
+            const carreadorChecked = modoRateioCarreador();
 
             if (carreadorChecked) {
                 talhoesAtivos = talhoesAtivos.filter(x => x.num !== '6666 (Rateio)' && x.num !== '6666');
@@ -1365,7 +1368,7 @@
 
         let loginPendente = null;
 
-                function mostrarErroSenha(msg) {
+        function mostrarErroSenha(msg) {
             const el = document.getElementById('senha-error');
             el.innerText = msg;
             el.style.display = 'block';
@@ -1426,7 +1429,7 @@
             document.getElementById('login-loader').style.display = 'block';
             try {
                 const res = await (await fetch(`${APPSCRIPT_URL}?action=validar_login&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`)).json();
-                                if(res.success) {
+                if(res.success) {
                     if (res.primeiroAcesso) {
                         loginPendente = { cracha: res.cracha, nome: res.solicitante, senhaAtual: p };
                         document.getElementById('login-screen').style.display = 'none';
