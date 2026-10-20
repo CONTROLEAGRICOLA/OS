@@ -59,6 +59,7 @@
         .talhoes-container { display: flex; flex-direction: column; gap: 0.6rem; padding: 0.8rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border-color); min-height: 48px; }
         .talhao-card { background: var(--bg-card); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
         .talhao-card.parcial-active { border-color: var(--warning); background: rgba(245, 158, 11, 0.05); }
+        .aviso-talhoes { margin-top: 0.5rem; padding: 0.6rem 0.8rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: var(--warning); background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); }
         .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 0.5rem; }
         table { width: 100%; border-collapse: collapse; min-width: 650px; }
         th { background-color: var(--bg-input); color: var(--text-muted); font-size: 0.8rem; padding: 0.75rem; text-align: left; }
@@ -301,6 +302,7 @@
                 <div class="form-group" style="margin-top: 1rem;" id="group-digitar-talhoes">
                     <label>Digitar Talhões (Ex: 1-9, 12, 15) — inclua 6666 para ratear o carreador</label>
                     <input type="text" id="talhoes-range-input" placeholder="Ex: 1-4, 8, 6666" autocomplete="off">
+                    <div id="aviso-talhoes" class="aviso-talhoes" style="display: none;"></div>
                 </div>
                 <div class="form-group" style="margin-top: 1rem;">
                     <label>Talhões Selecionados e Áreas Parciais</label>
@@ -799,7 +801,17 @@
                 document.getElementById('operacao').innerHTML = `<option value="${osOrigemObjeto.operacao}">${osOrigemObjeto.operacao}</option>`;
                 atualizarSecaoInsumos();
                 document.getElementById('talhoes-range-input').value = osOrigemObjeto.talhoes ? osOrigemObjeto.talhoes.split(',').map(t => t.split(':')[0].trim()).join(', ') : "";
-                processarEntradaTalhoes();
+                const jaFinalizados = processarEntradaTalhoes();
+
+                if (jaFinalizados.length > 0) {
+                    const restantes = talhoesAtivos.filter(t => t.num !== '6666 (Rateio)').map(t => t.num);
+                    if (modoRateioCarreador() && restantes.length > 0) restantes.push('6666');
+                    inputRangeTalhoes.value = restantes.join(', ');
+                    processarEntradaTalhoes();
+                    mostrarAvisoTalhoes(restantes.length > 0
+                        ? `ℹ️ Já 100% apontados nesta OS, retirados da lista: ${jaFinalizados.join(', ')}`
+                        : `✅ Todos os talhões desta OS já foram 100% apontados.`);
+                }
 
                 equipamentosSelecionados = [];
                 (osOrigemObjeto.equipamentos || "").split(',').forEach(eStr => {
@@ -858,6 +870,7 @@
             document.getElementById('produtos-tbody').innerHTML = '';
             equipamentosSelecionados = []; renderizerEquipamentos();
             talhoesAtivos = []; renderizerTalhoesSelecionados();
+            mostrarAvisoTalhoes('');
             flatpickrInstancia.clear();
             adicionarLinhaProduto();
             atualizarSecaoInsumos();
@@ -924,8 +937,13 @@
             return nums.includes(6666) && nums.some(n => n !== 6666);
         }
 
+        function mostrarAvisoTalhoes(texto) {
+            const aviso = document.getElementById('aviso-talhoes');
+            aviso.textContent = texto;
+            aviso.style.display = texto ? 'block' : 'none';
+        }
         function processarEntradaTalhoes() {
-            if (!fazendaSelecionada) return;
+            if (!fazendaSelecionada) return [];;
             const nums = expandirIntervalos(inputRangeTalhoes.value);
             const carreadorChecked = modoRateioCarreador();
 
@@ -990,12 +1008,16 @@
             });
 
             if (bloqueadosAnteriores.length > 0) {
-                alert(`⚠️ TRAVA DE APONTAMENTO:\n\nO(s) talhão(ões) [${bloqueadosAnteriores.join(', ')}] já está(ão) 100% executado(s) em apontamentos anteriores desta OS.`);
+                mostrarAvisoTalhoes(`⚠️ Já 100% apontados nesta OS, serão ignorados: ${bloqueadosAnteriores.join(', ')}`);
+            } else {
+                mostrarAvisoTalhoes('');
             }
 
             talhoesAtivos = novosTalhoesAtivos;
             recalcularAreasE6666();
+            return bloqueadosAnteriores;
         }
+
 
         function toggleParcial(num) {
             const t = talhoesAtivos.find(x => x.num === String(num));
@@ -1260,7 +1282,7 @@
                     });
                 }
             });
-            if (usaInsumo && !temInsumo) { alert("⚠️ FALTAM DADOS: Adicione ao menos 1 insumo."); return; }
+                        if (usaInsumo && !temInsumo) { alert("⚠️ FALTAM DADOS: Adicione ao menos 1 insumo."); return; }
 
             const stringEquipamentosFormatados = equipamentosSelecionados.map(e => e.colB ? `${e.nome} [${e.colB}]` : e.nome).join(', ');
             const dtStart = selectedDates[0] ? selectedDates[0].toISOString().split('T')[0] : "";
@@ -1478,16 +1500,18 @@
         function atualizarSecaoInsumos() {
             document.getElementById('secao-insumos').style.display = operacaoUsaInsumo() ? 'block' : 'none';
         }
+
         function popularCentrosDeCusto() {
             const s = document.getElementById('centro-custo'); s.innerHTML = '<option value="">Selecione...</option>';
             [...new Set(dbOperacoes.map(o => o.centroCusto))].filter(Boolean).sort(ordenarTexto).forEach(cc => s.innerHTML += `<option value="${cc}">${cc}</option>`);
             s.onchange = function() {
                 const s2 = document.getElementById('operacao'); s2.innerHTML = '<option value="">Selecione...</option>';
-                               [...new Set(dbOperacoes.filter(o => o.centroCusto === this.value).map(o => o.operacao))].filter(Boolean).sort(ordenarTexto).forEach(op => s2.innerHTML += `<option value="${op}">${op}</option>`);
+                                [...new Set(dbOperacoes.filter(o => o.centroCusto === this.value).map(o => o.operacao))].filter(Boolean).sort(ordenarTexto).forEach(op => s2.innerHTML += `<option value="${op}">${op}</option>`);
                 atualizarSecaoInsumos();
             };
             document.getElementById('operacao').onchange = atualizarSecaoInsumos;
-        };
+            };
+
     </script>
 </body>
 </html>
