@@ -342,7 +342,7 @@
                 </div>
             </div>
 
-            <div class="section">
+            <div class="section" id="secao-insumos">
                 <div class="section-title">Insumos Aplicados</div>
                 <div class="table-responsive" style="overflow-x: visible;">
                     <table id="produtos-table">
@@ -668,6 +668,7 @@
 
             document.getElementById('centro-custo').value = osObj.centro_custo;
             document.getElementById('operacao').innerHTML = `<option value="${osObj.operacao}">${osObj.operacao}</option>`;
+            atualizarSecaoInsumos();
             document.getElementById('observacao').value = osObj.observacao || "";
 
             if (osObj.data_prevista_inicio) {
@@ -798,6 +799,7 @@
 
                 document.getElementById('centro-custo').value = osOrigemObjeto.centro_custo;
                 document.getElementById('operacao').innerHTML = `<option value="${osOrigemObjeto.operacao}">${osOrigemObjeto.operacao}</option>`;
+                atualizarSecaoInsumos();
 
                 document.getElementById('talhoes-range-input').value = osOrigemObjeto.talhoes ? osOrigemObjeto.talhoes.split(',').map(t => t.split(':')[0].trim()).join(', ') : "";
                 const jaFinalizados = processarEntradaTalhoes();
@@ -872,6 +874,7 @@
             mostrarAvisoTalhoes('');
             flatpickrInstancia.clear();
             adicionarLinhaProduto();
+            atualizarSecaoInsumos();
 
             document.getElementById('solicitante-display').value = solicitanteLimpoDisplay;
             document.getElementById('data-solicitacao-display').value = new Date().toLocaleString('pt-BR');
@@ -1265,9 +1268,10 @@
             if (!ccVal || !opVal) { alert("⚠️ FALTAM DADOS: Selecione o Centro de Custo e Operação."); return; }
             if (equipamentosSelecionados.length === 0) { alert("⚠️ FALTAM DADOS: Adicione ao menos um Equipamento."); return; }
 
+            const usaInsumo = operacaoUsaInsumo();
             let temInsumo = false;
             let produtosEnvio = [];
-            document.querySelectorAll('#produtos-tbody tr').forEach(tr => {
+            if (usaInsumo) document.querySelectorAll('#produtos-tbody tr').forEach(tr => {
                 const cod = tr.querySelector('.prod-cod').value;
                 if (cod) {
                     temInsumo = true;
@@ -1279,7 +1283,7 @@
                     });
                 }
             });
-            if (!temInsumo) { alert("⚠️ FALTAM DADOS: Adicione ao menos 1 insumo."); return; }
+            if (usaInsumo && !temInsumo) { alert("⚠️ FALTAM DADOS: Adicione ao menos 1 insumo."); return; }
 
             const stringEquipamentosFormatados = equipamentosSelecionados.map(e => e.colB ? `${e.nome} [${e.colB}]` : e.nome).join(', ');
             const dtStart = selectedDates[0] ? selectedDates[0].toISOString().split('T')[0] : "";
@@ -1486,13 +1490,27 @@
         }
         const ordenarTexto = (a, b) => String(a).localeCompare(String(b), 'pt-BR', { numeric: true, sensitivity: 'base' });
 
+        function operacaoUsaInsumo() {
+            const cc = document.getElementById('centro-custo').value;
+            const op = document.getElementById('operacao').value;
+            const reg = dbOperacoes.find(o => o.centroCusto === cc && o.operacao === op);
+            const origem = String((reg && reg.origem) || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().trim();
+            return origem !== 'PRODUCAO';
+        }
+
+        function atualizarSecaoInsumos() {
+            document.getElementById('secao-insumos').style.display = operacaoUsaInsumo() ? 'block' : 'none';
+        }
+
         function popularCentrosDeCusto() {
             const s = document.getElementById('centro-custo'); s.innerHTML = '<option value="">Selecione...</option>';
             [...new Set(dbOperacoes.map(o => o.centroCusto))].filter(Boolean).sort(ordenarTexto).forEach(cc => s.innerHTML += `<option value="${cc}">${cc}</option>`);
             s.onchange = function() {
                 const s2 = document.getElementById('operacao'); s2.innerHTML = '<option value="">Selecione...</option>';
                 [...new Set(dbOperacoes.filter(o => o.centroCusto === this.value).map(o => o.operacao))].filter(Boolean).sort(ordenarTexto).forEach(op => s2.innerHTML += `<option value="${op}">${op}</option>`);
+                atualizarSecaoInsumos();
             };
+            document.getElementById('operacao').onchange = atualizarSecaoInsumos;
         }
     </script>
 </body>
