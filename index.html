@@ -77,6 +77,70 @@
         .net-status-pill { position: fixed; bottom: 12px; right: 12px; z-index: 9999; padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
         .net-online { background: #10b981; color: #fff; }
         .net-offline { background: #ef4444; color: #fff; }
+        textarea { font-family: inherit; }
+
+        /* Apontamentos dentro da Gestão de OS: abrem e fecham com o botão + */
+        .linha-filho { display: none; }
+        .linha-filho.aberto { display: table-row; }
+
+        /* ================= CELULAR (telas de até 600px) ================= */
+        @media (max-width: 600px) {
+            body { padding-bottom: 2.5rem; }
+            .container { margin: 0; padding: 1.2rem 1rem; border-radius: 0; border-left: none; border-right: none; box-shadow: none; }
+            .header { margin-bottom: 1.4rem; }
+            .modal-box { width: 92%; padding: 1.6rem 1.2rem; }
+            .grid-2 { grid-template-columns: 1fr; }
+            input[type="text"], input[type="password"], input[type="number"], textarea, select { font-size: 16px; }
+
+            /* --- As tabelas viram cartões --- */
+            .table-responsive { overflow-x: visible !important; border: none; }
+            .table-responsive table { min-width: 0; display: block; }
+            .table-responsive thead { display: none; }
+            .table-responsive tbody { display: flex; flex-direction: column; gap: 0.7rem; }
+            .table-responsive tr { display: grid; gap: 0.55rem 0.6rem; padding: 0.85rem; background: var(--bg-page); border: 1px solid var(--border-color); border-radius: 10px; }
+            .table-responsive td { padding: 0; border: none; min-width: 0; }
+            .table-responsive td[data-label]::before { content: attr(data-label); display: block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-bottom: 3px; }
+
+            /* Insumos: [código | excluir] / [descrição] / [UN | dose | total] */
+            #produtos-tbody tr { grid-template-columns: 0.7fr 1fr 1fr auto; grid-template-areas: "cod cod cod del" "desc desc desc desc" "un dose total total"; }
+            #produtos-tbody td:nth-child(1) { grid-area: cod; }
+            #produtos-tbody td:nth-child(2) { grid-area: desc; }
+            #produtos-tbody td:nth-child(3) { grid-area: un; }
+            #produtos-tbody td:nth-child(4) { grid-area: dose; }
+            #produtos-tbody td:nth-child(5) { grid-area: total; }
+            #produtos-tbody td:nth-child(6) { grid-area: del; align-self: end; }
+            #produtos-tbody .prod-un { width: 100% !important; }
+            #produtos-tbody .btn-danger { padding: 0.75rem 0.95rem !important; }
+            .dose-warning { position: static !important; display: block; margin-top: 3px; }
+
+            /* Equipamentos: [nome | excluir] / [C.C] */
+            #equipamentos-tbody tr { grid-template-columns: 1fr auto; grid-template-areas: "nome del" "cc cc"; align-items: center; }
+            #equipamentos-tbody td:nth-child(1) { grid-area: nome; }
+            #equipamentos-tbody td:nth-child(2) { grid-area: cc; }
+            #equipamentos-tbody td:nth-child(3) { grid-area: del; }
+            #equipamentos-tbody .btn-danger { padding: 0.6rem 0.85rem !important; }
+
+            /* Gestão de OS: [+ | OS | tipo] / [fazenda] / [área] / [status] */
+            #gestao-tbody tr { grid-template-columns: auto 1fr auto; grid-template-areas: "btn os tipo" "btn faz faz" "btn area area" "btn st st"; align-items: center; }
+            #gestao-tbody td:nth-child(1) { grid-area: btn; align-self: start; }
+            #gestao-tbody td:nth-child(2) { grid-area: os; padding-left: 0 !important; }
+            #gestao-tbody td:nth-child(3) { grid-area: tipo; }
+            #gestao-tbody td:nth-child(4) { grid-area: faz; }
+            #gestao-tbody td:nth-child(5) { grid-area: area; }
+            #gestao-tbody td:nth-child(6) { grid-area: st; }
+            #gestao-tbody td[colspan] { grid-column: 1 / -1; }
+            #gestao-tbody td:first-child button { width: 36px !important; height: 36px !important; font-size: 1.1rem; }
+            #gestao-tbody tr.linha-filho { display: none; }
+            #gestao-tbody tr.linha-filho.aberto { display: grid; margin-left: 1.2rem; border-left: 3px solid var(--accent); }
+
+            /* Botões de envio um embaixo do outro, o principal em cima */
+            #box-actions-lancar { flex-direction: column-reverse; }
+            #box-actions-lancar .btn { width: 100%; padding: 0.95rem; }
+
+            /* Selo de conexão: discreto quando online, completo quando offline */
+            .net-status-pill { bottom: 10px; right: 10px; padding: 4px 10px; font-size: 0.65rem; }
+            .net-online #net-text { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -607,7 +671,7 @@
                     <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${displayOS}</strong></td>
                     <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><span class="badge badge-analise">${osPai.tipo_registro}</span></td>
                     <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')">${osPai.fa_codigo} - ${osPai.descricao_fazenda}<br><small style="color:var(--text-muted);">${osPai.operacao}</small></td>
-                    <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${osPai.area_total} ha</strong> <span style="color:var(--accent); font-weight:700;">(${pct}%)</span></td>
+                    <td data-label="Área (executado)" onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${osPai.area_total} ha</strong> <span style="color:var(--accent); font-weight:700;">(${pct}%)</span></td>
                     <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><span class="badge ${isPendingSync ? 'badge-pending-sync' : getBadgeClass(osPai.status_aprovacao)}">${osPai.status_aprovacao || 'Em análise'}</span><small class="motivo-rejeicao"></small></td>
                 `;
                 mostrarMotivo(trPai, osPai);
@@ -616,8 +680,7 @@
                     const displayFilhoOS = osFilho.codigoOS || osFilho.codigoTemp;
                     const isPendingSyncF = osFilho.status_aprovacao === '⚠️ OS NÃO SINCRONIZADA';
                     const trFilho = document.createElement('tr');
-                    trFilho.className = `child-row-${osPai.codigoTemp}`;
-                    trFilho.style.display = 'none';
+                    trFilho.className = `child-row-${osPai.codigoTemp} linha-filho`;
                     trFilho.style.background = 'rgba(255,255,255,0.02)';
                     trFilho.style.cursor = 'pointer';
                     trFilho.innerHTML = `
@@ -625,7 +688,7 @@
                         <td style="padding-left: 1.5rem;" onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">↳ <strong>${displayFilhoOS}</strong></td>
                         <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')"><span class="badge badge-lancada">${osFilho.tipo_registro}</span></td>
                         <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">${osFilho.fa_codigo} - ${osFilho.descricao_fazenda}<br><small style="color:var(--text-muted);">${osFilho.operacao}</small></td>
-                        <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">${osFilho.area_total} ha</td>
+                        <td data-label="Área apontada" onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">${osFilho.area_total} ha</td>
                         <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')"><span class="badge ${isPendingSyncF ? 'badge-pending-sync' : getBadgeClass(osFilho.status_aprovacao)}">${osFilho.status_aprovacao || 'Em análise'}</span><small class="motivo-rejeicao"></small></td>
                     `;
                     mostrarMotivo(trFilho, osFilho);
@@ -642,10 +705,8 @@
         function toggleChildren(codigoTemp) {
             const rows = document.querySelectorAll(`.child-row-${codigoTemp}`);
             const btn = document.getElementById(`btn-expand-${codigoTemp}`);
-            rows.forEach(r => {
-                if (r.style.display === 'none') { r.style.display = 'table-row'; if (btn) btn.innerText = '-'; }
-                else { r.style.display = 'none'; if (btn) btn.innerText = '+'; }
-            });
+            rows.forEach(r => r.classList.toggle('aberto'));
+            if (btn && rows.length) btn.innerText = rows[0].classList.contains('aberto') ? '-' : '+';
         }
 
         function getBadgeClass(st) {
@@ -1161,7 +1222,7 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>${e.nome}</strong> (${e.propriedade || 'PRÓPRIO'})</td>
-                    <td><span style="color: var(--accent); font-weight: 600;">${e.colB || '-'}</span></td>
+                    <td data-label="C.C Equipamento"><span style="color: var(--accent); font-weight: 600;">${e.colB || '-'}</span></td>
                     <td style="text-align: center;">
                         <button type="button" class="btn btn-danger" style="padding: 2px 8px;" onclick="equipamentosSelecionados.splice(${i},1);renderizerEquipamentos();">×</button>
                     </td>
@@ -1177,14 +1238,14 @@
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><input type="text" class="prod-cod" value="${cod}" placeholder="Cód/Nome..." autocomplete="off"></td>
-                <td><input type="text" class="prod-desc" value="${desc}" readonly></td>
-                <td><input type="text" class="prod-un" value="${un}" readonly style="width: 45px; padding:0.5rem; text-align:center;"></td>
-                <td style="position: relative;">
+                <td data-label="Cód. Insumo"><input type="text" class="prod-cod" value="${cod}" placeholder="Cód/Nome..." autocomplete="off"></td>
+                <td data-label="Descrição"><input type="text" class="prod-desc" value="${desc}" readonly></td>
+                <td data-label="UN"><input type="text" class="prod-un" value="${un}" readonly style="width: 45px; padding:0.5rem; text-align:center;"></td>
+                <td data-label="Dosagem" style="position: relative;">
                     <input type="number" step="0.001" class="prod-dose" value="${dose}" placeholder="0.00" ${isApontamento ? 'readonly' : ''}>
                     <span class="dose-warning" style="color: var(--danger); font-size: 0.65rem; font-weight: bold; position: absolute; bottom: -12px; left: 0;"></span>
                 </td>
-                <td><input type="number" step="0.01" class="prod-total" value="${total}" placeholder="0.00" ${isApontamento ? '' : 'readonly'}></td>
+                <td data-label="Total"><input type="number" step="0.01" class="prod-total" value="${total}" placeholder="0.00" ${isApontamento ? '' : 'readonly'}></td>
                 <td style="text-align: center;"><button type="button" class="btn btn-danger" style="padding: 2px 8px;" onclick="this.closest('tr').remove();">×</button></td>
             `;
 
