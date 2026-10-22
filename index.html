@@ -205,6 +205,7 @@
                 <button class="btn btn-primary" style="padding: 1rem; font-size: 1rem;" onclick="iniciarAberturaOS()">🚜 ABERTURA DE OS</button>
                 <button class="btn btn-secondary" style="padding: 1rem; font-size: 1rem; border-color: var(--warning); color: var(--warning);" onclick="abrirModalApontamentoOS()">⏱️ APONTAMENTO DE OS</button>
                 <button class="btn btn-outline" style="padding: 1rem; font-size: 1rem; margin-top: 0.5rem;" onclick="abrirGestaoOS()">📋 GESTÃO DE OS</button>
+                <button class="btn btn-outline" id="btn-notificacoes" style="padding: 0.8rem; font-size: 0.9rem; display: none;" onclick="ativarNotificacoes()">🔔 ATIVAR NOTIFICAÇÕES</button>
             </div>
         </div>
     </div>
@@ -443,6 +444,7 @@
                 <button type="button" class="btn btn-primary" style="flex: 2;" onclick="enviarDados()" id="btn-submit">ENVIAR SOLICITAÇÃO</button>
             </div>
             <div id="box-actions-visualizar" style="display: none; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary" style="width: 100%; margin-bottom: 0.8rem; display: none;" id="btn-ver-pdf" onclick="baixarPDFdaOS()">📄 BAIXAR PDF DA OS</button>
                 <button type="button" class="btn btn-primary" style="width: 100%;" id="btn-voltar-gestao" onclick="fecharVisualizacaoOS()">⬅️ VOLTAR PARA GESTÃO DE OS</button>
             </div>
             <div id="submit-loader" class="loader" style="margin-top: 1rem;"></div>
@@ -451,6 +453,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js"></script>
 
     <script>
         const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQZWlJ8xGg-VqRLvWWPuowCQ2QUJg-CEXjW8oM_tEo7fqVsGOov2UZxU85snQtvyLp/exec';
@@ -564,9 +568,9 @@
             }
             try {
                 if ('caches' in window) {
-                    const cache = await caches.open('clealco-os-v5');
+                    const cache = await caches.open('clealco-os-v6');
                     await cache.addAll([
-                        location.href, './', './app_lancamento.html', './manifest.json',
+                        location.href, './', './index.html', './manifest.json',
                         'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
                         'https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css',
                         'https://cdn.jsdelivr.net/npm/flatpickr',
@@ -668,7 +672,7 @@
                     <td style="text-align: center;" onclick="event.stopPropagation(); toggleChildren('${osPai.codigoTemp}')">
                         ${hasFilhos ? `<button id="btn-expand-${osPai.codigoTemp}" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--accent); width:24px; height:24px; border-radius:4px; cursor:pointer; font-weight:bold;">+</button>` : ''}
                     </td>
-                    <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${displayOS}</strong></td>
+                    <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${displayOS}</strong>${osPai.pdf_url ? ' 📄' : ''}</td>
                     <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><span class="badge badge-analise">${osPai.tipo_registro}</span></td>
                     <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')">${osPai.fa_codigo} - ${osPai.descricao_fazenda}<br><small style="color:var(--text-muted);">${osPai.operacao}</small></td>
                     <td data-label="Área (executado)" onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${osPai.area_total} ha</strong> <span style="color:var(--accent); font-weight:700;">(${pct}%)</span></td>
@@ -790,9 +794,34 @@
                 boxLancar.style.display = 'none';
                 boxVisualizar.style.display = 'block';
                 setFormFieldsDisabled(true);
+                document.getElementById('btn-ver-pdf').style.display = osObj.pdf_url ? 'block' : 'none';
             }
         }
-
+                async function baixarPDFdaOS() {
+            if (!navigator.onLine) { alert('📶 Precisa de internet para baixar o PDF.'); return; }
+            const codigoTemp = document.getElementById('os-codigo-temp-atual').value;
+            const botao = document.getElementById('btn-ver-pdf');
+            botao.disabled = true;
+            botao.innerText = '⏳ BAIXANDO PDF...';
+            try {
+                const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_pdf&codigoTemp=${encodeURIComponent(codigoTemp)}`)).json();
+                if (!res.success) throw new Error(res.error || 'Não consegui buscar o PDF.');
+                const bytes = Uint8Array.from(atob(res.base64), c => c.charCodeAt(0));
+                const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = res.nome || 'OS.pdf';
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 60000);
+            } catch (e) {
+                alert('❌ ' + e.message);
+            } finally {
+                botao.disabled = false;
+                botao.innerText = '📄 BAIXAR PDF DA OS';
+            }
+        }
         function fecharVisualizacaoOS() {
             setFormFieldsDisabled(false);
             isEditandoRejeitada = false;
@@ -802,7 +831,7 @@
         }
 
         function setFormFieldsDisabled(disabled) {
-            document.querySelectorAll('#os-form input, #os-form select, #os-form textarea, #os-form button:not(#btn-voltar-gestao)').forEach(el => {
+            document.querySelectorAll('#os-form input, #os-form select, #os-form textarea, #os-form button:not(#btn-voltar-gestao):not(#btn-ver-pdf)').forEach(el => {
                 if (el.id !== 'solicitante-display' && el.id !== 'data-solicitacao-display') {
                     el.disabled = disabled;
                 }
@@ -1549,12 +1578,82 @@
             } finally { document.getElementById('login-loader').style.display = 'none'; }
         }
 
+        // ===================== NOTIFICAÇÕES (PUSH) =====================
+        const FIREBASE_CONFIG = {
+            apiKey: 'AIzaSyD7D6yXV2YlCFX7iotnXUKlqUF9SCveOVc',
+            authDomain: 'os-clealco.firebaseapp.com',
+            projectId: 'os-clealco',
+            storageBucket: 'os-clealco.firebasestorage.app',
+            messagingSenderId: '175045739560',
+            appId: '1:175045739560:web:14ac6b6e379e6ca9c7e11d'
+        };
+        const VAPID_KEY = 'BNgL56x4goAPaj2ccdRrr14bT_tEbfDDRvVkHk5qJo22Nt-cluGi4UohM_9LTncyCRDPeJYytVrEelv7M9Uisvc';
+
+        let firebasePronto = false;
+        try { firebase.initializeApp(FIREBASE_CONFIG); firebasePronto = true; }
+        catch (e) { console.warn('Firebase não carregou (sem internet?):', e); }
+
+        function pushSuportado() {
+            return firebasePronto && 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
+        }
+
+        function atualizarBotaoNotificacoes() {
+            const ativo = pushSuportado() && Notification.permission === 'granted' && localStorage.getItem('push_token_' + solicitanteCracha);
+            document.getElementById('btn-notificacoes').style.display = ativo ? 'none' : 'block';
+        }
+
+        async function registrarTokenPush() {
+            const registro = await navigator.serviceWorker.ready;
+            const token = await firebase.messaging().getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: registro });
+            if (!token) throw new Error('O Firebase não devolveu o endereço deste celular.');
+            if (localStorage.getItem('push_token_' + solicitanteCracha) === token) return;   // já está salvo
+            const res = await (await fetch(APPSCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'salvar_token', cracha: solicitanteCracha, token: token, aparelho: navigator.userAgent.slice(0, 150) })
+            })).json();
+            if (!res.success) throw new Error(res.error || 'Não consegui salvar.');
+            localStorage.setItem('push_token_' + solicitanteCracha, token);
+        }
+
+        async function ativarNotificacoes() {
+            if (!pushSuportado()) {
+                alert(/iPhone|iPad/.test(navigator.userAgent)
+                    ? '📱 No iPhone: toque em Compartilhar → "Adicionar à Tela de Início", abra o app pelo ícone e tente de novo.'
+                    : '⚠️ Este navegador não aceita notificações. Use o Chrome.');
+                return;
+            }
+            if (!navigator.onLine) { alert('📶 Precisa de internet para ativar.'); return; }
+            const permissao = await Notification.requestPermission();
+            if (permissao !== 'granted') {
+                alert('🔕 As notificações estão bloqueadas. Para liberar: toque no cadeado ao lado do endereço → Permissões → Notificações → Permitir.');
+                return;
+            }
+            try {
+                await registrarTokenPush();
+                alert('🔔 Pronto! Você vai ser avisado quando o PDF da sua OS chegar.');
+            } catch (e) {
+                alert('❌ Não consegui ativar: ' + e.message);
+            }
+            atualizarBotaoNotificacoes();
+        }
+
+        // Com o app aberto na tela, o Firebase não mostra a notificação sozinho: mostramos nós
+        if (pushSuportado()) {
+            try {
+                firebase.messaging().onMessage(p => {
+                    navigator.serviceWorker.ready.then(reg => reg.showNotification(p.notification.title, { body: p.notification.body, icon: 'logo.png' }));
+                });
+            } catch (e) {}
+        }
+
         function efetuarLoginSucesso(cracha, nome) {
             solicitanteCracha = cracha; solicitanteNome = nome;
             solicitanteLimpoDisplay = (nome || cracha).replace(new RegExp('^' + cracha + '\\s*-\\s*', 'i'), '').trim();
             localStorage.setItem('logged_cracha', cracha); localStorage.setItem('logged_nome', nome);
             document.getElementById('menu-user-name').innerText = `Olá, ${solicitanteLimpoDisplay}`;
             document.getElementById('login-screen').style.display = 'none'; document.getElementById('menu-screen').style.display = 'flex';
+            atualizarBotaoNotificacoes();
+            if (pushSuportado() && Notification.permission === 'granted' && navigator.onLine) registrarTokenPush().catch(() => {});
         }
         function verificarSessaoSalva() {
             if (localStorage.getItem('logged_cracha') && localStorage.getItem('logged_nome') && localStorage.getItem('permanecer_logado') === 'true') {

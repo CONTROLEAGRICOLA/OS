@@ -1,7 +1,8 @@
 {
   "name": "Controle Agricola Clealco",
   "short_name": "OS Clealco",
-  "start_url": "./app_lancamento.html",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#09090b",
   "theme_color": "#09090b",
