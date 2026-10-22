@@ -265,7 +265,7 @@
             </div>
             <div style="display: flex; gap: 0.8rem;">
                 <button class="btn btn-secondary" style="flex: 1;" onclick="fecharModalSelecaoOS()">Cancelar</button>
-                <button class="btn btn-primary" style="flex: 1;" onclick="avancarApontamentoOS()">Confirmar</button>
+                <button class="btn btn-primary" style="flex: 1;" id="btn-confirmar-os" onclick="avancarApontamentoOS()">Confirmar</button>
             </div>
         </div>
     </div>
@@ -634,21 +634,33 @@
             carregarEExibirGestaoOS();
         }
 
+                // Abre na hora com a lista guardada no celular e, por trás, busca a atualizada
         async function carregarEExibirGestaoOS() {
             const tbody = document.getElementById('gestao-tbody');
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem;">Carregando Ordens de Serviço...</td></tr>';
-            let listaRemota = [];
+            const dono = localStorage.getItem('os_cache_gestao_dono');
+            const ehDele = !dono || dono === String(solicitanteCracha);   // lista guardada é deste líder?
+            const guardada = ehDele ? JSON.parse(localStorage.getItem('os_cache_gestao') || '[]') : [];
+
+            if (guardada.length) desenharGestao(guardada);
+            else tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem;">Carregando Ordens de Serviço...</td></tr>';
+
             if (navigator.onLine) {
                 try {
-                    const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`)).json();
+                    const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`, { signal: AbortSignal.timeout(20000) })).json();
                     if (res.success && res.dados) {
-                        listaRemota = res.dados;
-                        localStorage.setItem('os_cache_gestao', JSON.stringify(listaRemota));
+                        localStorage.setItem('os_cache_gestao', JSON.stringify(res.dados));
+                        localStorage.setItem('os_cache_gestao_dono', String(solicitanteCracha));
+                        desenharGestao(res.dados);
+                        return;
                     }
-                } catch(e) {}
-            } else {
-                listaRemota = JSON.parse(localStorage.getItem('os_cache_gestao') || '[]');
+                } catch (e) {}
             }
+            if (!guardada.length) desenharGestao([]);   // sem internet e sem nada guardado: mostra só a fila offline
+        }
+
+        // Desenha a tabela da Gestão de OS com a lista recebida
+        function desenharGestao(listaRemota) {
+            const tbody = document.getElementById('gestao-tbody');
             const filaOffline = JSON.parse(localStorage.getItem('os_fila_offline') || '[]');
             const tempCodesFila = filaOffline.map(x => x.codigoTemp);
             listaOSCache = [...filaOffline, ...listaRemota.filter(r => !tempCodesFila.includes(r.codigoTemp))];
@@ -852,6 +864,8 @@
             document.getElementById('justificativa-texto').value = '';
         }
 
+               let atualizacaoApontamento = null;   // busca da lista nova que ainda está em andamento
+
         async function abrirModalApontamentoOS() {
             modoOperacaoSelecionado = "APONTAMENTO";
             isEditandoRejeitada = false;
@@ -860,25 +874,41 @@
             document.getElementById('select-os-modal').style.display = 'flex';
 
             const select = document.getElementById('select-os-origem');
-            select.innerHTML = '<option value="">Carregando Ordens de Serviço...</option>';
+            select.innerHTML = '';
+            const dono = localStorage.getItem('os_cache_gestao_dono');
+            const guardada = (!dono || dono === String(solicitanteCracha)) ? JSON.parse(localStorage.getItem('os_cache_gestao') || '[]') : [];
+            if (guardada.length) preencherSelectApontamento(guardada);    // mostra na hora o que já tem no celular
+            else select.innerHTML = '<option value="">Carregando Ordens de Serviço...</option>';
 
-            let resLista = [];
-            if (navigator.onLine) {
+            atualizacaoApontamento = null;
+            if (!navigator.onLine) { if (!guardada.length) preencherSelectApontamento([]); return; }
+
+            atualizacaoApontamento = (async () => {
                 try {
-                    const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`)).json();
-                    if (res.success && res.dados) resLista = res.dados;
-                } catch(e) {}
-            } else {
-                resLista = JSON.parse(localStorage.getItem('os_cache_gestao') || '[]');
-            }
+                    const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`, { signal: AbortSignal.timeout(20000) })).json();
+                    if (res.success && res.dados) {
+                        localStorage.setItem('os_cache_gestao', JSON.stringify(res.dados));
+                        localStorage.setItem('os_cache_gestao_dono', String(solicitanteCracha));
+                        preencherSelectApontamento(res.dados);
+                        return;
+                    }
+                } catch (e) {}
+                if (!guardada.length) preencherSelectApontamento([]);
+            })();
+            await atualizacaoApontamento;
+            atualizacaoApontamento = null;
+        }
 
-            listaOSCache = resLista;
-            const osLancadas = resLista.filter(o => o.tipo_registro === 'LANCAMENTO');
+        function preencherSelectApontamento(lista) {
+            const select = document.getElementById('select-os-origem');
+            const escolhida = select.value;   // se o líder já escolheu uma OS, mantém a escolha
+            listaOSCache = lista;
             select.innerHTML = '<option value="">Selecione a OS Original...</option>';
-            osLancadas.forEach(o => {
+            lista.filter(o => o.tipo_registro === 'LANCAMENTO').forEach(o => {
                 const displayOS = o.codigoOS || o.codigoTemp;
                 select.innerHTML += `<option value="${o.codigoTemp}">${displayOS} - ${o.fa_codigo} (${o.operacao})</option>`;
             });
+            if (escolhida) select.value = escolhida;
         }
 
         function fecharModalSelecaoOS() {
@@ -886,9 +916,19 @@
             document.getElementById('menu-screen').style.display = 'flex';
         }
 
-        function avancarApontamentoOS() {
+        async function avancarApontamentoOS() {
             const codTemp = document.getElementById('select-os-origem').value;
             if(!codTemp) { alert("Selecione uma OS da lista."); return; }
+
+            // A lista nova ainda está chegando? Espera ela, para a trava dos talhões 100% usar os apontamentos atualizados
+            if (atualizacaoApontamento) {
+                const botao = document.getElementById('btn-confirmar-os');
+                botao.disabled = true;
+                botao.innerText = 'Atualizando...';
+                await atualizacaoApontamento;
+                botao.disabled = false;
+                botao.innerText = 'Confirmar';
+            }
 
             document.getElementById('os-origem-id').value = codTemp;
             osOrigemObjeto = listaOSCache.find(x => x.codigoTemp === codTemp);
