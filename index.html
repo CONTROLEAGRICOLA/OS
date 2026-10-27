@@ -445,6 +445,7 @@
             </div>
             <div id="box-actions-visualizar" style="display: none; margin-top: 1.5rem;">
                 <button type="button" class="btn btn-secondary" style="width: 100%; margin-bottom: 0.8rem; display: none;" id="btn-ver-pdf" onclick="baixarPDFdaOS()">📄 BAIXAR PDF DA OS</button>
+                <button type="button" class="btn btn-primary" style="width: 100%; margin-bottom: 0.8rem; background-color: #25D366;" id="btn-compartilhar" onclick="compartilharOSAberta()">📱 COMPARTILHAR NO WHATSAPP</button>
                 <button type="button" class="btn btn-primary" style="width: 100%;" id="btn-voltar-gestao" onclick="fecharVisualizacaoOS()">⬅️ VOLTAR PARA GESTÃO DE OS</button>
             </div>
             <div id="submit-loader" class="loader" style="margin-top: 1rem;"></div>
@@ -843,7 +844,7 @@
         }
 
         function setFormFieldsDisabled(disabled) {
-            document.querySelectorAll('#os-form input, #os-form select, #os-form textarea, #os-form button:not(#btn-voltar-gestao):not(#btn-ver-pdf)').forEach(el => {
+                        document.querySelectorAll('#os-form input, #os-form select, #os-form textarea, #os-form button:not(#btn-voltar-gestao):not(#btn-ver-pdf):not(#btn-compartilhar)').forEach(el => {
                 if (el.id !== 'solicitante-display' && el.id !== 'data-solicitacao-display') {
                     el.disabled = disabled;
                 }
@@ -1520,19 +1521,38 @@
         }
 
         let linkWhatsApp = "";
-        function gerarComprovanteWhatsApp(p, codTemp) {
-            document.getElementById('main-app').style.display = 'none';
-            document.getElementById('receipt-modal').style.display = 'flex';
+
+        // Monta o texto do WhatsApp (usado no comprovante e no botão Compartilhar da Gestão)
+        function montarTextoWhatsApp(p, codTemp) {
             const displayOSFinal = p.codigoOS || codTemp;
             let texto = `*OPERAÇÃO REGISTRADA COM SUCESSO*\n\n`;
             texto += `*Tipo:* ${p.tipo_registro}\n*OS:* ${displayOSFinal}\n`;
             texto += `*Status:* ${p.status_aprovacao}\n`;
             texto += `*Fazenda:* ${p.fa_codigo} - ${p.descricao_fazenda}\n*Operação:* ${p.operacao}\n*Área Executada:* ${p.area_total} ha\n*Talhões:* ${p.talhoes}\n`;
             texto += `*Solicitante:* ${solicitanteLimpoDisplay}`;
+            return texto;
+        }
+
+        function gerarComprovanteWhatsApp(p, codTemp) {
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('receipt-modal').style.display = 'flex';
+            const texto = montarTextoWhatsApp(p, codTemp);
             document.getElementById('receipt-content').innerText = texto;
             linkWhatsApp = `https://wa.me/?text=${encodeURIComponent(texto)}`;
         }
         function enviarWhatsApp() { window.open(linkWhatsApp, '_blank'); }
+
+        // Botão "Compartilhar" da tela de visualização: manda a OS aberta para o WhatsApp a qualquer hora
+        function compartilharOSAberta() {
+            const codigoTemp = document.getElementById('os-codigo-temp-atual').value;
+            const os = listaOSCache.find(x => x.codigoTemp === codigoTemp);
+            if (!os) return;
+            // Apontamento ainda sem número: usa o número da OS mãe
+            const mae = listaOSCache.find(x => x.codigoTemp === os.os_origem);
+            const dados = { ...os, codigoOS: os.codigoOS || (mae && mae.codigoOS) || '' };
+            const texto = montarTextoWhatsApp(dados, os.codigoTemp);
+            window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+        }
 
         let loginPendente = null;
 
@@ -1670,7 +1690,7 @@
             }
             try {
                 await registrarTokenPush();
-                alert('🔔 Pronto! Você sera notificado sobre qualquer movimentação da sua Ordem de Serviço.');
+                alert('🔔 Pronto! Você vai ser avisado quando o PDF da sua OS chegar.');
             } catch (e) {
                 alert('❌ Não consegui ativar: ' + e.message);
             }
