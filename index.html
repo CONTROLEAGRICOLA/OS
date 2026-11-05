@@ -579,6 +579,216 @@
             white-space: nowrap;
         }
 
+        /* ================= GESTÃO DE OS: busca, período e cartões ================= */
+        .filtros-gestao {
+            display: grid;
+            grid-template-columns: 1fr 210px;
+            gap: 0.6rem;
+        }
+
+        .datas-gestao {
+            grid-column: 1 / -1;
+        }
+
+        .resumo-filtro {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin: 0.6rem 0 0.4rem;
+        }
+
+        .resumo-filtro button {
+            background: none;
+            border: 0;
+            padding: 0;
+            color: var(--accent);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .vazio-gestao {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .secao-gestao {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin: 1.2rem 0 0.6rem;
+        }
+
+        .secao-gestao.perigo {
+            color: var(--danger);
+        }
+
+        .secao-gestao .conta {
+            background: var(--bg-input);
+            color: var(--text-main);
+            border-radius: 999px;
+            padding: 1px 8px;
+            font-size: 0.72rem;
+        }
+
+        .mos-cartao {
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .mos-cartao+.mos-cartao {
+            margin-top: 0.7rem;
+        }
+
+        .mos-cartao.rejeitado {
+            border-color: rgba(239, 68, 68, 0.5);
+            cursor: default;
+        }
+
+        .mos-topo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mos-num {
+            font-size: 1.02rem;
+            font-weight: 800;
+        }
+
+        .mos-topo .badge {
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .mos-faz {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .mos-op {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-top: -4px;
+        }
+
+        .mos-area {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .mos-area strong {
+            color: var(--text-main);
+        }
+
+        .mos-aviso {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--warning);
+        }
+
+        .mos-motivo {
+            color: var(--danger);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .mos-botoes {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 2px;
+        }
+
+        .mos-botoes .btn {
+            padding: 0.55rem 0.85rem;
+            font-size: 0.82rem;
+        }
+
+        .mos-aps {
+            border-top: 1px dashed var(--border-color);
+            padding-top: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mos-ap {
+            display: grid;
+            grid-template-columns: 44px 1fr auto;
+            gap: 8px;
+            align-items: center;
+            font-size: 0.78rem;
+            padding: 5px 0;
+        }
+
+        .mos-ap-data {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .mos-ap-st {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--cor);
+        }
+
+        /* barra de progresso: verde = lançado, amarelo = aguardando análise */
+        .barra-os {
+            height: 8px;
+            border-radius: 999px;
+            background: var(--bg-input);
+            display: flex;
+            overflow: hidden;
+        }
+
+        .barra-os span {
+            height: 100%;
+        }
+
+        .barra-os .feito {
+            background: var(--success);
+        }
+
+        .barra-os .aguardando {
+            background: var(--warning);
+        }
+
+        .encerradas-botao {
+            width: 100%;
+            justify-content: space-between;
+            margin-top: 1.2rem;
+            background: var(--bg-page);
+            border: 1px dashed var(--border-color);
+            color: var(--text-muted);
+            border-radius: 10px;
+            padding: 0.8rem 0.9rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        @media (max-width: 600px) {
+            .filtros-gestao {
+                grid-template-columns: 1fr;
+            }
+        }
+
         /* ================= CELULAR (telas de até 600px) ================= */
         @media (max-width: 600px) {
             body {
@@ -1018,21 +1228,28 @@
             </div>
             <button class="btn btn-secondary" onclick="voltarAoMenu()">Voltar ao Menu</button>
         </div>
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 30px;"></th>
-                        <th>OS</th>
-                        <th>Tipo</th>
-                        <th>Fazenda / Operação</th>
-                        <th>Área Exec. (%)</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="gestao-tbody"></tbody>
-            </table>
+        <!-- Busca e período -->
+        <div class="filtros-gestao">
+            <input type="text" id="busca-gestao" placeholder="🔎 Buscar nº da OS, fazenda ou operação..."
+                autocomplete="off">
+            <select id="periodo-gestao">
+                <option value="0">Todo o período</option>
+                <option value="7">Últimos 7 dias</option>
+                <option value="30">Últimos 30 dias</option>
+                <option value="90">Últimos 90 dias</option>
+                <option value="datas">Escolher as datas...</option>
+            </select>
+            <div class="datas-gestao" id="datas-gestao" style="display: none;">
+                <input type="text" id="periodo-datas" placeholder="📅 Toque para escolher o início e o fim" readonly>
+            </div>
         </div>
+        <div class="resumo-filtro">
+            <span id="resumo-filtro"></span>
+            <button type="button" id="limpar-filtros" style="display: none;">Limpar filtros</button>
+        </div>
+
+        <!-- As OS, separadas por situação -->
+        <div id="gestao-lista"></div>
     </div>
 
     <!-- COMPROVANTE -->
@@ -1391,13 +1608,13 @@
 
         // Abre na hora com a lista guardada no celular e, por trás, busca a atualizada
         async function carregarEExibirGestaoOS() {
-            const tbody = document.getElementById('gestao-tbody');
+            const caixa = document.getElementById('gestao-lista');
             const dono = localStorage.getItem('os_cache_gestao_dono');
             const ehDele = !dono || dono === String(solicitanteCracha);   // lista guardada é deste líder?
             const guardada = ehDele ? JSON.parse(localStorage.getItem('os_cache_gestao') || '[]') : [];
 
             if (guardada.length) desenharGestao(guardada);
-            else tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem;">Carregando Ordens de Serviço...</td></tr>';
+            else caixa.innerHTML = '<p class="vazio-gestao">⏳ Carregando suas OS...</p>';
 
             if (navigator.onLine) {
                 try {
@@ -1413,79 +1630,250 @@
             if (!guardada.length) desenharGestao([]);   // sem internet e sem nada guardado: mostra só a fila offline
         }
 
-        // Desenha a tabela da Gestão de OS com a lista recebida
+        // ================= GESTÃO DE OS: organizar, filtrar e desenhar =================
+        const LANCADA = 'OS Lançada', REJEITADA = 'Rejeitado', NAO_ENVIADA = '⚠️ OS NÃO SINCRONIZADA';
+        const NOMES_DOS_TIPOS = { LANCAMENTO: 'Abertura', APONTAMENTO: 'Apontamento', ENCERRAMENTO: 'Encerramento' };
+        const apontamentosAbertos = new Set();   // OS com a lista de apontamentos aberta (o "+")
+        let mostrarEncerradas = false;
+        let periodoPicker = null;                // calendário do "Escolher as datas..."
+
+        // Recebe a lista do servidor (ou nada, quando só mudou a busca ou o período) e redesenha
         function desenharGestao(listaRemota) {
-            const tbody = document.getElementById('gestao-tbody');
-            const filaOffline = JSON.parse(localStorage.getItem('os_fila_offline') || '[]');
-            const tempCodesFila = filaOffline.map(x => x.codigoTemp);
-            listaOSCache = [...filaOffline, ...listaRemota.filter(r => !tempCodesFila.includes(r.codigoTemp))];
-            tbody.innerHTML = '';
-            const aberturas = listaOSCache.filter(o => o.tipo_registro === 'LANCAMENTO');
-            const apontamentos = listaOSCache.filter(o => o.tipo_registro !== 'LANCAMENTO');
-            if (aberturas.length === 0 && apontamentos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1.5rem;">Nenhuma OS cadastrada.</td></tr>';
-                return;
+            if (listaRemota) {
+                const filaOffline = JSON.parse(localStorage.getItem('os_fila_offline') || '[]');
+                const naFila = filaOffline.map(x => x.codigoTemp);
+                listaOSCache = [...filaOffline, ...listaRemota.filter(r => !naFila.includes(r.codigoTemp))];
             }
-            aberturas.forEach(osPai => {
-                const filhos = apontamentos.filter(a => a.os_origem === osPai.codigoTemp);
-                const areaApontada = filhos.reduce((acc, curr) => acc + (parseFloat(curr.area_total) || 0), 0);
-                const pct = osPai.area_total > 0 ? Math.min(100, Math.round((areaApontada / osPai.area_total) * 100)) : 0;
-                const hasFilhos = filhos.length > 0;
-                const displayOS = osPai.codigoOS || osPai.codigoTemp;
-                const isPendingSync = osPai.status_aprovacao === '⚠️ OS NÃO SINCRONIZADA';
-                const trPai = document.createElement('tr');
-                trPai.style.cursor = 'pointer';
-                trPai.innerHTML = `
-                    <td style="text-align: center;" onclick="event.stopPropagation(); toggleChildren('${osPai.codigoTemp}')">
-                        ${hasFilhos ? `<button id="btn-expand-${osPai.codigoTemp}" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--accent); width:24px; height:24px; border-radius:4px; cursor:pointer; font-weight:bold;">+</button>` : ''}
-                    </td>
-                    <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${displayOS}</strong>${osPai.pdf_url ? ' 📄' : ''}</td>
-                    <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><span class="badge badge-analise">${osPai.tipo_registro}</span></td>
-                    <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')">${osPai.fa_codigo} - ${osPai.descricao_fazenda}<br><small style="color:var(--text-muted);">${osPai.operacao}</small></td>
-                    <td data-label="Área (executado)" onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><strong>${osPai.area_total} ha</strong> <span style="color:var(--accent); font-weight:700;">(${pct}%)</span></td>
-                    <td onclick="abrirOSParaVisualizacaoOuEdicao('${osPai.codigoTemp}')"><span class="badge ${isPendingSync ? 'badge-pending-sync' : getBadgeClass(osPai.status_aprovacao)}">${osPai.status_aprovacao || 'Em análise'}</span><small class="motivo-rejeicao"></small></td>
-                `;
-                mostrarMotivo(trPai, osPai);
-                tbody.appendChild(trPai);
-                filhos.forEach(osFilho => {
-                    const displayFilhoOS = osFilho.codigoOS || osFilho.codigoTemp;
-                    const isPendingSyncF = osFilho.status_aprovacao === '⚠️ OS NÃO SINCRONIZADA';
-                    const trFilho = document.createElement('tr');
-                    trFilho.className = `child-row-${osPai.codigoTemp} linha-filho`;
-                    trFilho.style.background = 'rgba(255,255,255,0.02)';
-                    trFilho.style.cursor = 'pointer';
-                    trFilho.innerHTML = `
-                        <td></td>
-                        <td style="padding-left: 1.5rem;" onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">↳ <strong>${displayFilhoOS}</strong></td>
-                        <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')"><span class="badge badge-lancada">${osFilho.tipo_registro}</span></td>
-                        <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">${osFilho.fa_codigo} - ${osFilho.descricao_fazenda}<br><small style="color:var(--text-muted);">${osFilho.operacao}</small></td>
-                        <td data-label="Área apontada" onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')">${osFilho.area_total} ha</td>
-                        <td onclick="abrirOSParaVisualizacaoOuEdicao('${osFilho.codigoTemp}')"><span class="badge ${isPendingSyncF ? 'badge-pending-sync' : getBadgeClass(osFilho.status_aprovacao)}">${osFilho.status_aprovacao || 'Em análise'}</span><small class="motivo-rejeicao"></small></td>
-                    `;
-                    mostrarMotivo(trFilho, osFilho);
-                    tbody.appendChild(trFilho);
-                });
-            });
+            const g = montarGrupos(listaOSCache);
+            for (const nome in g) g[nome] = g[nome].filter(passaNoFiltro);
+            desenharResumoDoFiltro(g);
+
+            const termo = semAcentos(document.getElementById('busca-gestao').value);
+            const partes = [];
+            if (g.rejeitadas.length) partes.push(secao('⚠️ PRECISA CORRIGIR', g.rejeitadas.length, 'perigo') + g.rejeitadas.map(cartaoRejeitado).join(''));
+            if (g.andamento.length) partes.push(secao('EM ANDAMENTO', g.andamento.length) + g.andamento.map(cartaoOS).join(''));
+            if (g.aguardando.length) partes.push(secao('AGUARDANDO ANÁLISE', g.aguardando.length) + g.aguardando.map(cartaoAguardando).join(''));
+            if (g.encerradas.length) {
+                const abertas = mostrarEncerradas || termo;   // buscando, já mostra
+                partes.push(`<button type="button" class="encerradas-botao" onclick="alternarEncerradas()"><span>✅ ENCERRADAS (${g.encerradas.length})</span><span>${abertas ? 'esconder ▴' : 'ver ▾'}</span></button>`
+                    + (abertas ? '<div style="margin-top: 0.7rem;">' + g.encerradas.map(cartaoOS).join('') + '</div>' : ''));
+            }
+            document.getElementById('gestao-lista').innerHTML = partes.length ? partes.join('')
+                : `<p class="vazio-gestao">${filtroAtivo() ? 'Nenhuma OS com esses filtros.' : 'Nenhuma OS cadastrada.'}</p>`;
         }
 
-        function mostrarMotivo(tr, os) {
-            if (os.status_aprovacao !== 'Rejeitado') return;
-            tr.querySelector('.motivo-rejeicao').textContent = `Motivo: ${os.justificativa_controle || 'não informado'}`;
+        // Separa a lista do líder em: em andamento, aguardando, rejeitadas e encerradas
+        function montarGrupos(lista) {
+            const filhosPorAbertura = new Map();
+            for (const r of lista) {
+                if (r.tipo_registro === 'LANCAMENTO' || !r.os_origem) continue;
+                if (!filhosPorAbertura.has(r.os_origem)) filhosPorAbertura.set(r.os_origem, []);
+                filhosPorAbertura.get(r.os_origem).push(r);
+            }
+            const maeDe = r => lista.find(x => x.codigoTemp === r.os_origem);
+            const grupos = { andamento: [], aguardando: [], rejeitadas: [], encerradas: [] };
+
+            for (const r of lista) {
+                if (r.status_aprovacao === REJEITADA) { grupos.rejeitadas.push({ registro: r, mae: maeDe(r), data: dataDe(r) }); continue; }
+                if (r.status_aprovacao !== LANCADA) { grupos.aguardando.push({ registro: r, mae: maeDe(r), data: dataDe(r) }); continue; }
+                if (r.tipo_registro !== 'LANCAMENTO') continue;   // apontamento lançado aparece dentro da OS dele
+                const os = montarOS(r, filhosPorAbertura.get(r.codigoTemp) || []);
+                (os.encerrada ? grupos.encerradas : grupos.andamento).push(os);
+            }
+            for (const nome in grupos) grupos[nome].sort((a, b) => lerData(b.data) - lerData(a.data));   // mais novo primeiro
+            return grupos;
         }
 
-        function toggleChildren(codigoTemp) {
-            const rows = document.querySelectorAll(`.child-row-${codigoTemp}`);
-            const btn = document.getElementById(`btn-expand-${codigoTemp}`);
-            rows.forEach(r => r.classList.toggle('aberto'));
-            if (btn && rows.length) btn.innerText = rows[0].classList.contains('aberto') ? '-' : '+';
+        // Uma abertura lançada com os apontamentos dela: quanto foi feito, quanto está esperando, quanto falta
+        function montarOS(abertura, filhos) {
+            const ordenados = filhos.slice().sort((a, b) => lerData(dataDe(a)) - lerData(dataDe(b)));
+            const lancados = ordenados.filter(f => f.status_aprovacao === LANCADA);
+            const esperando = ordenados.filter(f => f.status_aprovacao !== LANCADA && f.status_aprovacao !== REJEITADA);
+            const somar = l => l.filter(f => f.tipo_registro !== 'ENCERRAMENTO').reduce((s, f) => s + (parseFloat(f.area_total) || 0), 0);
+
+            const previsto = parseFloat(abertura.area_total) || 0;
+            const feito = somar(lancados), aguardando = somar(esperando);
+            const pctFeito = previsto > 0 ? Math.min(100, feito / previsto * 100) : 0;
+            const ultimo = ordenados[ordenados.length - 1];
+            return {
+                abertura, apontamentos: ordenados, previsto, feito, aguardando, pctFeito,
+                pctAguardando: previsto > 0 ? Math.min(100 - pctFeito, aguardando / previsto * 100) : 0,
+                encerrada: lancados.some(f => f.tipo_registro === 'ENCERRAMENTO'),
+                encerramentoPendente: esperando.some(f => f.tipo_registro === 'ENCERRAMENTO'),
+                data: ultimo ? dataDe(ultimo) : dataDe(abertura)   // última movimentação
+            };
         }
 
-        function getBadgeClass(st) {
-            if (st === 'OS Lançada') return 'badge-lancada';
-            if (st === 'Rejeitado') return 'badge-rejeitado';
-            return 'badge-analise';
+        // ---------- Busca e período ----------
+        function passaNoFiltro(item) {
+            const r = item.abertura || item.registro;
+            const termo = semAcentos(document.getElementById('busca-gestao').value);
+            if (termo && !semAcentos([numeroDaOS(r, item.mae), r.fa_codigo, r.descricao_fazenda, r.operacao].join(' ')).includes(termo)) return false;
+            const [inicio, fim] = periodoEscolhido();
+            if (!inicio) return true;
+            const quando = lerData(item.data) || Date.now();   // sem data = acabou de ser feito (fila offline)
+            return quando >= inicio && quando <= fim;
         }
 
+        // [início, fim] em milissegundos; [0] quando é "Todo o período"
+        function periodoEscolhido() {
+            const valor = document.getElementById('periodo-gestao').value;
+            if (valor === 'datas') {
+                const datas = periodoPicker ? periodoPicker.selectedDates : [];
+                if (datas.length < 2) return [0];
+                return [new Date(datas[0]).setHours(0, 0, 0, 0), new Date(datas[1]).setHours(23, 59, 59, 999)];
+            }
+            const dias = Number(valor);
+            if (!dias) return [0];
+            const inicio = new Date();
+            inicio.setHours(0, 0, 0, 0);
+            inicio.setDate(inicio.getDate() - (dias - 1));   // "7 dias" = hoje e os 6 dias antes
+            return [inicio.getTime(), Infinity];
+        }
+
+        function filtroAtivo() {
+            return document.getElementById('busca-gestao').value.trim() !== '' || periodoEscolhido()[0] !== 0;
+        }
+
+        function desenharResumoDoFiltro(g) {
+            const total = g.andamento.length + g.aguardando.length + g.rejeitadas.length + g.encerradas.length;
+            const select = document.getElementById('periodo-gestao');
+            let periodo = select.options[select.selectedIndex].text.toLowerCase();
+            if (select.value === 'datas') {
+                const datas = periodoPicker ? periodoPicker.selectedDates : [];
+                periodo = datas.length === 2 ? `de ${datas[0].toLocaleDateString('pt-BR')} a ${datas[1].toLocaleDateString('pt-BR')}` : 'escolha as datas';
+            }
+            document.getElementById('resumo-filtro').textContent = `${total} ${total === 1 ? 'registro' : 'registros'} · ${periodo}`;
+            document.getElementById('limpar-filtros').style.display = filtroAtivo() ? 'inline' : 'none';
+        }
+
+        // ---------- Cartões ----------
+        function secao(titulo, quantos, classe = '') {
+            return `<div class="secao-gestao ${classe}">${titulo} <span class="conta">${quantos}</span></div>`;
+        }
+
+        function barraDaOS(o) {
+            return `<div class="barra-os"><span class="feito" style="width:${o.pctFeito}%"></span><span class="aguardando" style="width:${o.pctAguardando}%"></span></div>`;
+        }
+
+        // OS lançada (em andamento ou encerrada). Tocar no cartão abre a OS, como antes.
+        function cartaoOS(o) {
+            const a = o.abertura;
+            const aberto = apontamentosAbertos.has(a.codigoTemp);
+            const linhas = o.apontamentos.map(f => {
+                const [cor, texto] = f.status_aprovacao === LANCADA ? ['var(--success)', '✓ Lançado']
+                    : f.status_aprovacao === REJEITADA ? ['var(--danger)', 'Rejeitado']
+                        : ['var(--warning)', f.status_aprovacao === NAO_ENVIADA ? 'Não enviado' : 'Em análise'];
+                const talhoes = talhoesDe(f.talhoes);
+                const oque = f.tipo_registro === 'ENCERRAMENTO' ? 'Encerramento da OS'
+                    : `${talhoes.includes(',') ? 'Talhões' : 'Talhão'} ${esc(talhoes)} · ${ha(f.area_total)} ha`;
+                return `<div class="mos-ap" style="--cor: ${cor}" onclick="event.stopPropagation(); abrirOSParaVisualizacaoOuEdicao('${f.codigoTemp}')">
+                    <span class="mos-ap-data">${dataCurta(dataDe(f))}</span><span>${oque}</span><span class="mos-ap-st">${texto}</span></div>`;
+            }).join('');
+            const quantos = o.apontamentos.length;
+            return `<div class="mos-cartao" onclick="abrirOSParaVisualizacaoOuEdicao('${a.codigoTemp}')">
+                <div class="mos-topo"><span class="mos-num">OS ${esc(a.codigoOS)}${a.pdf_url ? ' 📄' : ''}</span>
+                    ${o.encerrada ? '<span class="badge badge-lancada">✅ Encerrada</span>' : '<span class="badge badge-lancada">OS Lançada</span>'}</div>
+                <div class="mos-faz">${esc(a.fa_codigo)} · ${esc(a.descricao_fazenda)}</div>
+                <div class="mos-op">${esc(a.operacao)} · enviada ${dataCurta(dataDe(a))}</div>
+                ${barraDaOS(o)}
+                <div class="mos-area"><span><strong>${ha(o.feito)}</strong> lançado${o.aguardando ? ` + <strong>${ha(o.aguardando)}</strong> aguardando` : ''}</span><span>de ${ha(o.previsto)} ha</span></div>
+                ${o.encerramentoPendente ? '<div class="mos-aviso">⏳ Encerramento enviado, aguardando análise</div>' : ''}
+                <div class="mos-botoes">
+                    ${quantos ? `<button type="button" class="btn btn-secondary" onclick="alternarApontamentos(event, '${a.codigoTemp}')">${aberto ? '−' : '+'} ${quantos} ${quantos === 1 ? 'apontamento' : 'apontamentos'}</button>` : ''}
+                    ${o.encerrada ? '' : `<button type="button" class="btn btn-primary" onclick="event.stopPropagation(); apontarOS('${a.codigoTemp}')">⏱️ Apontar</button>`}
+                </div>
+                ${aberto && quantos ? `<div class="mos-aps">${linhas}</div>` : ''}
+            </div>`;
+        }
+
+        // Enviado e ainda não analisado (ou parado na fila do celular, sem internet)
+        function cartaoAguardando({ registro: r, mae }) {
+            const naoEnviada = r.status_aprovacao === NAO_ENVIADA;
+            const titulo = r.tipo_registro === 'LANCAMENTO' ? 'Aguardando nº da OS' : `${NOMES_DOS_TIPOS[r.tipo_registro]} da OS ${esc(numeroDaOS(r, mae))}`;
+            return `<div class="mos-cartao" onclick="abrirOSParaVisualizacaoOuEdicao('${r.codigoTemp}')">
+                <div class="mos-topo"><span class="mos-num">${titulo}</span>
+                    <span class="badge ${naoEnviada ? 'badge-pending-sync' : 'badge-analise'}">${naoEnviada ? 'Não enviada' : 'Em análise'}</span></div>
+                <div class="mos-faz">${esc(r.fa_codigo)} · ${esc(r.descricao_fazenda)}</div>
+                <div class="mos-op">${esc(r.operacao)} · ${r.tipo_registro === 'ENCERRAMENTO' ? 'encerrar a OS' : ha(r.area_total) + ' ha'}</div>
+                <div class="mos-area"><span>${naoEnviada ? '📶 Vai ser enviada quando tiver internet' : 'Enviada ' + dataCurta(dataDe(r))}</span><span>${NOMES_DOS_TIPOS[r.tipo_registro] || ''}</span></div>
+            </div>`;
+        }
+
+        // Rejeitado pelo controle: motivo e o botão para corrigir
+        function cartaoRejeitado({ registro: r, mae }) {
+            const titulo = r.tipo_registro === 'LANCAMENTO' ? `Abertura de ${dataCurta(dataDe(r))}` : `${NOMES_DOS_TIPOS[r.tipo_registro]} da OS ${esc(numeroDaOS(r, mae))}`;
+            return `<div class="mos-cartao rejeitado">
+                <div class="mos-topo"><span class="mos-num">${titulo}</span><span class="badge badge-rejeitado">Rejeitado</span></div>
+                <div class="mos-faz">${esc(r.fa_codigo)} · ${esc(r.descricao_fazenda)}</div>
+                <div class="mos-op">${esc(r.operacao)} · ${ha(r.area_total)} ha</div>
+                <div class="mos-motivo">Motivo: ${esc(r.justificativa_controle || 'não informado')}</div>
+                <div class="mos-botoes"><button type="button" class="btn btn-danger" style="width: 100%;" onclick="abrirOSParaVisualizacaoOuEdicao('${r.codigoTemp}')">✏️ CORRIGIR E REENVIAR</button></div>
+            </div>`;
+        }
+
+        // ---------- Botões dos cartões ----------
+        function alternarApontamentos(evento, codigoTemp) {
+            evento.stopPropagation();   // não deixa o clique chegar no cartão (que abriria a OS)
+            if (apontamentosAbertos.has(codigoTemp)) apontamentosAbertos.delete(codigoTemp);
+            else apontamentosAbertos.add(codigoTemp);
+            desenharGestao();
+        }
+
+        function alternarEncerradas() {
+            mostrarEncerradas = !mostrarEncerradas;
+            desenharGestao();
+        }
+
+        // "Apontar" do cartão: começa o apontamento desta OS, sem a janela de escolher
+        async function apontarOS(codigoTemp) {
+            modoOperacaoSelecionado = "APONTAMENTO";
+            isEditandoRejeitada = false;
+            prepararFormulario();
+            document.getElementById('check-encerrar-os').checked = false;
+            document.getElementById('observacao').value = '';
+            document.getElementById('gestao-app').style.display = 'none';
+            await avancarApontamentoOS(codigoTemp);
+        }
+
+        // ---------- Pequenas ajudas ----------
+        function dataDe(r) { return (r && (r.dataSincronizacao || r.data_solicitacao)) || ''; }   // a do servidor, ou a do celular (fila offline)
+        function lerData(texto) {   // "05/11/2026 07:10" → número (para ordenar e comparar)
+            const m = String(texto || '').match(/(\d{2})\/(\d{2})\/(\d{4})(?:\D+(\d{2}):(\d{2}))?/);
+            return m ? new Date(m[3], m[2] - 1, m[1], m[4] || 0, m[5] || 0).getTime() : 0;
+        }
+        function dataCurta(texto) { const m = String(texto || '').match(/(\d{2})\/(\d{2})/); return m ? `${m[1]}/${m[2]}` : ''; }
+        function ha(n) { return (Number(n) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+        function esc(t) { return String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+        function talhoesDe(t) { return String(t || '').split(',').map(x => x.split(':')[0].trim()).filter(Boolean).join(', '); }
+        function semAcentos(t) { return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
+        function numeroDaOS(r, mae) { return r.codigoOS || (mae && mae.codigoOS) || ''; }
+
+        // ---------- Busca, período e "Limpar filtros" ----------
+        document.getElementById('busca-gestao').addEventListener('input', () => desenharGestao());
+
+        document.getElementById('periodo-gestao').addEventListener('change', evento => {
+            const escolherDatas = evento.target.value === 'datas';
+            document.getElementById('datas-gestao').style.display = escolherDatas ? 'block' : 'none';
+            if (escolherDatas) {
+                if (!periodoPicker) {   // o calendário só é criado na primeira vez
+                    periodoPicker = flatpickr('#periodo-datas', {
+                        mode: 'range', dateFormat: 'd/m/Y', locale: 'pt',
+                        onChange: datas => { if (datas.length !== 1) desenharGestao(); }   // espera escolher as duas datas
+                    });
+                }
+                periodoPicker.open();
+            }
+            desenharGestao();
+        });
+
+        document.getElementById('limpar-filtros').addEventListener('click', () => {
+            document.getElementById('busca-gestao').value = '';
+            document.getElementById('periodo-gestao').value = '0';
+            document.getElementById('datas-gestao').style.display = 'none';
+            if (periodoPicker) periodoPicker.clear();
+            desenharGestao();
+        });
         function abrirOSParaVisualizacaoOuEdicao(codigoTemp) {
             const osObj = listaOSCache.find(x => x.codigoTemp === codigoTemp);
             if (!osObj) return;
@@ -1500,7 +1888,7 @@
             modoOperacaoSelecionado = (osObj.tipo_registro === 'LANCAMENTO') ? 'LANCAMENTO' : 'APONTAMENTO';
 
             document.getElementById('os-codigo-temp-atual').value = osObj.codigoTemp;
-            document.getElementById('os-origem-id').value = osObj.os_origem || osObj.codigoTemp;
+            document.getElementById('os-origem-id').value = osObj.tipo_registro === 'LANCAMENTO' ? '' : (osObj.os_origem || '');   // abertura não tem OS de origem
             document.getElementById('pea-input').value = osObj.pea || "";
             document.getElementById('fundo-input').value = `${osObj.fa_codigo} - ${osObj.descricao_fazenda}`;
             document.getElementById('tipo-fazenda').value = osObj.tipo_fazenda || "";
@@ -1701,7 +2089,17 @@
             });
         }
 
+        function prepararFormulario() {
+            modoVisualizacao = false;
+            setFormFieldsDisabled(false);
+            document.getElementById('view-mode-banner').style.display = 'none';
+            document.getElementById('box-actions-lancar').style.display = 'flex';
+            document.getElementById('box-actions-visualizar').style.display = 'none';
+            document.getElementById('btn-submit').innerText = 'ENVIAR SOLICITAÇÃO';
+        }
+
         function iniciarAberturaOS() {
+            prepararFormulario();
             modoOperacaoSelecionado = "LANCAMENTO";
             isEditandoRejeitada = false;
             document.getElementById('os-origem-id').value = "";
@@ -1718,6 +2116,7 @@
         let atualizacaoApontamento = null;   // busca da lista nova que ainda está em andamento
 
         async function abrirModalApontamentoOS() {
+            prepararFormulario();
             modoOperacaoSelecionado = "APONTAMENTO";
             isEditandoRejeitada = false;
             document.getElementById('view-mode-banner').style.display = 'none';
@@ -1767,8 +2166,8 @@
             document.getElementById('menu-screen').style.display = 'flex';
         }
 
-        async function avancarApontamentoOS() {
-            const codTemp = document.getElementById('select-os-origem').value;
+        async function avancarApontamentoOS(codigo) {
+            const codTemp = codigo || document.getElementById('select-os-origem').value;
             if (!codTemp) { alert("Selecione uma OS da lista."); return; }
 
             // A lista nova ainda está chegando? Espera ela, para a trava dos talhões 100% usar os apontamentos atualizados
@@ -1945,6 +2344,7 @@
             const areaJaApontadaPorTalhao = {};
             if (modoOperacaoSelecionado === 'APONTAMENTO' && osOrigemObjeto) {
                 const apontamentosAnteriores = listaOSCache.filter(o =>
+                    o.tipo_registro !== 'LANCAMENTO' &&
                     o.os_origem === osOrigemObjeto.codigoTemp &&
                     o.status_aprovacao !== 'Rejeitado'
                 );
