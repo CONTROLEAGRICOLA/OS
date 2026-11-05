@@ -14,10 +14,11 @@ firebase.initializeApp({
 firebase.messaging();   // com o app fechado, o Firebase recebe o push e mostra a notificação
 
 // ===================== OFFLINE =====================
-const CACHE_NAME = 'clealco-os-v6';
+const CACHE_NAME = 'clealco-os-v7';
 const ASSETS = [
   './',
   './index.html',
+  './admin.js',
   './manifest.json',
   'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
   'https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css',
