@@ -710,6 +710,23 @@
             font-weight: 600;
         }
 
+        /* Cancelada pelo controle: cartão cinza, só para o líder ficar sabendo */
+        .mos-cartao.cancelado {
+            cursor: default;
+            border-style: dashed;
+        }
+
+        .badge-cancelado {
+            background: rgba(161, 161, 170, 0.15);
+            color: var(--text-muted);
+            border: 1px solid rgba(161, 161, 170, 0.35);
+        }
+
+        .mos-motivo-cancelado {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
         .mos-botoes {
             display: flex;
             gap: 0.5rem;
@@ -1632,6 +1649,8 @@
 
         // ================= GESTÃO DE OS: organizar, filtrar e desenhar =================
         const LANCADA = 'OS Lançada', REJEITADA = 'Rejeitado', NAO_ENVIADA = '⚠️ OS NÃO SINCRONIZADA';
+        const CANCELADA_LIDER = 'Cancelado pelo líder', CANCELADA_CONTROLE = 'Cancelado pelo controle';
+        const cancelada = r => r.status_aprovacao === CANCELADA_LIDER || r.status_aprovacao === CANCELADA_CONTROLE;
         const NOMES_DOS_TIPOS = { LANCAMENTO: 'Abertura', APONTAMENTO: 'Apontamento', ENCERRAMENTO: 'Encerramento' };
         const apontamentosAbertos = new Set();   // OS com a lista de apontamentos aberta (o "+")
         let mostrarEncerradas = false;
@@ -1651,6 +1670,7 @@
             const termo = semAcentos(document.getElementById('busca-gestao').value);
             const partes = [];
             if (g.rejeitadas.length) partes.push(secao('⚠️ PRECISA CORRIGIR', g.rejeitadas.length, 'perigo') + g.rejeitadas.map(cartaoRejeitado).join(''));
+            if (g.canceladas.length) partes.push(secao('🚫 CANCELADAS PELO CONTROLE', g.canceladas.length) + g.canceladas.map(cartaoCancelado).join(''));
             if (g.andamento.length) partes.push(secao('EM ANDAMENTO', g.andamento.length) + g.andamento.map(cartaoOS).join(''));
             if (g.aguardando.length) partes.push(secao('AGUARDANDO ANÁLISE', g.aguardando.length) + g.aguardando.map(cartaoAguardando).join(''));
             if (g.encerradas.length) {
@@ -1666,14 +1686,20 @@
         function montarGrupos(lista) {
             const filhosPorAbertura = new Map();
             for (const r of lista) {
-                if (r.tipo_registro === 'LANCAMENTO' || !r.os_origem) continue;
+                if (r.tipo_registro === 'LANCAMENTO' || !r.os_origem || cancelada(r)) continue;   // cancelado não entra na conta da OS
                 if (!filhosPorAbertura.has(r.os_origem)) filhosPorAbertura.set(r.os_origem, []);
                 filhosPorAbertura.get(r.os_origem).push(r);
             }
             const maeDe = r => lista.find(x => x.codigoTemp === r.os_origem);
-            const grupos = { andamento: [], aguardando: [], rejeitadas: [], encerradas: [] };
+            const grupos = { andamento: [], aguardando: [], rejeitadas: [], canceladas: [], encerradas: [] };
+            const vistas = canceladasVistas();
 
             for (const r of lista) {
+                if (r.status_aprovacao === CANCELADA_LIDER) continue;   // o próprio líder cancelou: sai da lista
+                if (r.status_aprovacao === CANCELADA_CONTROLE) {        // o controle cancelou: aparece até o líder tocar em "Entendi"
+                    if (!vistas.includes(r.codigoTemp)) grupos.canceladas.push({ registro: r, mae: maeDe(r), data: dataDe(r) });
+                    continue;
+                }
                 if (r.status_aprovacao === REJEITADA) { grupos.rejeitadas.push({ registro: r, mae: maeDe(r), data: dataDe(r) }); continue; }
                 if (r.status_aprovacao !== LANCADA) { grupos.aguardando.push({ registro: r, mae: maeDe(r), data: dataDe(r) }); continue; }
                 if (r.tipo_registro !== 'LANCAMENTO') continue;   // apontamento lançado aparece dentro da OS dele
@@ -1736,7 +1762,7 @@
         }
 
         function desenharResumoDoFiltro(g) {
-            const total = g.andamento.length + g.aguardando.length + g.rejeitadas.length + g.encerradas.length;
+            const total = g.andamento.length + g.aguardando.length + g.rejeitadas.length + g.canceladas.length + g.encerradas.length;
             const select = document.getElementById('periodo-gestao');
             let periodo = select.options[select.selectedIndex].text.toLowerCase();
             if (select.value === 'datas') {
@@ -1808,7 +1834,22 @@
                 <div class="mos-faz">${esc(r.fa_codigo)} · ${esc(r.descricao_fazenda)}</div>
                 <div class="mos-op">${esc(r.operacao)} · ${ha(r.area_total)} ha</div>
                 <div class="mos-motivo">Motivo: ${esc(r.justificativa_controle || 'não informado')}</div>
-                <div class="mos-botoes"><button type="button" class="btn btn-danger" style="width: 100%;" onclick="abrirOSParaVisualizacaoOuEdicao('${r.codigoTemp}')">✏️ CORRIGIR E REENVIAR</button></div>
+                <div class="mos-botoes">
+                    <button type="button" class="btn btn-danger" style="width: 100%;" onclick="abrirOSParaVisualizacaoOuEdicao('${r.codigoTemp}')">✏️ Corrigir e reenviar</button>
+                    <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="cancelarSolicitacao('${r.codigoTemp}')">Cancelar solicitação</button>
+                </div>
+            </div>`;
+        }
+
+        // Cancelado pelo controle: o motivo e o "Entendi" (não tem o que corrigir)
+        function cartaoCancelado({ registro: r, mae }) {
+            const titulo = r.tipo_registro === 'LANCAMENTO' ? `Abertura de ${dataCurta(dataDe(r))}` : `${NOMES_DOS_TIPOS[r.tipo_registro]} da OS ${esc(numeroDaOS(r, mae))}`;
+            return `<div class="mos-cartao cancelado">
+                <div class="mos-topo"><span class="mos-num">${titulo}</span><span class="badge badge-cancelado">Cancelada</span></div>
+                <div class="mos-faz">${esc(r.fa_codigo)} · ${esc(r.descricao_fazenda)}</div>
+                <div class="mos-op">${esc(r.operacao)} · ${ha(r.area_total)} ha</div>
+                <div class="mos-motivo-cancelado">Motivo: ${esc(r.justificativa_controle || 'não informado')}</div>
+                <div class="mos-botoes"><button type="button" class="btn btn-secondary" style="width: 100%;" onclick="entendiCancelada('${r.codigoTemp}')">✓ ENTENDI</button></div>
             </div>`;
         }
 
@@ -1823,6 +1864,41 @@
         function alternarEncerradas() {
             mostrarEncerradas = !mostrarEncerradas;
             desenharGestao();
+        }
+
+        // ---------- Canceladas pelo controle: o "Entendi" fica guardado no celular (uma lista por crachá) ----------
+        function canceladasVistas() {
+            return JSON.parse(localStorage.getItem('canceladas_vistas_' + solicitanteCracha) || '[]');
+        }
+
+        function entendiCancelada(codigoTemp) {
+            const vistas = canceladasVistas();
+            if (!vistas.includes(codigoTemp)) localStorage.setItem('canceladas_vistas_' + solicitanteCracha, JSON.stringify([...vistas, codigoTemp]));
+            desenharGestao();
+        }
+
+        // O líder desiste de corrigir uma rejeitada: no servidor ela vira "Cancelado pelo líder" e sai da lista
+        async function cancelarSolicitacao(codigoTemp) {
+            if (!navigator.onLine) { alert('📶 Precisa de internet para cancelar.'); return; }
+            if (!confirm('Cancelar esta solicitação?\n\nEla sai da sua lista e não poderá mais ser corrigida.')) return;
+            try {
+                const res = await (await fetch(APPSCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'cancelar_solicitacao', codigoTemp, cracha: solicitanteCracha, nome: solicitanteNome })
+                })).json();
+                if (!res.success) throw new Error(res.error || 'Não consegui cancelar.');
+
+                // Muda na hora, no que está na tela e no que está guardado no celular
+                const marcar = lista => lista.forEach(r => { if (r.codigoTemp === codigoTemp) r.status_aprovacao = CANCELADA_LIDER; });
+                marcar(listaOSCache);
+                const guardada = JSON.parse(localStorage.getItem('os_cache_gestao') || '[]');
+                marcar(guardada);
+                localStorage.setItem('os_cache_gestao', JSON.stringify(guardada));
+                desenharGestao();
+            } catch (e) {
+                alert('❌ ' + e.message);
+                carregarEExibirGestaoOS();   // a lista pode estar velha: busca de novo
+            }
         }
 
         // "Apontar" do cartão: começa o apontamento desta OS, sem a janela de escolher
@@ -2154,7 +2230,7 @@
             const escolhida = select.value;   // se o líder já escolheu uma OS, mantém a escolha
             listaOSCache = lista;
             select.innerHTML = '<option value="">Selecione a OS Original...</option>';
-            lista.filter(o => o.tipo_registro === 'LANCAMENTO').forEach(o => {
+            montarGrupos(lista).andamento.map(item => item.abertura).forEach(o => {   // só OS lançadas e ainda abertas (as do "Em andamento")
                 const displayOS = o.codigoOS || o.codigoTemp;
                 select.innerHTML += `<option value="${o.codigoTemp}">${displayOS} - ${o.fa_codigo} (${o.operacao})</option>`;
             });
@@ -2346,7 +2422,8 @@
                 const apontamentosAnteriores = listaOSCache.filter(o =>
                     o.tipo_registro !== 'LANCAMENTO' &&
                     o.os_origem === osOrigemObjeto.codigoTemp &&
-                    o.status_aprovacao !== 'Rejeitado'
+                    o.status_aprovacao !== 'Rejeitado' &&
+                    !cancelada(o)
                 );
                 apontamentosAnteriores.forEach(ap => {
                     if (ap.talhoes) {
@@ -2754,17 +2831,25 @@
             let fila = JSON.parse(localStorage.getItem('os_fila_offline') || '[]');
             if (fila.length === 0) return;
             let novaFila = [];
+            const recusadas = [];
             for (let item of fila) {
                 item.status_aprovacao = 'Em análise';
                 try {
                     const res = await (await fetch(APPSCRIPT_URL, { method: 'POST', body: JSON.stringify(item) })).json();
-                    if (!res.success) novaFila.push(item);
+                    if (res.recusada) {
+                        // O servidor recusou de vez (ex.: OS encerrada): tentar de novo não adianta, então sai da fila
+                        recusadas.push(`• ${item.fa_codigo} - ${item.descricao_fazenda} (${item.operacao}): ${res.error}`);
+                    } else if (!res.success) {
+                        item.status_aprovacao = '⚠️ OS NÃO SINCRONIZADA';
+                        novaFila.push(item);
+                    }
                 } catch (e) {
                     item.status_aprovacao = '⚠️ OS NÃO SINCRONIZADA';
                     novaFila.push(item);
                 }
             }
             localStorage.setItem('os_fila_offline', JSON.stringify(novaFila));
+            if (recusadas.length) alert('⚠️ Não foi possível enviar o que estava guardado no celular:\n\n' + recusadas.join('\n'));
             if (document.getElementById('gestao-app').style.display === 'block') {
                 carregarEExibirGestaoOS();
             }
