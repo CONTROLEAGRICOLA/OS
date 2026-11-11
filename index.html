@@ -579,10 +579,15 @@
             white-space: nowrap;
         }
 
-        /* ================= GESTÃO DE OS: busca, período e cartões ================= */
+        /* ================= GESTÃO DE OS: busca, período, placar e cartões ================= */
+        #gestao-app {
+            max-width: 760px;
+            /* no computador a lista fica numa coluna, sem esticar */
+        }
+
         .filtros-gestao {
             display: grid;
-            grid-template-columns: 1fr 210px;
+            grid-template-columns: 1fr 200px;
             gap: 0.6rem;
         }
 
@@ -597,7 +602,7 @@
             gap: 8px;
             font-size: 0.78rem;
             color: var(--text-muted);
-            margin: 0.6rem 0 0.4rem;
+            margin: 0.6rem 0;
         }
 
         .resumo-filtro button {
@@ -609,26 +614,84 @@
             font-weight: 700;
         }
 
+        /* Placar: os 4 números que separam a lista */
+        .placar-gestao {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .placa {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 2px;
+            padding: 0.7rem 0.8rem;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-muted);
+            text-align: left;
+        }
+
+        .placa b {
+            font-size: 1.45rem;
+            font-weight: 700;
+            line-height: 1.1;
+            color: var(--text-main);
+        }
+
+        .placa span {
+            font-size: 0.76rem;
+            font-weight: 600;
+        }
+
+        .placa.ativa {
+            border-color: var(--accent);
+            box-shadow: inset 0 0 0 1px var(--accent);
+        }
+
+        .placa.ativa span {
+            color: var(--accent);
+        }
+
+        .placa.perigo b {
+            color: var(--danger);
+        }
+
+        .placa.perigo.ativa {
+            border-color: var(--danger);
+            box-shadow: inset 0 0 0 1px var(--danger);
+        }
+
+        .placa.perigo.ativa span {
+            color: var(--danger);
+        }
+
+        .placa.zerada b {
+            color: var(--success);
+        }
+
         .vazio-gestao {
             text-align: center;
             color: var(--text-muted);
             padding: 2rem 0.5rem;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
 
+        /* Título de cada grupo quando o líder está buscando */
         .secao-gestao {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.78rem;
-            font-weight: 800;
+            font-size: 0.75rem;
+            font-weight: 700;
             letter-spacing: 0.05em;
             color: var(--text-muted);
-            margin: 1.2rem 0 0.6rem;
+            margin: 1rem 0 0.5rem;
         }
 
-        .secao-gestao.perigo {
-            color: var(--danger);
+        .secao-gestao:first-child {
+            margin-top: 0;
         }
 
         .secao-gestao .conta {
@@ -636,43 +699,79 @@
             color: var(--text-main);
             border-radius: 999px;
             padding: 1px 8px;
-            font-size: 0.72rem;
+            margin-left: 4px;
         }
 
+        /* ---------- Cartões ---------- */
         .mos-cartao {
             background: var(--bg-page);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 0.85rem;
+            padding: 0.85rem 0.95rem;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 0.45rem;
             cursor: pointer;
         }
 
         .mos-cartao+.mos-cartao {
-            margin-top: 0.7rem;
+            margin-top: 0.6rem;
         }
 
         .mos-cartao.rejeitado {
-            border-color: rgba(239, 68, 68, 0.5);
+            border-color: rgba(239, 68, 68, 0.45);
             cursor: default;
+        }
+
+        .mos-cartao.cancelado {
+            border-style: dashed;
+            cursor: default;
+        }
+
+        .mos-cartao.encerrada .mos-num,
+        .mos-cartao.encerrada .mos-faz {
+            color: var(--text-muted);
         }
 
         .mos-topo {
             display: flex;
-            align-items: center;
-            gap: 8px;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.8rem;
+        }
+
+        .mos-topo .badge {
+            flex-shrink: 0;
+        }
+
+        .mos-id {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
 
         .mos-num {
             font-size: 1.02rem;
-            font-weight: 800;
+            font-weight: 700;
         }
 
-        .mos-topo .badge {
-            margin-left: auto;
-            flex-shrink: 0;
+        .mos-pdf {
+            font-size: 0.62rem;
+            font-weight: 700;
+            color: var(--accent);
+            border: 1px solid currentColor;
+            border-radius: 4px;
+            padding: 0 4px;
+            vertical-align: middle;
+        }
+
+        .mos-etiqueta {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--text-muted);
         }
 
         .mos-faz {
@@ -680,95 +779,33 @@
             font-size: 0.9rem;
         }
 
+        .mos-faz small {
+            font-size: inherit;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
         .mos-op {
             color: var(--text-muted);
-            font-size: 0.75rem;
-            margin-top: -4px;
-        }
-
-        .mos-area {
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
             font-size: 0.78rem;
-            color: var(--text-muted);
         }
 
-        .mos-area strong {
-            color: var(--text-main);
-        }
-
-        .mos-aviso {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--warning);
-        }
-
-        .mos-motivo {
-            color: var(--danger);
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        /* Cancelada pelo controle: cartão cinza, só para o líder ficar sabendo */
-        .mos-cartao.cancelado {
-            cursor: default;
-            border-style: dashed;
-        }
-
-        .badge-cancelado {
-            background: rgba(161, 161, 170, 0.15);
-            color: var(--text-muted);
-            border: 1px solid rgba(161, 161, 170, 0.35);
-        }
-
-        .mos-motivo-cancelado {
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .mos-botoes {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-top: 2px;
-        }
-
-        .mos-botoes .btn {
+        .mos-apontar {
+            flex-shrink: 0;
             padding: 0.55rem 0.85rem;
-            font-size: 0.82rem;
+            font-size: 0.85rem;
         }
 
-        .mos-aps {
-            border-top: 1px dashed var(--border-color);
-            padding-top: 4px;
+        /* Andamento: barra fina e os números na mesma linha */
+        .mos-andamento {
             display: flex;
-            flex-direction: column;
-        }
-
-        .mos-ap {
-            display: grid;
-            grid-template-columns: 44px 1fr auto;
-            gap: 8px;
             align-items: center;
-            font-size: 0.78rem;
-            padding: 5px 0;
+            gap: 0.7rem;
         }
 
-        .mos-ap-data {
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        .mos-ap-st {
-            font-size: 0.7rem;
-            font-weight: 800;
-            color: var(--cor);
-        }
-
-        /* barra de progresso: verde = lançado, amarelo = aguardando análise */
         .barra-os {
-            height: 8px;
+            flex: 1;
+            height: 6px;
             border-radius: 999px;
             background: var(--bg-input);
             display: flex;
@@ -787,23 +824,101 @@
             background: var(--warning);
         }
 
-        .encerradas-botao {
-            width: 100%;
-            justify-content: space-between;
-            margin-top: 1.2rem;
-            background: var(--bg-page);
-            border: 1px dashed var(--border-color);
+        .mos-area {
+            font-size: 0.78rem;
             color: var(--text-muted);
-            border-radius: 10px;
-            padding: 0.8rem 0.9rem;
-            font-size: 0.85rem;
-            font-weight: 700;
+            white-space: nowrap;
         }
 
-        @media (max-width: 600px) {
-            .filtros-gestao {
-                grid-template-columns: 1fr;
-            }
+        .mos-area strong {
+            color: var(--text-main);
+        }
+
+        .mos-aviso {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--warning);
+        }
+
+        .mos-aviso.perigo {
+            color: var(--danger);
+            cursor: pointer;
+        }
+
+        /* Motivo da rejeição (vermelho) ou do cancelamento (cinza) */
+        .mos-motivo {
+            font-size: 0.84rem;
+            line-height: 1.4;
+            background: rgba(239, 68, 68, 0.08);
+            border-left: 3px solid var(--danger);
+            border-radius: 6px;
+            padding: 0.55rem 0.7rem;
+        }
+
+        .mos-motivo.cinza {
+            background: rgba(161, 161, 170, 0.08);
+            border-left-color: var(--text-muted);
+        }
+
+        .mos-motivo b {
+            display: block;
+            font-size: 0.7rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .badge-cancelado {
+            background: rgba(161, 161, 170, 0.15);
+            color: var(--text-muted);
+            border: 1px solid rgba(161, 161, 170, 0.35);
+        }
+
+        /* Botões lado a lado: o principal maior */
+        .mos-acoes {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .mos-acoes .btn {
+            flex: 1;
+            padding: 0.65rem 0.6rem;
+            font-size: 0.85rem;
+        }
+
+        .mos-acoes .principal {
+            flex: 1.6;
+            background: var(--danger);
+            border-color: var(--danger);
+            color: #fff;
+        }
+
+        /* "Ver 2 apontamentos": parece link, não botão */
+        .mos-ver {
+            align-self: flex-start;
+            background: none;
+            border: 0;
+            padding: 2px 0;
+            color: var(--accent);
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .mos-aps {
+            border-top: 1px dashed var(--border-color);
+            padding-top: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mos-ap {
+            display: grid;
+            grid-template-columns: 44px 1fr auto;
+            gap: 8px;
+            align-items: center;
+            font-size: 0.78rem;
+            padding: 5px 0;
         }
 
         /* ================= CELULAR (telas de até 600px) ================= */
@@ -1265,7 +1380,10 @@
             <button type="button" id="limpar-filtros" style="display: none;">Limpar filtros</button>
         </div>
 
-        <!-- As OS, separadas por situação -->
+        <!-- Placar: os 4 números; tocar num deles mostra só aquele grupo -->
+        <div class="placar-gestao" id="placar-gestao"></div>
+
+        <!-- As OS do grupo escolhido -->
         <div id="gestao-lista"></div>
     </div>
 
@@ -1274,7 +1392,7 @@
         <div class="modal-box" style="border: 1px solid var(--success);">
             <h2 style="color: var(--success);">Registro Salvo!</h2>
             <pre id="receipt-content"
-                style="text-align: left; background: var(--bg-input); padding: 1rem; border-radius: 8px; font-size: 0.85rem; color: var(--success); margin: 1rem 0; white-space: pre-wrap; font-family: monospace;"></pre>
+                style="text-align: left; background: var(--bg-input); padding: 1rem; border-radius: 8px; font-size: 0.9rem; line-height: 1.45; color: var(--text-main); margin: 1rem 0; white-space: pre-wrap; font-family: inherit;"></pre>
             <button class="btn btn-primary" style="width: 100%; background-color: #25D366; margin-bottom: 0.6rem;"
                 onclick="enviarWhatsApp()">📱 Enviar WhatsApp</button>
             <button class="btn btn-outline" style="width: 100%;" onclick="voltarAoMenu()">Ir para o Menu
@@ -1620,6 +1738,7 @@
             document.getElementById('menu-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'none';
             document.getElementById('gestao-app').style.display = 'block';
+            grupoEscolhido = '';   // abre no que precisa do líder (ou em "Em andamento")
             carregarEExibirGestaoOS();
         }
 
@@ -1653,10 +1772,18 @@
         const cancelada = r => r.status_aprovacao === CANCELADA_LIDER || r.status_aprovacao === CANCELADA_CONTROLE;
         const NOMES_DOS_TIPOS = { LANCAMENTO: 'Abertura', APONTAMENTO: 'Apontamento', ENCERRAMENTO: 'Encerramento' };
         const apontamentosAbertos = new Set();   // OS com a lista de apontamentos aberta (o "+")
-        let mostrarEncerradas = false;
+        let grupoEscolhido = '';                 // o número do placar que está aberto ('' = o app escolhe)
         let periodoPicker = null;                // calendário do "Escolher as datas..."
 
-        // Recebe a lista do servidor (ou nada, quando só mudou a busca ou o período) e redesenha
+        // Os 4 números do placar: o nome, o aviso de vazio e o cartão de cada grupo
+        const GRUPOS = {
+            atencao: { titulo: 'Precisa de você', vazio: '✓ Tudo certo, nada para corrigir.', cartao: cartaoAtencao },
+            andamento: { titulo: 'Em andamento', vazio: 'Nenhuma OS em andamento.', cartao: cartaoOS },
+            aguardando: { titulo: 'Aguardando análise', vazio: 'Nada aguardando análise.', cartao: cartaoAguardando },
+            encerradas: { titulo: 'Encerradas', vazio: 'Nenhuma OS encerrada.', cartao: cartaoOS }
+        };
+
+        // Recebe a lista do servidor (ou nada, quando só mudou a busca, o período ou o número escolhido) e redesenha
         function desenharGestao(listaRemota) {
             if (listaRemota) {
                 const filaOffline = JSON.parse(localStorage.getItem('os_fila_offline') || '[]');
@@ -1665,21 +1792,49 @@
             }
             const g = montarGrupos(listaOSCache);
             for (const nome in g) g[nome] = g[nome].filter(passaNoFiltro);
-            desenharResumoDoFiltro(g);
+            const grupos = {
+                atencao: [...g.rejeitadas, ...g.canceladas],   // o que precisa do líder
+                andamento: g.andamento,
+                aguardando: g.aguardando,
+                encerradas: g.encerradas
+            };
+            if (!grupoEscolhido) grupoEscolhido = grupos.atencao.length ? 'atencao' : 'andamento';
 
-            const termo = semAcentos(document.getElementById('busca-gestao').value);
-            const partes = [];
-            if (g.rejeitadas.length) partes.push(secao('⚠️ PRECISA CORRIGIR', g.rejeitadas.length, 'perigo') + g.rejeitadas.map(cartaoRejeitado).join(''));
-            if (g.canceladas.length) partes.push(secao('🚫 CANCELADAS PELO CONTROLE', g.canceladas.length) + g.canceladas.map(cartaoCancelado).join(''));
-            if (g.andamento.length) partes.push(secao('EM ANDAMENTO', g.andamento.length) + g.andamento.map(cartaoOS).join(''));
-            if (g.aguardando.length) partes.push(secao('AGUARDANDO ANÁLISE', g.aguardando.length) + g.aguardando.map(cartaoAguardando).join(''));
-            if (g.encerradas.length) {
-                const abertas = mostrarEncerradas || termo;   // buscando, já mostra
-                partes.push(`<button type="button" class="encerradas-botao" onclick="alternarEncerradas()"><span>✅ ENCERRADAS (${g.encerradas.length})</span><span>${abertas ? 'esconder ▴' : 'ver ▾'}</span></button>`
-                    + (abertas ? '<div style="margin-top: 0.7rem;">' + g.encerradas.map(cartaoOS).join('') + '</div>' : ''));
+            const buscando = semAcentos(document.getElementById('busca-gestao').value) !== '';
+            desenharPlacar(grupos, buscando);
+            desenharResumoDoFiltro(grupos);
+
+            let html;
+            if (buscando) {   // buscando: mostra o que achou em todos os grupos, cada um com seu título
+                html = Object.keys(GRUPOS).filter(nome => grupos[nome].length)
+                    .map(nome => secao(GRUPOS[nome].titulo.toUpperCase(), grupos[nome].length) + grupos[nome].map(GRUPOS[nome].cartao).join(''))
+                    .join('') || '<p class="vazio-gestao">Nenhuma OS com essa busca.</p>';
+            } else {
+                const itens = grupos[grupoEscolhido];
+                html = itens.length ? itens.map(GRUPOS[grupoEscolhido].cartao).join('')
+                    : `<p class="vazio-gestao">${filtroAtivo() ? 'Nada nesse período.' : GRUPOS[grupoEscolhido].vazio}</p>`;
             }
-            document.getElementById('gestao-lista').innerHTML = partes.length ? partes.join('')
-                : `<p class="vazio-gestao">${filtroAtivo() ? 'Nenhuma OS com esses filtros.' : 'Nenhuma OS cadastrada.'}</p>`;
+            document.getElementById('gestao-lista').innerHTML = html;
+        }
+
+        // O placar: 4 números; tocar num deles mostra só aquele grupo
+        function desenharPlacar(grupos, buscando) {
+            document.getElementById('placar-gestao').innerHTML = Object.keys(GRUPOS).map(nome => {
+                const quantos = grupos[nome].length;
+                const nadaParaCorrigir = nome === 'atencao' && quantos === 0;
+                const classes = ['placa'];
+                if (nome === grupoEscolhido && !buscando) classes.push('ativa');
+                if (nome === 'atencao') classes.push(nadaParaCorrigir ? 'zerada' : 'perigo');
+                return `<button type="button" class="${classes.join(' ')}" onclick="escolherGrupo('${nome}')">
+                    <b>${nadaParaCorrigir ? '✓' : quantos}</b><span>${nadaParaCorrigir ? 'Nada para corrigir' : GRUPOS[nome].titulo}</span></button>`;
+            }).join('');
+        }
+
+        function escolherGrupo(nome) {
+            grupoEscolhido = nome;
+            document.getElementById('busca-gestao').value = '';   // tocou num número: sai da busca
+            desenharGestao();
+            document.getElementById('placar-gestao').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         // Separa a lista do líder em: em andamento, aguardando, rejeitadas e encerradas
@@ -1762,7 +1917,7 @@
         }
 
         function desenharResumoDoFiltro(g) {
-            const total = g.andamento.length + g.aguardando.length + g.rejeitadas.length + g.canceladas.length + g.encerradas.length;
+            const total = Object.values(g).reduce((soma, lista) => soma + lista.length, 0);
             const select = document.getElementById('periodo-gestao');
             let periodo = select.options[select.selectedIndex].text.toLowerCase();
             if (select.value === 'datas') {
@@ -1782,6 +1937,18 @@
             return `<div class="barra-os"><span class="feito" style="width:${o.pctFeito}%"></span><span class="aguardando" style="width:${o.pctAguardando}%"></span></div>`;
         }
 
+        // O bloco da esquerda dos cartões: título (nº da OS ou etiqueta), fazenda e operação
+        function identidade(titulo, r, detalhe) {
+            return `<div class="mos-id">${titulo}
+                <span class="mos-faz"><small>${esc(r.fa_codigo)} ·</small> ${esc(r.descricao_fazenda)}</span>
+                <span class="mos-op">${esc(r.operacao)}${detalhe ? ' · ' + detalhe : ''}</span></div>`;
+        }
+
+        // "Abertura de 30/10" ou "Apontamento · OS 11121"
+        function etiquetaDe(r, mae) {
+            return r.tipo_registro === 'LANCAMENTO' ? `Abertura de ${dataCurta(dataDe(r))}` : `${NOMES_DOS_TIPOS[r.tipo_registro]} · OS ${esc(numeroDaOS(r, mae))}`;
+        }
+
         // OS lançada (em andamento ou encerrada). Tocar no cartão abre a OS, como antes.
         function cartaoOS(o) {
             const a = o.abertura;
@@ -1797,18 +1964,17 @@
                     <span class="mos-ap-data">${dataCurta(dataDe(f))}</span><span>${oque}</span><span class="mos-ap-st">${texto}</span></div>`;
             }).join('');
             const quantos = o.apontamentos.length;
-            return `<div class="mos-cartao" onclick="abrirOSParaVisualizacaoOuEdicao('${a.codigoTemp}')">
-                <div class="mos-topo"><span class="mos-num">OS ${esc(a.codigoOS)}${a.pdf_url ? ' 📄' : ''}</span>
-                    ${o.encerrada ? '<span class="badge badge-lancada">✅ Encerrada</span>' : '<span class="badge badge-lancada">OS Lançada</span>'}</div>
-                <div class="mos-faz">${esc(a.fa_codigo)} · ${esc(a.descricao_fazenda)}</div>
-                <div class="mos-op">${esc(a.operacao)} · enviada ${dataCurta(dataDe(a))}</div>
-                ${barraDaOS(o)}
-                <div class="mos-area"><span><strong>${ha(o.feito)}</strong> lançado${o.aguardando ? ` + <strong>${ha(o.aguardando)}</strong> aguardando` : ''}</span><span>de ${ha(o.previsto)} ha</span></div>
+            const rejeitado = o.apontamentos.find(f => f.status_aprovacao === REJEITADA);
+            const numero = `<span class="mos-num">OS ${esc(numeroDaOS(a))}${a.pdf_url ? ' <span class="mos-pdf">PDF</span>' : ''}</span>`;
+            return `<div class="mos-cartao ${o.encerrada ? 'encerrada' : ''}" onclick="abrirOSParaVisualizacaoOuEdicao('${a.codigoTemp}')">
+                <div class="mos-topo">${identidade(numero, a)}
+                    ${o.encerrada ? '<span class="badge badge-lancada">✓ Encerrada</span>'
+                    : `<button type="button" class="btn btn-primary mos-apontar" onclick="event.stopPropagation(); apontarOS('${a.codigoTemp}')">⏱️ Apontar</button>`}</div>
+                <div class="mos-andamento">${barraDaOS(o)}<span class="mos-area"><strong>${ha(o.feito)}</strong> de ${ha(o.previsto)} ha · ${Math.round(o.pctFeito)}%</span></div>
+                ${rejeitado ? `<div class="mos-aviso perigo" onclick="event.stopPropagation(); escolherGrupo('atencao')">⚠️ ${NOMES_DOS_TIPOS[rejeitado.tipo_registro]} rejeitado · toque aqui para corrigir</div>` : ''}
+                ${o.aguardando ? `<div class="mos-aviso">⏳ ${ha(o.aguardando)} ha aguardando análise</div>` : ''}
                 ${o.encerramentoPendente ? '<div class="mos-aviso">⏳ Encerramento enviado, aguardando análise</div>' : ''}
-                <div class="mos-botoes">
-                    ${quantos ? `<button type="button" class="btn btn-secondary" onclick="alternarApontamentos(event, '${a.codigoTemp}')">${aberto ? '−' : '+'} ${quantos} ${quantos === 1 ? 'apontamento' : 'apontamentos'}</button>` : ''}
-                    ${o.encerrada ? '' : `<button type="button" class="btn btn-primary" onclick="event.stopPropagation(); apontarOS('${a.codigoTemp}')">⏱️ Apontar</button>`}
-                </div>
+                ${quantos ? `<button type="button" class="mos-ver" onclick="alternarApontamentos(event, '${a.codigoTemp}')">${aberto ? 'Esconder' : 'Ver'} ${quantos} ${quantos === 1 ? 'apontamento' : 'apontamentos'} ${aberto ? '▴' : '▾'}</button>` : ''}
                 ${aberto && quantos ? `<div class="mos-aps">${linhas}</div>` : ''}
             </div>`;
         }
@@ -1816,40 +1982,40 @@
         // Enviado e ainda não analisado (ou parado na fila do celular, sem internet)
         function cartaoAguardando({ registro: r, mae }) {
             const naoEnviada = r.status_aprovacao === NAO_ENVIADA;
-            const titulo = r.tipo_registro === 'LANCAMENTO' ? 'Aguardando nº da OS' : `${NOMES_DOS_TIPOS[r.tipo_registro]} da OS ${esc(numeroDaOS(r, mae))}`;
+            const etiqueta = r.tipo_registro === 'LANCAMENTO' ? 'Abertura · aguardando nº da OS' : `${NOMES_DOS_TIPOS[r.tipo_registro]} · OS ${esc(numeroDaOS(r, mae))}`;
+            const detalhe = r.tipo_registro === 'ENCERRAMENTO' ? 'encerrar a OS' : ha(r.area_total) + ' ha';
             return `<div class="mos-cartao" onclick="abrirOSParaVisualizacaoOuEdicao('${r.codigoTemp}')">
-                <div class="mos-topo"><span class="mos-num">${titulo}</span>
+                <div class="mos-topo">${identidade(`<span class="mos-etiqueta">${etiqueta}</span>`, r, detalhe)}
                     <span class="badge ${naoEnviada ? 'badge-pending-sync' : 'badge-analise'}">${naoEnviada ? 'Não enviada' : 'Em análise'}</span></div>
-                <div class="mos-faz">${esc(r.fa_codigo)} · ${esc(r.descricao_fazenda)}</div>
-                <div class="mos-op">${esc(r.operacao)} · ${r.tipo_registro === 'ENCERRAMENTO' ? 'encerrar a OS' : ha(r.area_total) + ' ha'}</div>
-                <div class="mos-area"><span>${naoEnviada ? '📶 Vai ser enviada quando tiver internet' : 'Enviada ' + dataCurta(dataDe(r))}</span><span>${NOMES_DOS_TIPOS[r.tipo_registro] || ''}</span></div>
+                <div class="mos-area">${naoEnviada ? '📶 Vai ser enviada quando tiver internet' : 'Enviada ' + dataCurta(dataDe(r))}</div>
             </div>`;
         }
 
-        // Rejeitado pelo controle: motivo e o botão para corrigir
+        // "Precisa de você": a rejeitada (corrigir ou cancelar) ou a cancelada pelo controle (Entendi)
+        function cartaoAtencao(item) {
+            return item.registro.status_aprovacao === CANCELADA_CONTROLE ? cartaoCancelado(item) : cartaoRejeitado(item);
+        }
+
+        // Rejeitado pelo controle: o motivo e os botões para corrigir ou cancelar
         function cartaoRejeitado({ registro: r, mae }) {
-            const titulo = r.tipo_registro === 'LANCAMENTO' ? `Abertura de ${dataCurta(dataDe(r))}` : `${NOMES_DOS_TIPOS[r.tipo_registro]} da OS ${esc(numeroDaOS(r, mae))}`;
             return `<div class="mos-cartao rejeitado">
-                <div class="mos-topo"><span class="mos-num">${titulo}</span><span class="badge badge-rejeitado">Rejeitado</span></div>
-                <div class="mos-faz">${esc(r.fa_codigo)} · ${esc(r.descricao_fazenda)}</div>
-                <div class="mos-op">${esc(r.operacao)} · ${ha(r.area_total)} ha</div>
-                <div class="mos-motivo">Motivo: ${esc(r.justificativa_controle || 'não informado')}</div>
-                <div class="mos-botoes">
-                    <button type="button" class="btn btn-danger" style="width: 100%;" onclick="abrirOSParaVisualizacaoOuEdicao('${r.codigoTemp}')">✏️ Corrigir e reenviar</button>
-                    <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="cancelarSolicitacao('${r.codigoTemp}')">Cancelar solicitação</button>
+                <div class="mos-topo">${identidade(`<span class="mos-etiqueta">${etiquetaDe(r, mae)}</span>`, r, ha(r.area_total) + ' ha')}
+                    <span class="badge badge-rejeitado">Rejeitado</span></div>
+                <div class="mos-motivo"><b>Motivo</b>${esc(r.justificativa_controle || 'não informado')}</div>
+                <div class="mos-acoes">
+                    <button type="button" class="btn btn-danger principal" onclick="abrirOSParaVisualizacaoOuEdicao('${r.codigoTemp}')">✏️ Corrigir e reenviar</button>
+                    <button type="button" class="btn btn-secondary" onclick="cancelarSolicitacao('${r.codigoTemp}')">Cancelar</button>
                 </div>
             </div>`;
         }
 
         // Cancelado pelo controle: o motivo e o "Entendi" (não tem o que corrigir)
         function cartaoCancelado({ registro: r, mae }) {
-            const titulo = r.tipo_registro === 'LANCAMENTO' ? `Abertura de ${dataCurta(dataDe(r))}` : `${NOMES_DOS_TIPOS[r.tipo_registro]} da OS ${esc(numeroDaOS(r, mae))}`;
             return `<div class="mos-cartao cancelado">
-                <div class="mos-topo"><span class="mos-num">${titulo}</span><span class="badge badge-cancelado">Cancelada</span></div>
-                <div class="mos-faz">${esc(r.fa_codigo)} · ${esc(r.descricao_fazenda)}</div>
-                <div class="mos-op">${esc(r.operacao)} · ${ha(r.area_total)} ha</div>
-                <div class="mos-motivo-cancelado">Motivo: ${esc(r.justificativa_controle || 'não informado')}</div>
-                <div class="mos-botoes"><button type="button" class="btn btn-secondary" style="width: 100%;" onclick="entendiCancelada('${r.codigoTemp}')">✓ ENTENDI</button></div>
+                <div class="mos-topo">${identidade(`<span class="mos-etiqueta">${etiquetaDe(r, mae)} · cancelada pelo controle</span>`, r, ha(r.area_total) + ' ha')}
+                    <span class="badge badge-cancelado">Cancelada</span></div>
+                <div class="mos-motivo cinza"><b>Motivo</b>${esc(r.justificativa_controle || 'não informado')}</div>
+                <div class="mos-acoes"><button type="button" class="btn btn-secondary" onclick="entendiCancelada('${r.codigoTemp}')">✓ Entendi</button></div>
             </div>`;
         }
 
@@ -1858,11 +2024,6 @@
             evento.stopPropagation();   // não deixa o clique chegar no cartão (que abriria a OS)
             if (apontamentosAbertos.has(codigoTemp)) apontamentosAbertos.delete(codigoTemp);
             else apontamentosAbertos.add(codigoTemp);
-            desenharGestao();
-        }
-
-        function alternarEncerradas() {
-            mostrarEncerradas = !mostrarEncerradas;
             desenharGestao();
         }
 
@@ -1923,7 +2084,7 @@
         function esc(t) { return String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
         function talhoesDe(t) { return String(t || '').split(',').map(x => x.split(':')[0].trim()).filter(Boolean).join(', '); }
         function semAcentos(t) { return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
-        function numeroDaOS(r, mae) { return r.codigoOS || (mae && mae.codigoOS) || ''; }
+        function numeroDaOS(r, mae) { return String(r.codigoOS || (mae && mae.codigoOS) || '').replace(/;/g, ' · '); }   // "11038;11052" → "11038 · 11052"
 
         // ---------- Busca, período e "Limpar filtros" ----------
         document.getElementById('busca-gestao').addEventListener('input', () => desenharGestao());
@@ -1953,6 +2114,7 @@
         function abrirOSParaVisualizacaoOuEdicao(codigoTemp) {
             const osObj = listaOSCache.find(x => x.codigoTemp === codigoTemp);
             if (!osObj) return;
+            carreadorAjustado = null;   // o carreador começa proporcional
 
             document.getElementById('gestao-app').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
@@ -2167,6 +2329,7 @@
 
         function prepararFormulario() {
             modoVisualizacao = false;
+            carreadorAjustado = null;   // o carreador começa proporcional
             setFormFieldsDisabled(false);
             document.getElementById('view-mode-banner').style.display = 'none';
             document.getElementById('box-actions-lancar').style.display = 'flex';
@@ -2231,7 +2394,7 @@
             listaOSCache = lista;
             select.innerHTML = '<option value="">Selecione a OS Original...</option>';
             montarGrupos(lista).andamento.map(item => item.abertura).forEach(o => {   // só OS lançadas e ainda abertas (as do "Em andamento")
-                const displayOS = o.codigoOS || o.codigoTemp;
+                const displayOS = o.codigoOS ? numeroDaOS(o) : o.codigoTemp;
                 select.innerHTML += `<option value="${o.codigoTemp}">${displayOS} - ${o.fa_codigo} (${o.operacao})</option>`;
             });
             if (escolhida) select.value = escolhida;
@@ -2358,6 +2521,8 @@
         }
 
         let fazendaSelecionada = null, talhoesAtivos = [];
+        let carreadorAjustado = null;    // área do 6666 que o líder digitou (null = usa a proporcional)
+        let carreadorJaApontado = 0;     // quanto do 6666 já foi apontado nesta OS (no apontamento)
         const inputFundo = document.getElementById('fundo-input'), listFundo = document.getElementById('fundo-autocomplete');
         const inputRangeTalhoes = document.getElementById('talhoes-range-input');
 
@@ -2440,6 +2605,7 @@
                 });
             }
 
+            carreadorJaApontado = areaJaApontadaPorTalhao[6666] || 0;
             let novosTalhoesAtivos = [];
             let bloqueadosAnteriores = [];
             let parciaisRestantes = [];
@@ -2513,6 +2679,25 @@
             }
         }
 
+        // Carreador (6666): "Ajustar" guarda a área proporcional como ponto de partida; "Usar proporcional" volta ao cálculo
+        function alternarAjusteCarreador() {
+            const t = talhoesAtivos.find(x => x.num === '6666 (Rateio)');
+            carreadorAjustado = (carreadorAjustado === null && t) ? Number(t.areaParcial.toFixed(2)) : null;
+            recalcularAreasE6666();
+        }
+
+        function alterarAreaCarreador(valor) {
+            const t = talhoesAtivos.find(x => x.num === '6666 (Rateio)');
+            let v = parseFloat(String(valor).replace(',', '.')) || 0;
+            if (t && v > t.maxArea) {
+                alert(`🚨 A área do carreador (${v} ha) não pode passar do que o talhão 6666 tem disponível (${t.maxArea.toFixed(2)} ha)!`);
+                v = t.maxArea;
+            }
+            if (v < 0) v = 0;
+            carreadorAjustado = v;
+            recalcularAreasE6666();
+        }
+
         function recalcularAreasE6666() {
             let sumAreaSelecionada = 0;
             let sumAreaTotalFazendaSem6666 = 0;
@@ -2533,16 +2718,21 @@
                 talhoesAtivos = talhoesAtivos.filter(x => x.num !== '6666 (Rateio)' && x.num !== '6666');
             }
 
+            if (!carreadorChecked) carreadorAjustado = null;   // tirou o 6666: na próxima vez volta proporcional
+
             talhoesAtivos.forEach(t => { sumAreaSelecionada += t.areaParcial; });
 
             if (carreadorChecked && area6666Base > 0 && sumAreaSelecionada > 0 && sumAreaTotalFazendaSem6666 > 0) {
                 const proporcao = sumAreaSelecionada / sumAreaTotalFazendaSem6666;
-                const area6666Rateada = area6666Base * proporcao;
+                const disponivel = Math.max(0, area6666Base - carreadorJaApontado);   // o que sobra do carreador nesta OS
+                const area6666Rateada = Math.min(area6666Base * proporcao, disponivel);
+                const ajustada = carreadorAjustado !== null;
                 talhoesAtivos.push({
                     num: '6666 (Rateio)',
-                    maxArea: area6666Rateada,
-                    areaParcial: area6666Rateada,
-                    isParcial: false
+                    maxArea: disponivel,
+                    proporcional: area6666Rateada,
+                    areaParcial: ajustada ? Math.min(carreadorAjustado, disponivel) : area6666Rateada,
+                    isParcial: ajustada
                 });
             }
 
@@ -2565,18 +2755,26 @@
                     inputHtml = `<input type="number" step="0.01" max="${t.maxArea}" value="${t.areaParcial}"
                         style="width: 100px; padding: 2px 6px; font-size: 0.85rem;"
                         onchange="alterarAreaParcial('${t.num}', this.value)">`;
+                } else if (t.isParcial && isCarreadorRateio) {
+                    inputHtml = `<input type="number" step="0.01" min="0" max="${t.maxArea.toFixed(2)}" value="${t.areaParcial.toFixed(2)}"
+                        style="width: 100px; padding: 2px 6px; font-size: 0.85rem;"
+                        onchange="alterarAreaCarreador(this.value)">`;
                 }
+
 
                 let btnParcialHtml = '';
                 if (!isCarreadorRateio) {
                     btnParcialHtml = `<button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.75rem;"
                         onclick="toggleParcial('${t.num}')">${t.isParcial ? 'Restaurar Total' : 'Parcial'}</button>`;
+                } else {
+                    btnParcialHtml = `<button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.75rem;"
+                        onclick="alternarAjusteCarreador()">${t.isParcial ? 'Usar proporcional' : 'Ajustar'}</button>`;
                 }
 
                 div.innerHTML = `
                     <div>
                         <strong>Talhão ${t.num}</strong>
-                        <span style="color:var(--text-muted); font-size:0.8rem; margin-left: 6px;">(Disp: ${t.maxArea.toFixed(2)} ha)</span>
+                        <span style="color:var(--text-muted); font-size:0.8rem; margin-left: 6px;">(${isCarreadorRateio ? `Proporcional: ${t.proporcional.toFixed(2)} ha · ` : ''}Disp: ${t.maxArea.toFixed(2)} ha)</span>
                     </div>
                     <div style="display:flex; align-items:center; gap: 8px;">
                         ${inputHtml}
@@ -2857,22 +3055,73 @@
 
         let linkWhatsApp = "";
 
+
+
         // Monta o texto do WhatsApp (usado no comprovante e no botão Compartilhar da Gestão)
         function montarTextoWhatsApp(p, codTemp) {
-            const displayOSFinal = p.codigoOS || codTemp;
-            let texto = `*OPERAÇÃO REGISTRADA COM SUCESSO*\n\n`;
-            texto += `*Tipo:* ${p.tipo_registro}\n*OS:* ${displayOSFinal}\n`;
-            texto += `*Status:* ${p.status_aprovacao}\n`;
-            texto += `*Fazenda:* ${p.fa_codigo} - ${p.descricao_fazenda}\n*Operação:* ${p.operacao}\n*Área Executada:* ${p.area_total} ha\n*Talhões:* ${p.talhoes}\n`;
-            texto += `*Solicitante:* ${solicitanteLimpoDisplay}`;
-            return texto;
+            const TITULOS = {
+                '⚠️ OS NÃO SINCRONIZADA': '*SALVA NO CELULAR*\n_Vai ser enviada quando tiver internet_',
+                'Em análise': '*ENVIADA PARA ANÁLISE*',
+                'OS Lançada': '*OS LANÇADA*',
+                'Rejeitado': '*REJEITADA PELO CONTROLE*'
+            };
+            const TIPOS = { LANCAMENTO: 'Abertura de OS', APONTAMENTO: 'Apontamento', ENCERRAMENTO: 'Encerramento da OS' };
+            const numero = p.codigoOS ? `OS ${String(p.codigoOS).replace(/;/g, ' · ')}` : `aguardando nº da OS (${codTemp})`;
+
+            const linhas = [
+                TITULOS[p.status_aprovacao] || '*ORDEM DE SERVIÇO*',
+                `_${TIPOS[p.tipo_registro] || p.tipo_registro} · ${numero}_`,
+                '',
+                `*${p.fa_codigo} · ${p.descricao_fazenda}*`,
+                `*Área:* ${numeroBR(p.area_total, 2)} ha`,
+                `*Talhões:* ${talhoesLegiveis(p.talhoes)}`,
+                '',
+                `*Operação:* ${p.operacao}`
+            ];
+
+            const insumos = (p.produtos || []).filter(prod => prod.cod && prod.cod !== '-');
+            if (insumos.length) {
+                linhas.push('*Insumos:*');
+                insumos.forEach(prod => linhas.push(`• ${prod.cod} - ${prod.desc}`, `   Dose ${numeroBR(prod.dose, 3)} ${prod.un}/ha · Total ${numeroBR(prod.total, 2)} ${prod.un}`));
+            }
+
+            const quando = String(p.data_solicitacao || '').replace(',', '').slice(0, 16);   // "11/11/2026 08:42"
+            linhas.push('', `*Solicitante:* ${solicitanteLimpoDisplay}${quando ? ' · ' + quando : ''}`);
+            return linhas.join('\n');
+        }
+
+        // Número: "20.24" → "20,24"
+        function numeroBR(valor, casas) {
+            const n = parseFloat(String(valor).replace(',', '.'));
+            return isNaN(n) ? '-' : n.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas });
+        }
+
+        // "1:20.24ha, 6666 (Rateio):1.04ha" → "1 (20,24 ha), carreador 6666 (1,04 ha)"
+        function talhoesLegiveis(texto) {
+            return String(texto || '').split(',').map(t => t.trim()).filter(Boolean).map(t => {
+                const [num, area] = t.split(':');
+                const nome = num.includes('6666') ? 'carreador 6666' : num.trim();
+                return area ? `${nome} (${numeroBR(area, 2)} ha)` : nome;
+            }).join(', ');
+        }
+
+        // "2026-11-05" e "2026-11-06" → "05/11 a 06/11" (mesmo dia: só "05/11")
+        function periodoLegivel(inicio, fim) {
+            const curta = d => { const m = String(d || '').match(/(\d{4})-(\d{2})-(\d{2})/); return m ? `${m[3]}/${m[2]}` : ''; };
+            const a = curta(inicio), b = curta(fim);
+            return a && b && a !== b ? `${a} a ${b}` : a;
+        }
+
+        // O comprovante na tela: *negrito* e _itálico_ do WhatsApp viram negrito e itálico de verdade
+        function textoWhatsAppEmHTML(texto) {
+            return esc(texto).replace(/\*(.+?)\*/g, '<b>$1</b>').replace(/_(.+?)_/g, '<i>$1</i>');
         }
 
         function gerarComprovanteWhatsApp(p, codTemp) {
             document.getElementById('main-app').style.display = 'none';
             document.getElementById('receipt-modal').style.display = 'flex';
             const texto = montarTextoWhatsApp(p, codTemp);
-            document.getElementById('receipt-content').innerText = texto;
+            document.getElementById('receipt-content').innerHTML = textoWhatsAppEmHTML(texto);
             linkWhatsApp = `https://wa.me/?text=${encodeURIComponent(texto)}`;
         }
         function enviarWhatsApp() { window.open(linkWhatsApp, '_blank'); }
