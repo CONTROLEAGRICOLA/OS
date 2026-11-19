@@ -1445,8 +1445,8 @@
 
             <div class="section">
                 <div class="grid grid-2">
-                    <div class="form-group"><label>PEA (Permissão Entrada) - Opcional</label><input type="text"
-                            id="pea-input" placeholder="Nº PEA"></div>
+                    <div class="form-group"><label id="pea-label">PEA (Permissão Entrada) - Opcional</label><input
+                            type="text" id="pea-input" placeholder="Nº PEA"></div>
                     <div class="form-group"><label>Status Programação</label>
                         <div id="status-programacao-badge" class="badge-prog-status"></div>
                     </div>
@@ -2149,6 +2149,8 @@
             document.getElementById('os-codigo-temp-atual').value = osObj.codigoTemp;
             document.getElementById('os-origem-id').value = osObj.tipo_registro === 'LANCAMENTO' ? '' : (osObj.os_origem || '');   // abertura não tem OS de origem
             document.getElementById('pea-input').value = osObj.pea || "";
+            marcarPEA(isRejeitada && modoOperacaoSelecionado === 'APONTAMENTO'
+                && apontamentosDaOS(osObj.os_origem, osObj.codigoTemp).length === 0);
             document.getElementById('fundo-input').value = `${osObj.fa_codigo} - ${osObj.descricao_fazenda}`;
             document.getElementById('tipo-fazenda').value = osObj.tipo_fazenda || "";
             fazendaSelecionada = dbFazendas.find(f => String(f.codigo).trim() === String(osObj.fa_codigo).trim());
@@ -2340,6 +2342,39 @@
             document.getElementById('gestao-app').style.display = 'block';
         }
 
+        // ---------- PEA: obrigatório no 1º apontamento da OS ----------
+        let peaObrigatorio = false;   // true quando é o 1º apontamento da OS
+
+        // Os outros apontamentos desta OS que valem (rejeitado e cancelado não contam; o que está sendo corrigido também não).
+        // Junta a fila offline: apontamento guardado no celular também conta.
+        function apontamentosDaOS(origem, codigoAtual) {
+            const fila = JSON.parse(localStorage.getItem('os_fila_offline') || '[]');
+            const naFila = fila.map(x => x.codigoTemp);
+            return [...fila, ...listaOSCache.filter(o => !naFila.includes(o.codigoTemp))].filter(o =>
+                o.tipo_registro !== 'LANCAMENTO' &&
+                o.os_origem === origem &&
+                o.codigoTemp !== codigoAtual &&
+                o.status_aprovacao !== REJEITADA &&
+                !cancelada(o)
+            );
+        }
+
+        // Liga ou desliga a obrigação e troca o texto do campo
+        function marcarPEA(obrigatorio) {
+            peaObrigatorio = obrigatorio;
+            document.getElementById('pea-label').innerText = obrigatorio
+                ? 'PEA (Permissão Entrada) - Obrigatório'
+                : 'PEA (Permissão Entrada) - Opcional';
+        }
+
+        // O PEA que já vem preenchido: o do último apontamento que tem PEA; se nenhum tem, o da abertura
+        function peaSugerido(abertura, anteriores) {
+            const comPEA = anteriores
+                .filter(o => String(o.pea || '').trim())
+                .sort((a, b) => lerData(dataDe(b)) - lerData(dataDe(a)));   // mais novo primeiro
+            return comPEA.length ? String(comPEA[0].pea).trim() : (abertura.pea || '');
+        }
+
         function setFormFieldsDisabled(disabled) {
             document.querySelectorAll('#os-form input, #os-form select, #os-form textarea, #os-form button:not(#btn-voltar-gestao):not(#btn-ver-pdf):not(#btn-compartilhar)').forEach(el => {
                 if (el.id !== 'solicitante-display' && el.id !== 'data-solicitacao-display') {
@@ -2351,6 +2386,7 @@
         function prepararFormulario() {
             modoVisualizacao = false;
             carreadorAjustado = null;   // o carreador começa proporcional
+            marcarPEA(false);           // o PEA começa opcional (o apontamento decide depois)
             setFormFieldsDisabled(false);
             document.getElementById('view-mode-banner').style.display = 'none';
             document.getElementById('box-actions-lancar').style.display = 'flex';
@@ -2444,7 +2480,9 @@
             osOrigemObjeto = listaOSCache.find(x => x.codigoTemp === codTemp);
 
             if (osOrigemObjeto) {
-                document.getElementById('pea-input').value = osOrigemObjeto.pea || "";
+                const anteriores = apontamentosDaOS(codTemp, '');
+                document.getElementById('pea-input').value = peaSugerido(osOrigemObjeto, anteriores);
+                marcarPEA(anteriores.length === 0);   // nenhum apontamento antes: este é o 1º
                 document.getElementById('fundo-input').value = `${osOrigemObjeto.fa_codigo} - ${osOrigemObjeto.descricao_fazenda}`;
                 document.getElementById('tipo-fazenda').value = osOrigemObjeto.tipo_fazenda || "";
                 fazendaSelecionada = dbFazendas.find(f => String(f.codigo).trim() === String(osOrigemObjeto.fa_codigo).trim());
@@ -2947,6 +2985,13 @@
         async function enviarDados() {
             if (modoVisualizacao) return;
 
+            const pea = document.getElementById('pea-input').value.trim();
+            if (peaObrigatorio && !pea) {
+                alert("⚠️ FALTAM DADOS: É o 1º apontamento desta OS. Digite o número do PEA.");
+                document.getElementById('pea-input').focus();
+                return;
+            }
+
             if (!fazendaSelecionada) { alert("⚠️ FALTAM DADOS: Selecione a Fazenda/Fundo Agrícola."); return; }
             if (talhoesAtivos.length === 0) { alert("⚠️ FALTAM DADOS: Digite os Talhões."); return; }
 
@@ -3006,7 +3051,7 @@
                 centro_custo: ccVal, operacao: opVal,
                 data_prevista_inicio: dtStart, data_prevista_fim: dtEnd,
                 observacao: document.getElementById('observacao').value,
-                pea: document.getElementById('pea-input').value,
+                pea: pea,
                 area_total: document.getElementById('area-total').value,
                 talhoes: talhoesAtivos.map(t => `${t.num}:${t.areaParcial.toFixed(2)}ha`).join(', '),
                 frota: stringEquipamentosFormatados,
