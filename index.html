@@ -1,439 +1,3470 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de OS · Controle Agrícola</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-    <link rel="stylesheet" href="css/style.css">
+    <meta name="theme-color" content="#09090b">
+    <title>Ordem de Serviço - Campo | Clealco</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+    <style>
+        :root[data-theme="dark"] {
+            --bg-page: #09090b;
+            --bg-card: #18181b;
+            --bg-input: #27272a;
+            --border-color: #3f3f46;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --accent: #06b6d4;
+            --accent-hover: #0891b2;
+            --accent-glow: rgba(6, 182, 212, 0.25);
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --tr-hover: #27272a;
+        }
+
+        :root[data-theme="light"] {
+            --bg-page: #f4f4f5;
+            --bg-card: #ffffff;
+            --bg-input: #e4e4e7;
+            --border-color: #d4d4d8;
+            --text-main: #18181b;
+            --text-muted: #71717a;
+            --accent: #0284c7;
+            --accent-hover: #0369a1;
+            --accent-glow: rgba(2, 132, 199, 0.25);
+            --danger: #dc2626;
+            --warning: #d97706;
+            --success: #059669;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --tr-hover: #f4f4f5;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        button,
+        .btn {
+            appearance: none;
+            border: 1px solid transparent;
+            outline: none;
+            font-family: inherit;
+            cursor: pointer;
+            border-radius: 8px;
+            padding: 0.75rem 1.25rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+            user-select: none;
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: #fff;
+            box-shadow: 0 2px 8px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-input);
+            color: var(--text-main);
+            border-color: var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text-main);
+            border-color: var(--border-color);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-danger {
+            background-color: rgba(239, 68, 68, 0.12);
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-icon-gear {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 1.1rem;
+        }
+
+        .modal-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(9, 9, 11, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-box {
+            background: var(--bg-card);
+            padding: 2.2rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 40px var(--shadow-color);
+            width: 90%;
+            max-width: 460px;
+            text-align: center;
+            position: relative;
+        }
+
+        .modal-box h2 {
+            color: var(--accent);
+            margin-bottom: 1.2rem;
+            font-size: 1.3rem;
+        }
+
+        /* Pergunta "A OS termina com este apontamento?" */
+        .enc-os { color: var(--text-muted); font-size: 0.95rem; margin: -0.4rem 0 1rem; line-height: 1.4; }
+        .enc-area { background: var(--bg-input); border-radius: 10px; padding: 0.8rem 1rem; margin-bottom: 0.6rem; text-align: left; font-size: 0.95rem; }
+        .enc-area div { display: flex; justify-content: space-between; gap: 0.8rem; padding: 0.25rem 0; }
+        .enc-area span { color: var(--text-muted); }
+        .enc-area strong { white-space: nowrap; }
+        .enc-antes { color: var(--warning); font-size: 0.85rem; margin-bottom: 0.4rem; }
+        .enc-btn { width: 100%; margin-top: 0.7rem; padding: 1rem; font-size: 1rem; font-weight: 700; }
+        .enc-nota { color: var(--text-muted); font-size: 0.8rem; margin-top: 0.35rem; }
+
+        .container {
+            background-color: var(--bg-card);
+            max-width: 1100px;
+            width: 100%;
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            margin: 1.5rem;
+            display: none;
+            box-shadow: 0 10px 30px var(--shadow-color);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-img {
+            height: 46px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.2rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            position: relative;
+            text-align: left;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            outline: none;
+            font-size: 0.95rem;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        input[readonly],
+        select[disabled],
+        textarea[readonly] {
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+
+        .badge-prog-status {
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 700;
+            text-align: center;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 44px;
+        }
+
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            box-shadow: 0 10px 25px var(--shadow-color);
+        }
+
+        .autocomplete-item {
+            padding: 10px 14px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--bg-input);
+            font-size: 0.85rem;
+        }
+
+        .autocomplete-item:hover {
+            background-color: var(--bg-input);
+            color: var(--accent);
+        }
+
+        #global-autocomplete {
+            position: absolute;
+            z-index: 9999;
+            display: none;
+        }
+
+        .talhoes-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            padding: 0.8rem;
+            background: var(--bg-input);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            min-height: 48px;
+        }
+
+        .talhao-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .talhao-card.parcial-active {
+            border-color: var(--warning);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .aviso-talhoes {
+            margin-top: 0.5rem;
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--warning);
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-top: 0.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
+
+        th {
+            background-color: var(--bg-input);
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        td {
+            padding: 0.55rem 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            position: relative;
+        }
+
+        .badge {
+            padding: 6px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .badge-analise {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .badge-lancada {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-rejeitado {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .motivo-rejeicao {
+            display: block;
+            margin-top: 4px;
+            color: var(--danger);
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: normal;
+        }
+
+        .badge-pending-sync {
+            background: rgba(245, 158, 11, 0.25);
+            color: var(--warning);
+            border: 1px dashed var(--warning);
+        }
+
+        .loader {
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            cursor: pointer;
+        }
+
+        .checkbox-container input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+
+        .net-status-pill {
+            position: fixed;
+            bottom: 12px;
+            right: 12px;
+            z-index: 9999;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .net-online {
+            background: #10b981;
+            color: #fff;
+        }
+
+        .net-offline {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        textarea {
+            font-family: inherit;
+        }
+
+        /* Apontamentos dentro da Gestão de OS: abrem e fecham com o botão + */
+        .linha-filho {
+            display: none;
+        }
+
+        .linha-filho.aberto {
+            display: table-row;
+        }
+
+        /* ================= MEUS RELATÓRIOS ================= */
+        .badge-novo {
+            background: var(--danger);
+            color: #fff;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 2px 8px;
+        }
+
+        .relatorios-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            max-height: 55vh;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        .relatorios-vazio {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 1.5rem 0;
+        }
+
+        .relatorio-item {
+            width: 100%;
+            justify-content: space-between;
+            text-align: left;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.85rem 1rem;
+        }
+
+        .relatorio-item:hover {
+            border-color: var(--accent);
+        }
+
+        .relatorio-item.novo {
+            border-left: 4px solid var(--accent);
+        }
+
+        .relatorio-titulo {
+            display: block;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .relatorio-sub {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 3px;
+        }
+
+        .relatorio-tag {
+            font-size: 0.62rem;
+            font-weight: 800;
+            color: #fff;
+            background: var(--accent);
+            border-radius: 4px;
+            padding: 1px 5px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        .relatorio-acao {
+            font-size: 0.8rem;
+            color: var(--accent);
+            white-space: nowrap;
+        }
+
+        /* ================= GESTÃO DE OS: busca, período, placar e cartões ================= */
+        #gestao-app {
+            max-width: 760px;
+            /* no computador a lista fica numa coluna, sem esticar */
+        }
+
+        .filtros-gestao {
+            display: grid;
+            grid-template-columns: 1fr 200px;
+            gap: 0.6rem;
+        }
+
+        .datas-gestao {
+            grid-column: 1 / -1;
+        }
+
+        .resumo-filtro {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin: 0.6rem 0;
+        }
+
+        .resumo-filtro button {
+            background: none;
+            border: 0;
+            padding: 0;
+            color: var(--accent);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        /* Placar: os 4 números que separam a lista */
+        .placar-gestao {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .placa {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 2px;
+            padding: 0.7rem 0.8rem;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-muted);
+            text-align: left;
+        }
+
+        .placa b {
+            font-size: 1.45rem;
+            font-weight: 700;
+            line-height: 1.1;
+            color: var(--text-main);
+        }
+
+        .placa span {
+            font-size: 0.76rem;
+            font-weight: 600;
+        }
+
+        .placa.ativa {
+            border-color: var(--accent);
+            box-shadow: inset 0 0 0 1px var(--accent);
+        }
+
+        .placa.ativa span {
+            color: var(--accent);
+        }
+
+        .placa.perigo b {
+            color: var(--danger);
+        }
+
+        .placa.perigo.ativa {
+            border-color: var(--danger);
+            box-shadow: inset 0 0 0 1px var(--danger);
+        }
+
+        .placa.perigo.ativa span {
+            color: var(--danger);
+        }
+
+        .placa.zerada b {
+            color: var(--success);
+        }
+
+        .vazio-gestao {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        /* Título de cada grupo quando o líder está buscando */
+        .secao-gestao {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin: 1rem 0 0.5rem;
+        }
+
+        .secao-gestao:first-child {
+            margin-top: 0;
+        }
+
+        .secao-gestao .conta {
+            background: var(--bg-input);
+            color: var(--text-main);
+            border-radius: 999px;
+            padding: 1px 8px;
+            margin-left: 4px;
+        }
+
+        /* ---------- Cartões ---------- */
+        .mos-cartao {
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.85rem 0.95rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+            cursor: pointer;
+        }
+
+        .mos-cartao+.mos-cartao {
+            margin-top: 0.6rem;
+        }
+
+        .mos-cartao.rejeitado {
+            border-color: rgba(239, 68, 68, 0.45);
+            cursor: default;
+        }
+
+        .mos-cartao.cancelado {
+            border-style: dashed;
+            cursor: default;
+        }
+
+        .mos-cartao.encerrada .mos-num,
+        .mos-cartao.encerrada .mos-faz {
+            color: var(--text-muted);
+        }
+
+        .mos-topo {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.8rem;
+        }
+
+        .mos-topo .badge {
+            flex-shrink: 0;
+        }
+
+        .mos-id {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .mos-num {
+            font-size: 1.02rem;
+            font-weight: 700;
+        }
+
+        .mos-pdf {
+            font-size: 0.62rem;
+            font-weight: 700;
+            color: var(--accent);
+            border: 1px solid currentColor;
+            border-radius: 4px;
+            padding: 0 4px;
+            vertical-align: middle;
+        }
+
+        .mos-etiqueta {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .mos-faz {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .mos-faz small {
+            font-size: inherit;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .mos-op {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
+        .mos-apontar {
+            flex-shrink: 0;
+            padding: 0.55rem 0.85rem;
+            font-size: 0.85rem;
+        }
+
+        /* Andamento: barra fina e os números na mesma linha */
+        .mos-andamento {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .barra-os {
+            flex: 1;
+            height: 6px;
+            border-radius: 999px;
+            background: var(--bg-input);
+            display: flex;
+            overflow: hidden;
+        }
+
+        .barra-os span {
+            height: 100%;
+        }
+
+        .barra-os .feito {
+            background: var(--success);
+        }
+
+        .barra-os .aguardando {
+            background: var(--warning);
+        }
+
+        .mos-area {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .mos-area strong {
+            color: var(--text-main);
+        }
+
+        .mos-aviso {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--warning);
+        }
+
+        .mos-aviso.perigo {
+            color: var(--danger);
+            cursor: pointer;
+        }
+
+        /* Motivo da rejeição (vermelho) ou do cancelamento (cinza) */
+        .mos-motivo {
+            font-size: 0.84rem;
+            line-height: 1.4;
+            background: rgba(239, 68, 68, 0.08);
+            border-left: 3px solid var(--danger);
+            border-radius: 6px;
+            padding: 0.55rem 0.7rem;
+        }
+
+        .mos-motivo.cinza {
+            background: rgba(161, 161, 170, 0.08);
+            border-left-color: var(--text-muted);
+        }
+
+        .mos-motivo b {
+            display: block;
+            font-size: 0.7rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .badge-cancelado {
+            background: rgba(161, 161, 170, 0.15);
+            color: var(--text-muted);
+            border: 1px solid rgba(161, 161, 170, 0.35);
+        }
+
+        /* Botões lado a lado: o principal maior */
+        .mos-acoes {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .mos-acoes .btn {
+            flex: 1;
+            padding: 0.65rem 0.6rem;
+            font-size: 0.85rem;
+        }
+
+        .mos-acoes .principal {
+            flex: 1.6;
+            background: var(--danger);
+            border-color: var(--danger);
+            color: #fff;
+        }
+
+        /* "Ver 2 apontamentos": parece link, não botão */
+        .mos-ver {
+            align-self: flex-start;
+            background: none;
+            border: 0;
+            padding: 2px 0;
+            color: var(--accent);
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .mos-aps {
+            border-top: 1px dashed var(--border-color);
+            padding-top: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mos-ap {
+            display: grid;
+            grid-template-columns: 44px 1fr auto;
+            gap: 8px;
+            align-items: center;
+            font-size: 0.78rem;
+            padding: 5px 0;
+        }
+
+        .mos-ap-data {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .mos-ap-st {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--cor);
+        }
+
+        @media (max-width: 600px) {
+            .filtros-gestao {
+                grid-template-columns: 1fr;
+            }
+
+            .placar-gestao {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* ================= CELULAR (telas de até 600px) ================= */
+        @media (max-width: 600px) {
+            body {
+                padding-bottom: 2.5rem;
+            }
+
+            .container {
+                margin: 0;
+                padding: 1.2rem 1rem;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                box-shadow: none;
+            }
+
+            .header {
+                margin-bottom: 1.4rem;
+            }
+
+            .modal-box {
+                width: 92%;
+                padding: 1.6rem 1.2rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            input[type="text"],
+            input[type="password"],
+            input[type="number"],
+            textarea,
+            select {
+                font-size: 16px;
+            }
+
+            /* --- As tabelas viram cartões --- */
+            .table-responsive {
+                overflow-x: visible !important;
+                border: none;
+            }
+
+            .table-responsive table {
+                min-width: 0;
+                display: block;
+            }
+
+            .table-responsive thead {
+                display: none;
+            }
+
+            .table-responsive tbody {
+                display: flex;
+                flex-direction: column;
+                gap: 0.7rem;
+            }
+
+            .table-responsive tr {
+                display: grid;
+                gap: 0.55rem 0.6rem;
+                padding: 0.85rem;
+                background: var(--bg-page);
+                border: 1px solid var(--border-color);
+                border-radius: 10px;
+            }
+
+            .table-responsive td {
+                padding: 0;
+                border: none;
+                min-width: 0;
+            }
+
+            .table-responsive td[data-label]::before {
+                content: attr(data-label);
+                display: block;
+                font-size: 0.7rem;
+                font-weight: 600;
+                color: var(--text-muted);
+                margin-bottom: 3px;
+            }
+
+            /* Insumos: [código | excluir] / [descrição] / [UN | dose | total] */
+            #produtos-tbody tr {
+                grid-template-columns: 0.7fr 1fr 1fr auto;
+                grid-template-areas: "cod cod cod del" "desc desc desc desc" "un dose total total";
+            }
+
+            #produtos-tbody td:nth-child(1) {
+                grid-area: cod;
+            }
+
+            #produtos-tbody td:nth-child(2) {
+                grid-area: desc;
+            }
+
+            #produtos-tbody td:nth-child(3) {
+                grid-area: un;
+            }
+
+            #produtos-tbody td:nth-child(4) {
+                grid-area: dose;
+            }
+
+            #produtos-tbody td:nth-child(5) {
+                grid-area: total;
+            }
+
+            #produtos-tbody td:nth-child(6) {
+                grid-area: del;
+                align-self: end;
+            }
+
+            #produtos-tbody .prod-un {
+                width: 100% !important;
+            }
+
+            #produtos-tbody .btn-danger {
+                padding: 0.75rem 0.95rem !important;
+            }
+
+            .dose-warning {
+                position: static !important;
+                display: block;
+                margin-top: 3px;
+            }
+
+            /* Equipamentos: [nome | excluir] / [C.C] */
+            #equipamentos-tbody tr {
+                grid-template-columns: 1fr auto;
+                grid-template-areas: "nome del" "cc cc";
+                align-items: center;
+            }
+
+            #equipamentos-tbody td:nth-child(1) {
+                grid-area: nome;
+            }
+
+            #equipamentos-tbody td:nth-child(2) {
+                grid-area: cc;
+            }
+
+            #equipamentos-tbody td:nth-child(3) {
+                grid-area: del;
+            }
+
+            #equipamentos-tbody .btn-danger {
+                padding: 0.6rem 0.85rem !important;
+            }
+
+            /* Gestão de OS: [+ | OS | tipo] / [fazenda] / [área] / [status] */
+            #gestao-tbody tr {
+                grid-template-columns: auto 1fr auto;
+                grid-template-areas: "btn os tipo" "btn faz faz" "btn area area" "btn st st";
+                align-items: center;
+            }
+
+            #gestao-tbody td:nth-child(1) {
+                grid-area: btn;
+                align-self: start;
+            }
+
+            #gestao-tbody td:nth-child(2) {
+                grid-area: os;
+                padding-left: 0 !important;
+            }
+
+            #gestao-tbody td:nth-child(3) {
+                grid-area: tipo;
+            }
+
+            #gestao-tbody td:nth-child(4) {
+                grid-area: faz;
+            }
+
+            #gestao-tbody td:nth-child(5) {
+                grid-area: area;
+            }
+
+            #gestao-tbody td:nth-child(6) {
+                grid-area: st;
+            }
+
+            #gestao-tbody td[colspan] {
+                grid-column: 1 / -1;
+            }
+
+            #gestao-tbody td:first-child button {
+                width: 36px !important;
+                height: 36px !important;
+                font-size: 1.1rem;
+            }
+
+            #gestao-tbody tr.linha-filho {
+                display: none;
+            }
+
+            #gestao-tbody tr.linha-filho.aberto {
+                display: grid;
+                margin-left: 1.2rem;
+                border-left: 3px solid var(--accent);
+            }
+
+            /* Botões de envio um embaixo do outro, o principal em cima */
+            #box-actions-lancar {
+                flex-direction: column-reverse;
+            }
+
+            #box-actions-lancar .btn {
+                width: 100%;
+                padding: 0.95rem;
+            }
+
+            /* Selo de conexão: discreto quando online, completo quando offline */
+            .net-status-pill {
+                bottom: 10px;
+                right: 10px;
+                padding: 4px 10px;
+                font-size: 0.65rem;
+            }
+
+            .net-online #net-text {
+                display: none;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <header class="topo">
-        <div class="topo-marca">
-            <strong>GESTÃO A VISTA</strong>
-            <span>Ordem de Serviço</span>
-        </div>
 
-        <input type="search" id="busca" class="busca" placeholder="Buscar OS, fazenda ou líder…"
-            aria-label="Buscar OS, fazenda ou líder">
-
-        <div class="topo-direita">
-            <div class="campo-inline">
-                Ver OS de
-                <details class="multi" id="filtro-analista">
-                    <summary class="multi-botao"><span id="filtro-analista-texto">Todos os analistas</span></summary>
-                    <div class="multi-lista" id="filtro-analista-lista"></div>
-                </details>
-            </div>
-
-            <!-- NOVO: quem está usando o painel (vai para o log) -->
-            <button type="button" id="btn-eu-sou" class="botao-pilula">
-                Usuário: <strong id="eu-sou-nome">—</strong>
-            </button>
-
-            <!-- Ferramentas: o botão flutuante abre o menu (ferramenta nova = mais um <button class="ferramenta">) -->
-            <div class="ferramentas" id="ferramentas">
-                <button type="button" id="btn-ferramentas" class="botao-flutuante" aria-label="Ferramentas"
-                    aria-expanded="false" aria-controls="ferramentas-menu">
-                    <span class="icone-hamburguer" aria-hidden="true"><i></i><i></i><i></i></span>
-                    <span class="botao-flutuante-texto">Ferramentas</span>
-                </button>
-
-                <div class="ferramentas-menu" id="ferramentas-menu" hidden>
-                    <p class="ferramentas-titulo">Ferramentas</p>
-
-                    <button type="button" class="ferramenta" id="btn-relatorios">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M22 2 11 13"></path>
-                            <path d="M22 2 15 22 11 13 2 9 22 2z"></path>
-                        </svg>
-                        <span><strong>Enviar relatórios</strong><small>Disponibilizar os relatórios</small></span>
-                    </button>
-
-                    <button type="button" class="ferramenta" id="btn-programacao">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                            <path d="M16 2v4M8 2v4M3 10h18"></path>
-                        </svg>
-                        <span><strong>Programação da semana</strong><small>Subir o .xlsx com as áreas programadas</small></span>
-                    </button>
-                </div>
-            </div>
-
-            <button type="button" id="btn-sino" class="botao-icone" aria-label="Notificações">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" aria-hidden="true">
-                    <path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9"></path>
-                    <path d="M10.3 21a1.9 1.9 0 003.4 0"></path>
-                </svg>
-            </button>
-
-            <!-- NOVO: mostra se os dados estão em dia -->
-            <span id="status-atualizacao" class="status">Carregando…</span>
-        </div>
-    </header>
-
-    <main class="pagina">
-        <nav class="visoes" aria-label="O que ver">
-            <button type="button" class="visao-botao ativo" data-visao="solicitacoes">Solicitações</button>
-            <button type="button" class="visao-botao" data-visao="os">Ordens de Serviço</button>
-        </nav>
-
-        <div class="visao" id="visao-solicitacoes">
-            <div class="barra-filtros">
-                <nav class="abas" id="abas" aria-label="Situação">
-                    <button type="button" class="aba ativa" data-aba="afazer">Pendente<span class="contador"
-                            id="cont-afazer">0</span></button>
-                    <button type="button" class="aba" data-aba="lancadas">Lançadas <span class="contador"
-                            id="cont-lancadas">0</span></button>
-                    <button type="button" class="aba" data-aba="rejeitadas">Rejeitadas <span class="contador"
-                            id="cont-rejeitadas">0</span></button>
-                    <button type="button" class="aba" data-aba="todas">Todas <span class="contador"
-                            id="cont-todas">0</span></button>
-                </nav>
-
-                <div class="filtros">
-                    <span class="filtros-rotulo">Tipo</span>
-                    <button type="button" class="chip" data-tipo="LANCAMENTO" aria-pressed="true">Abertura</button>
-                    <button type="button" class="chip" data-tipo="APONTAMENTO" aria-pressed="true">Apontamento</button>
-                    <button type="button" class="chip" data-tipo="ENCERRAMENTO"
-                        aria-pressed="true">Encerramento</button>
-                    <select id="filtro-periodo" aria-label="Período">
-                        <option value="30">Últimos 30 dias</option>
-                        <option value="7">Últimos 7 dias</option>
-                        <option value="0">Tudo</option>
-                    </select>
-                </div>
-            </div>
-            <div class="colunas">
-                <section class="cartao fila" aria-label="Fila de trabalho">
-                    <div class="cartao-cabecalho">
-                        <strong id="fila-titulo">A fazer</strong>
-                        <button type="button" id="fila-ordem" class="botao-ordem" title="Trocar a ordem">mais antigo
-                            primeiro</button>
-                    </div>
-                    <div id="fila-lista" class="fila-lista"></div>
-                </section>
-
-                <section class="detalhe" id="detalhe" aria-label="Detalhe da solicitação">
-                    <p class="vazio">Escolha uma solicitação na lista para ver os detalhes.</p>
-                </section>
-
-                <aside class="lateral" id="lateral" aria-label="Decisão">
-                    <!-- Decisão: só aparece para OS em análise -->
-                    <section class="cartao bloco" id="decisao" hidden>
-                        <h2 class="decisao-titulo">Decisão</h2>
-
-                        <div class="decisao-abas">
-                            <button type="button" class="decisao-aba ativa" data-modo="lancar">Lançar</button>
-                            <button type="button" class="decisao-aba" data-modo="rejeitar">Rejeitar</button>
-                            <button type="button" class="decisao-aba" data-modo="cancelar">Cancelar</button>
-                        </div>
-
-                        <form id="form-lancar" class="decisao-form">
-                            <label class="arquivo">
-                                <input type="file" id="lancar-pdf" accept="application/pdf">
-                                <strong id="lancar-pdf-nome">Anexar PDF da O.S</strong>
-                                <span id="lancar-pdf-info">opcional · clique ou arraste aqui</span>
-                            </label>
-
-                            <label class="campo-form">
-                                Número da OS
-                                <input type="text" id="lancar-numero" inputmode="numeric" autocomplete="off">
-                            </label>
-                            <p class="dica" id="lancar-dica"></p>
-                            <p class="alerta" id="lancar-alerta"></p>
-
-                            <button type="submit" class="botao-principal" id="lancar-botao">Lançar OS</button>
-                        </form>
-
-                        <form id="form-rejeitar" class="decisao-form" hidden>
-                            <label class="campo-form">
-                                Motivo da rejeição
-                                <textarea id="rejeitar-detalhe" rows="4"
-                                    placeholder="Explique ao responsável o que precisa ser corrigido…"></textarea>
-                            </label>
-
-                            <button type="submit" class="botao-perigo" id="rejeitar-botao">Rejeitar</button>
-                        </form>
-
-                        <form id="form-cancelar" class="decisao-form" hidden>
-                            <p class="dica">Uma vez cancelada, não será possivel corrigir e reenviar</p>
-                            <label class="campo-form">
-                                Motivo do cancelamento
-                                <textarea id="cancelar-motivo" rows="3"
-                                    placeholder="Explique ao responsável por que foi cancelada…"></textarea>
-                            </label>
-
-                            <button type="submit" class="botao-cancelar" id="cancelar-botao">Cancelar
-                                solicitação</button>
-                        </form>
-
-                        <p class="decisao-aviso" id="decisao-aviso" role="status"></p>
-                    </section>
-
-                    <!-- Situação: para OS já lançada ou rejeitada -->
-                    <section class="cartao bloco" id="situacao" hidden>
-                        <h2 class="decisao-titulo" id="situacao-titulo"></h2>
-                        <p class="situacao-texto" id="situacao-texto"></p>
-                        <!-- OS lançada: PDF, número e edição ficam na aba Ordens de Serviço -->
-                        <button type="button" class="link-botao" id="ver-na-os" hidden>Ver em Ordens de Serviço
-                            →</button>
-                        <!-- Rejeitada cuja pendência se resolveu: volta para análise sem o líder reenviar -->
-                        <div class="decisao-form situacao-cancelar" id="bloco-voltar-analise" hidden>
-                            <button type="button" class="botao-principal" id="voltar-analise-botao">↩️ Voltar para
-                                análise</button>
-                            <p class="dica">A solicitação voltará para "Solicitações em análise".</p>
-                            <p class="decisao-aviso" id="voltar-analise-aviso" role="status"></p>
-                        </div>
-                        <!-- Rejeitada que o líder deixou parada: o analista pode cancelar -->
-                        <form id="form-cancelar-rejeitada" class="decisao-form situacao-cancelar" hidden>
-                            <label class="campo-form">
-                                Cancelar OS rejeitada
-                                <textarea id="cancelar-rejeitada-motivo" rows="2"
-                                    placeholder="Ex.: ninguém corrigiu, operação não vai acontecer…"></textarea>
-                            </label>
-                            <button type="submit" class="botao-cancelar" id="cancelar-rejeitada-botao">Cancelar
-                                solicitação</button>
-                            <p class="decisao-aviso" id="situacao-aviso" role="status"></p>
-                        </form>
-                    </section>
-
-                    <!-- Histórico: quem fez o quê, e quando -->
-                    <section class="cartao bloco" id="historico" hidden>
-                        <h2 class="decisao-titulo">Histórico</h2>
-                        <ol class="linha-do-tempo" id="historico-lista"></ol>
-                    </section>
-                </aside>
-            </div>
-        </div>
-
-        <div class="visao" id="visao-os" hidden>
-            <div class="barra-filtros">
-                <nav class="abas" id="abas-os" aria-label="Situação da OS">
-                    <button type="button" class="aba ativa" data-aba="abertas">Abertas <span class="contador"
-                            id="cont-os-abertas">0</span></button>
-                    <button type="button" class="aba" data-aba="encerradas">Encerradas <span class="contador"
-                            id="cont-os-encerradas">0</span></button>
-                    <button type="button" class="aba" data-aba="todas">Todas <span class="contador"
-                            id="cont-os-todas">0</span></button>
-                </nav>
-            </div>
-            <div class="colunas">
-                <section class="cartao fila" aria-label="Lista de Ordens de Serviço">
-                    <div class="cartao-cabecalho">
-                        <strong>Ordens de Serviço</strong>
-                        <button type="button" id="os-ordem" class="botao-ordem" title="Trocar a ordem">mais antiga
-                            primeiro</button>
-                    </div>
-                    <div id="os-lista" class="fila-lista"></div>
-                </section>
-                <section class="detalhe" id="os-ficha" aria-label="Ficha da OS">
-                    <p class="vazio">Escolha uma OS na lista para ver o andamento.</p>
-                </section>
-            </div>
-        </div>
-    </main>
-
-    <dialog id="dialogo-eu-sou" class="dialogo">
-        <h2 class="dialogo-titulo">Quem está usando este computador?</h2>
-        <p class="dica">Fica guardado neste navegador. Para trocar depois, clique em "Usuário" no topo.</p>
-        <div class="lista-eu-sou" id="lista-eu-sou"></div>
-    </dialog>
-
-    <dialog id="dialogo-editar" class="dialogo dialogo-largo">
-        <h2 class="dialogo-titulo" id="editar-titulo">Editar solicitação</h2>
-        <p class="dica" id="editar-subtitulo"></p>
-        <p class="dica" id="editar-carregando">Carregando listas…</p>
-        <datalist id="lista-fazendas"></datalist>
-        <datalist id="lista-equipamentos"></datalist>
-        <datalist id="lista-insumos"></datalist>
-
-        <form id="form-editar" class="form-editar" hidden>
-            <!-- Só no apontamento em análise: marcar (o líder esqueceu) ou desmarcar (foi engano) o encerramento -->
-            <div class="caixa-encerrar inteiro" id="campo-encerra" hidden>
-                <label class="linha-encerrar">
-                    <input type="checkbox" id="editar-encerra">
-                    🔒 Este apontamento encerra a OS
-                </label>
-                <small id="editar-encerra-dica"></small>
-            </div>
-            <!-- Só na OS lançada (aba Ordens de Serviço) -->
-            <label class="campo-form inteiro" id="campo-numero-os" hidden>Número da OS · mais de um, separe com vírgula
-                <input name="codigo_os" inputmode="numeric" autocomplete="off" placeholder="Ex.: 10577, 10578">
-            </label>
-            <label class="campo-form inteiro">Fazenda
-                <input name="fazenda" list="lista-fazendas" autocomplete="off">
-            </label>
-
-            <fieldset class="grupo-edicao inteiro">
-                <legend>Talhões</legend>
-                <div class="linhas-edicao" id="editar-talhoes"></div>
-                <div class="adicionar">
-                    <input id="editar-novo-talhao" placeholder="Adicionar talhões: 1-4, 8" autocomplete="off">
-                    <button type="button" class="botao-secundario" id="editar-add-talhao">Adicionar</button>
-                </div>
-                <p class="alerta" id="editar-talhoes-aviso"></p>
-                <p class="alerta" id="editar-apontado"></p>
-            </fieldset>
-            <label class="campo-form">Centro de custo
-                <select name="centro_custo" id="editar-cc"></select>
-            </label>
-            <label class="campo-form">Operação
-                <select name="operacao" id="editar-operacao"></select>
-            </label>
-
-            <label class="campo-form">Data início
-                <input type="date" name="data_prevista_inicio">
-            </label>
-            <label class="campo-form">Data fim
-                <input type="date" name="data_prevista_fim">
-            </label>
-
-            <label class="campo-form">Área total (ha) · soma dos talhões
-                <input type="number" name="area_total" readonly>
-            </label>
-            <label class="campo-form">PEA
-                <input name="pea">
-            </label>
-
-            <label class="campo-form">Programação
-                <select name="programacao">
-                    <option value="SIM">SIM</option>
-                    <option value="NÃO">NÃO</option>
-                </select>
-            </label>
-            <label class="campo-form" id="campo-carreador">Justificativa (sem programação)
-                <input name="carreador">
-            </label>
-
-            <fieldset class="grupo-edicao inteiro">
-                <legend>Equipamentos</legend>
-                <div class="linhas-edicao" id="editar-equipamentos"></div>
-                <div class="adicionar">
-                    <input id="editar-novo-equipamento" list="lista-equipamentos" placeholder="Digite para buscar…"
-                        autocomplete="off">
-                    <button type="button" class="botao-secundario" id="editar-add-equipamento">Adicionar</button>
-                </div>
-                <p class="alerta" id="editar-equipamentos-aviso"></p>
-            </fieldset>
-
-            <fieldset class="grupo-edicao inteiro">
-                <legend>Insumos</legend>
-                <div class="linha-insumo cabecalho-insumos">
-                    <span>Código</span><span>Produto</span><span>UN</span><span>Dose/ha</span><span>Total</span><span></span>
-                </div>
-                <div class="linhas-edicao" id="editar-insumos"></div>
-                <button type="button" class="botao-secundario botao-pequeno" id="editar-add-insumo">+ Insumo</button>
-            </fieldset>
-
-            <label class="campo-form inteiro">Observação
-                <textarea name="observacao" rows="3"></textarea>
-            </label>
-
-            <!-- Só na OS lançada: vai para o histórico e para o aviso do líder -->
-            <!-- Só na OS lançada: vai para o histórico e para o aviso do líder -->
-            <label class="campo-form inteiro" id="campo-motivo" hidden>Motivo da alteração (opcional)
-                <input name="motivo" autocomplete="off" placeholder="Ex.: Acrescentado talhão 1">
-            </label>
-
-            <p class="alerta inteiro" id="editar-erro"></p>
-
-            <div class="dialogo-botoes inteiro">
-                <button type="button" class="botao-secundario" id="editar-cancelar">Cancelar</button>
-                <button type="submit" class="botao-principal" id="editar-salvar">Salvar alterações</button>
-            </div>
-        </form>
-    </dialog>
-    <!-- Trocar ou anexar o PDF de uma OS lançada (aberta pela aba Ordens de Serviço) -->
-    <dialog id="dialogo-pdf" class="dialogo">
-        <form id="form-pdf" class="decisao-form">
-            <h2 class="dialogo-titulo" id="pdf-titulo">Trocar o PDF da OS</h2>
-            <p class="dica" id="pdf-subtitulo"></p>
-            <label class="arquivo">
-                <input type="file" id="pdf-novo" accept="application/pdf">
-                <strong id="pdf-novo-nome">Escolher o PDF</strong>
-                <span id="pdf-novo-info">clique ou arraste aqui</span>
-            </label>
-            <p class="alerta" id="pdf-novo-alerta"></p>
-            <p class="decisao-aviso" id="pdf-novo-aviso" role="status"></p>
-            <div class="dialogo-botoes">
-                <button type="button" class="botao-secundario" id="pdf-fechar">Cancelar</button>
-                <button type="submit" class="botao-principal" id="pdf-novo-botao">Trocar o PDF</button>
-            </div>
-        </form>
-    </dialog>
-    <!-- Encerrar ou reabrir uma OS lançada (aba Ordens de Serviço) -->
-    <dialog id="dialogo-encerrar" class="dialogo">
-        <form id="form-encerrar" class="decisao-form">
-            <h2 class="dialogo-titulo" id="encerrar-titulo">Encerrar a OS</h2>
-            <p class="dica" id="encerrar-subtitulo"></p>
-            <p class="encerrar-texto" id="encerrar-texto"></p>
-            <label class="campo-form" id="encerrar-campo-motivo">Motivo (opcional)
-                <input id="encerrar-motivo" autocomplete="off"
-                    placeholder="Ex.: líder esqueceu de marcar o encerramento">
-            </label>
-            <p class="decisao-aviso" id="encerrar-aviso" role="status"></p>
-            <div class="dialogo-botoes">
-                <button type="button" class="botao-secundario" id="encerrar-fechar">Cancelar</button>
-                <button type="submit" class="botao-perigo" id="encerrar-botao">Encerrar a OS</button>
-            </div>
-        </form>
-    </dialog>
-
-    <!-- Programação da semana (sobe toda quinta; substitui a anterior) -->
-    <dialog id="dialogo-programacao" class="dialogo dialogo-largo">
-        <h2 class="dialogo-titulo">Programação da semana</h2>
-        <p class="dica" id="programacao-atual"></p>
-
-        <label class="arquivo programacao-arquivo">
-            <input type="file" id="programacao-arquivo" accept=".xlsx">
-            <strong>Escolher o arquivo da programação (.xlsx)</strong>
-            <span>clique ou arraste aqui · a programação nova substitui a anterior</span>
-        </label>
-
-        <div class="programacao-resumo" id="programacao-resumo"></div>
-        <p class="alerta" id="programacao-erro"></p>
-
-        <div class="dialogo-botoes">
-            <button type="button" class="botao-secundario" id="programacao-fechar">Fechar</button>
-            <button type="button" class="botao-principal" id="programacao-enviar" disabled>Enviar programação</button>
-        </div>
-    </dialog>
-    <dialog id="dialogo-relatorios" class="dialogo dialogo-largo">
-        <h2 class="dialogo-titulo">Enviar relatórios aos responsáveiss</h2>
-        <p class="dica">Escolha ou arraste os PDFs. O responsável de cada um é escolhido pelo nome do arquivo: confira
-            antes
-            de enviar.</p>
-
-        <label class="arquivo relatorios-arquivo">
-            <input type="file" id="relatorios-pdf" accept="application/pdf" multiple>
-            <strong>Escolher os PDFs dos relatórios</strong>
-            <span>clique ou arraste aqui · pode ser vários de uma vez</span>
-        </label>
-
-        <div class="relatorios-lista" id="relatorios-lista"></div>
-        <p class="alerta" id="relatorios-erro"></p>
-
-        <div class="dialogo-botoes">
-            <button type="button" class="botao-secundario" id="relatorios-fechar">Fechar</button>
-            <button type="button" class="botao-principal" id="relatorios-enviar" disabled>Enviar</button>
-        </div>
-    </dialog>
-    <div id="carregando" class="carregando" role="status" hidden>
-        <span class="carregando-roda" aria-hidden="true"></span>
-        <span>Atualizando as solicitações…</span>
+    <div id="net-indicator" class="net-status-pill net-online">
+        <span id="net-dot">●</span> <span id="net-text">ONLINE</span>
     </div>
-    <div id="aviso" class="aviso" role="status" hidden></div>
+
+    <div id="global-autocomplete" class="autocomplete-list"></div>
+
+    <!-- 1. LOGIN -->
+    <div id="login-screen" class="modal-screen">
+        <div class="modal-box">
+            <img src="logo.png" alt="Clealco"
+                style="height: 56px; margin: 0 auto 1.2rem auto; display: block; object-fit: contain;"
+                onerror="this.style.display='none'">
+            <h2>Controle Agrícola</h2>
+            <form id="login-form" onsubmit="event.preventDefault(); executarLogin();">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label>Usuário / Crachá</label>
+                    <input type="text" id="login-user" placeholder="Digite seu crachá..." required>
+                </div>
+                <div class="form-group" style="margin-bottom: 1.2rem;">
+                    <label>Senha</label>
+                    <input type="password" id="login-pass" placeholder="Digite sua senha..." required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">ENTRAR NO SISTEMA</button>
+            </form>
+            <div id="login-loader" class="loader" style="margin-top: 1rem;"></div>
+            <p id="login-error"
+                style="color: var(--danger); margin-top: 1rem; display: none; font-size: 0.85rem; font-weight: 600;">
+            </p>
+        </div>
+    </div>
+
+    <!-- 1.1 PRIMEIRO ACESSO -->
+    <div id="primeiro-acesso-modal" class="modal-screen" style="display: none;">
+        <div class="modal-box">
+            <h2>Primeiro Acesso</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Por segurança, crie uma nova
+                senha antes de continuar.</p>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label>Nova Senha</label>
+                <input type="password" id="nova-senha" placeholder="Digite a nova senha...">
+            </div>
+            <div class="form-group" style="margin-bottom: 1.2rem;">
+                <label>Confirmar Nova Senha</label>
+                <input type="password" id="confirma-senha" placeholder="Repita a nova senha...">
+            </div>
+            <button type="button" class="btn btn-primary" id="btn-salvar-senha" style="width: 100%;"
+                onclick="salvarNovaSenha()">SALVAR NOVA SENHA</button>
+            <div id="senha-loader" class="loader" style="margin-top: 1rem;"></div>
+            <p id="senha-error"
+                style="color: var(--danger); margin-top: 1rem; display: none; font-size: 0.85rem; font-weight: 600;">
+            </p>
+        </div>
+    </div>
+
+    <!-- 2. MENU PRINCIPAL -->
+    <div id="menu-screen" class="modal-screen" style="display: none;">
+        <div class="modal-box">
+            <div style="position: absolute; top: 1.2rem; right: 1.2rem; display: flex; gap: 8px;">
+                <button class="btn-icon-gear" title="Ajuda e Reportes" onclick="abrirModalAjuda()">❓</button>
+                <button class="btn-icon-gear" title="Configurações" onclick="abrirConfiguracoes()">⚙️</button>
+            </div>
+            <img src="logo.png" alt="Clealco"
+                style="height: 48px; margin: 0 auto 1rem auto; display: block; object-fit: contain;"
+                onerror="this.style.display='none'">
+            <h2>Painel Principal</h2>
+            <p id="menu-user-name"
+                style="color: var(--text-muted); font-weight: 600; margin-bottom: 1.8rem; font-size: 0.95rem;"></p>
+            <div style="display: flex; flex-direction: column; gap: 0.9rem;">
+                <button class="btn btn-primary" style="padding: 1rem; font-size: 1rem;" onclick="iniciarAberturaOS()">🚜
+                    ABERTURA DE OS</button>
+                <button class="btn btn-secondary"
+                    style="padding: 1rem; font-size: 1rem; border-color: var(--warning); color: var(--warning);"
+                    onclick="abrirModalApontamentoOS()">⏱️ APONTAMENTO DE OS</button>
+                <button class="btn btn-outline" style="padding: 1rem; font-size: 1rem; margin-top: 0.5rem;"
+                    onclick="abrirGestaoOS()">📋 GESTÃO DE OS</button>
+                <button class="btn btn-outline" style="padding: 1rem; font-size: 1rem;"
+                    onclick="abrirMeusRelatorios()">📊 MEUS RELATÓRIOS <span id="badge-relatorios" class="badge-novo"
+                        style="display: none;"></span></button>
+                <button class="btn btn-outline" id="btn-notificacoes"
+                    style="padding: 0.8rem; font-size: 0.9rem; display: none;" onclick="ativarNotificacoes()">🔔 ATIVAR
+                    NOTIFICAÇÕES</button>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- MEUS RELATÓRIOS -->
+    <div id="relatorios-modal" class="modal-screen" style="display: none;">
+        <div class="modal-box">
+            <h2>📊 Meus Relatórios</h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.2rem;">Toque no relatório para
+                baixar o PDF.</p>
+            <div id="relatorios-lista" class="relatorios-lista"></div>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 1.2rem;"
+                onclick="fecharMeusRelatorios()">Voltar</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIGURAÇÕES -->
+    <div id="settings-modal" class="modal-screen" style="display: none;">
+        <div class="modal-box">
+            <h2>Configurações</h2>
+            <div style="display: flex; flex-direction: column; gap: 0.8rem; margin: 1.5rem 0;">
+                <div style="background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px; text-align: left;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">LOGIN ATIVO /
+                        SESSÃO</span>
+                    <div id="settings-user-display"
+                        style="font-weight: 700; color: var(--accent); font-size: 0.95rem; margin-top: 2px;"></div>
+                </div>
+                <div
+                    style="background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px; text-align: left; display: flex; flex-direction: column; gap: 6px;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">INSTALAÇÃO /
+                        ATALHO</span>
+                    <button type="button" class="btn btn-outline" style="font-size: 0.85rem; padding: 0.6rem 1rem;"
+                        onclick="criarAtalhoApp()">📲 Criar Atalho na Tela Inicial</button>
+                </div>
+                <div
+                    style="background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px; text-align: left; display: flex; flex-direction: column; gap: 6px;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">BANCO DE DADOS & APP
+                        OFFLINE</span>
+                    <button type="button" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.6rem 1rem;"
+                        onclick="baixarEAtualizarDadosOffline(true)">🔄 Baixar / Atualizar Dados OFFLINE</button>
+                    <small id="settings-offline-date"
+                        style="color: var(--text-muted); font-size: 0.72rem; text-align: center;">Última atualização:
+                        Não baixado</small>
+                </div>
+                <div
+                    style="background: var(--bg-input); padding: 0.8rem 1rem; border-radius: 8px; text-align: left; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.85rem; font-weight: 600;">Aparência / Tema</span>
+                    <button type="button" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;"
+                        onclick="alternarTema()">☀️ / 🌙 Alternar Modo</button>
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.8rem;">
+                <button class="btn btn-secondary" style="flex: 1;" onclick="fecharConfiguracoes()">Voltar</button>
+                <button class="btn btn-danger" style="flex: 1;" onclick="efetuarLogout()">Sair / Deslogar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE AJUDA -->
+    <div id="help-modal" class="modal-screen" style="display: none;">
+        <div class="modal-box">
+            <h2>Ajuda e Reportes</h2>
+            <div class="form-group"><label>Tipo de Reporte</label><select id="reporte-tipo">
+                    <option value="Erros">Erro / Falha no App</option>
+                    <option value="Melhoria">Sugestão de Melhoria</option>
+                    <option value="Sugestao">Outras Sugestões</option>
+                </select></div>
+            <div class="form-group" style="margin-top:1rem;"><label>Descrição do Caso</label><textarea
+                    id="reporte-descricao" rows="4" placeholder="Descreva aqui..."></textarea></div>
+            <div style="display: flex; gap: 0.8rem; margin-top: 1.5rem;">
+                <button class="btn btn-secondary" style="flex:1;"
+                    onclick="document.getElementById('help-modal').style.display='none'">Voltar</button>
+                <button class="btn btn-primary" style="flex:1;" onclick="enviarReporte()">Enviar Reporte</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SELEÇÃO DE OS PARA APONTAMENTO -->
+    <div id="select-os-modal" class="modal-screen" style="display: none;">
+        <div class="modal-box">
+            <h2>Selecione a Ordem de Serviço</h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Escolha a OS para realizar o
+                Apontamento ou Encerramento.</p>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <select id="select-os-origem">
+                    <option value="">Carregando Ordens de Serviço...</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 0.8rem;">
+                <button class="btn btn-secondary" style="flex: 1;" onclick="fecharModalSelecaoOS()">Cancelar</button>
+                <button class="btn btn-primary" style="flex: 1;" id="btn-confirmar-os"
+                    onclick="avancarApontamentoOS()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE PROGRAMAÇÃO -->
+    <div id="prog-modal" class="modal-screen" style="display: none;">
+        <div class="modal-box">
+            <h2>Validação de Programação</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Esta Ordem de Serviço consta na programação?</p>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;" id="prog-btns">
+                <button class="btn btn-primary" style="flex: 1; background-color: var(--success);"
+                    onclick="respostaProgramacao('SIM')">SIM</button>
+                <button class="btn btn-danger" style="flex: 1;" onclick="mostrarJustificativa()">NÃO</button>
+            </div>
+            <div id="justificativa-box" style="display: none; margin-top: 1.5rem; text-align: left;">
+                <div class="form-group">
+                    <label>Informe a Justificativa (Obrigatório):</label>
+                    <textarea id="justificativa-texto" rows="3"
+                        placeholder="Escreva o motivo da quebra de programação..."></textarea>
+                </div>
+                <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;"
+                    onclick="respostaProgramacao('NÃO')">CONFIRMAR E AVANÇAR</button>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem;"
+                onclick="fecharModalProgramacao()">Cancelar Operação</button>
+        </div>
+    </div>
+
+
+    <!-- Pergunta no Enviar do apontamento: a OS termina com ele? -->
+    <div id="encerrar-modal" class="modal-screen" style="display: none;">
+        <div class="modal-box">
+            <h2>A OS termina com este apontamento?</h2>
+            <p class="enc-os" id="enc-os"></p>
+            <div class="enc-area" id="enc-area"></div>
+            <p class="enc-antes" id="enc-antes" style="display: none;"></p>
+            <button type="button" class="btn btn-primary enc-btn" onclick="responderEncerramento(false)">NÃO · A OS
+                CONTINUA ABERTA</button>
+            <button type="button" class="btn btn-danger enc-btn" onclick="responderEncerramento(true)">SIM · ENCERRAR A
+                OS</button>
+            <p class="enc-nota">Encerrada, não dá mais para apontar nesta OS.</p>
+            <button type="button" class="btn btn-secondary enc-btn" style="font-weight: 500;"
+                onclick="responderEncerramento(null)">Voltar e revisar</button>
+        </div>
+    </div>
+
+    <!-- GESTÃO OS -->
+    <div class="container" id="gestao-app">
+        <div class="header">
+            <div class="logo-container"><img src="logo.png" class="logo-img" onerror="this.style.display='none'">
+                <div class="logo-text">CONTROLE<br>AGRICOLA</div>
+            </div>
+            <button class="btn btn-secondary" onclick="voltarAoMenu()">Voltar ao Menu</button>
+        </div>
+        <!-- Busca e período -->
+        <div class="filtros-gestao">
+            <input type="text" id="busca-gestao" placeholder="🔎 Buscar nº da OS, fazenda ou operação..."
+                autocomplete="off">
+            <select id="periodo-gestao">
+                <option value="0">Todo o período</option>
+                <option value="7">Últimos 7 dias</option>
+                <option value="30">Últimos 30 dias</option>
+                <option value="90">Últimos 90 dias</option>
+                <option value="datas">Escolher as datas...</option>
+            </select>
+            <div class="datas-gestao" id="datas-gestao" style="display: none;">
+                <input type="text" id="periodo-datas" placeholder="📅 Toque para escolher o início e o fim" readonly>
+            </div>
+        </div>
+        <div class="resumo-filtro">
+            <span id="resumo-filtro"></span>
+            <button type="button" id="limpar-filtros" style="display: none;">Limpar filtros</button>
+        </div>
+
+        <!-- Placar: os 4 números; tocar num deles mostra só aquele grupo -->
+        <div class="placar-gestao" id="placar-gestao"></div>
+
+        <!-- As OS do grupo escolhido -->
+        <div id="gestao-lista"></div>
+    </div>
+
+    <!-- COMPROVANTE -->
+    <div id="receipt-modal" class="modal-screen" style="display: none;">
+        <div class="modal-box" style="border: 1px solid var(--success);">
+            <h2 style="color: var(--success);">Registro Salvo!</h2>
+            <pre id="receipt-content"
+                style="text-align: left; background: var(--bg-input); padding: 1rem; border-radius: 8px; font-size: 0.9rem; line-height: 1.45; color: var(--text-main); margin: 1rem 0; white-space: pre-wrap; font-family: inherit;"></pre>
+            <button class="btn btn-primary" style="width: 100%; background-color: #25D366; margin-bottom: 0.6rem;"
+                onclick="enviarWhatsApp()">📱 Enviar WhatsApp</button>
+            <button class="btn btn-outline" style="width: 100%;" onclick="voltarAoMenu()">Ir para o Menu
+                Principal</button>
+        </div>
+    </div>
+
+    <!-- FORMULÁRIO PRINCIPAL -->
+    <div class="container" id="main-app">
+        <div class="header">
+            <div class="logo-container"><img src="logo.png" alt="Clealco" class="logo-img"
+                    onerror="this.style.display='none'">
+                <div class="logo-text">CONTROLE<br>AGRICOLA</div>
+            </div>
+            <div>
+                <h1 style="font-size: 1.2rem; color: var(--accent);" id="main-app-title">Lançamento de OS</h1>
+                <span id="badge-tipo-operacao" class="badge badge-analise" style="margin-top: 4px;">MODO: ABERTURA DE
+                    OS</span>
+            </div>
+        </div>
+
+        <div id="view-mode-banner"
+            style="display: none; padding: 0.8rem 1rem; border-radius: 8px; font-weight: 700; margin-bottom: 1.5rem;">
+        </div>
+
+        <form id="os-form">
+            <input type="hidden" id="os-origem-id">
+            <input type="hidden" id="os-codigo-temp-atual">
+
+            <div class="section">
+                <div class="grid grid-2">
+                    <div class="form-group"><label id="pea-label">PEA (Permissão Entrada) - Opcional</label><input
+                            type="text" id="pea-input" placeholder="Nº PEA"></div>
+                    <div class="form-group"><label>Status Programação</label>
+                        <div id="status-programacao-badge" class="badge-prog-status"></div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="section">
+                <div class="section-title">
+                    Localização e Talhões
+                </div>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label>Fazenda / Descrição (F.A)</label>
+                        <input type="text" id="fundo-input" placeholder="Digite o código ou nome..." autocomplete="off">
+                        <div id="fundo-autocomplete" class="autocomplete-list"></div>
+                    </div>
+                    <div class="form-group"><label>Tipo de Fazenda</label><input type="text" id="tipo-fazenda" readonly
+                            placeholder="Automático" style="font-weight: 700; color: var(--accent);"></div>
+                </div>
+                <div class="form-group" style="margin-top: 1rem;" id="group-digitar-talhoes">
+                    <label>Digitar Talhões (Ex: 1-9, 12, 15) — inclua 6666 para ratear o carreador</label>
+                    <input type="text" id="talhoes-range-input" placeholder="Ex: 1-4, 8, 6666" autocomplete="off">
+                    <div id="aviso-talhoes" class="aviso-talhoes" style="display: none;"></div>
+                </div>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label>Talhões Selecionados e Áreas Parciais</label>
+                    <div id="talhoes-container" class="talhoes-container"></div>
+                </div>
+                <div class="grid grid-2" style="margin-top: 1rem;">
+                    <div class="form-group"><label>Área Total Somada (ha)</label><input type="number" id="area-total"
+                            readonly value="0.00" style="font-weight: 700; color: var(--accent);"></div>
+                    <div class="form-group">
+                        <label>Data de Execução</label>
+                        <input type="text" id="data-execucao" placeholder="Selecione o período (Início e Fim)...">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Recursos (C.C. e Equipamentos)</div>
+                <div class="grid grid-2">
+                    <div class="form-group"><label>Centro de Custo</label><select id="centro-custo">
+                            <option value="">Aguardando...</option>
+                        </select></div>
+                    <div class="form-group"><label>Operação</label><select id="operacao">
+                            <option value="">Selecione o Centro de Custo</option>
+                        </select></div>
+                </div>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label>Buscar Equipamentos / Frota</label>
+                    <input type="text" id="frota-input" placeholder="Digite para buscar e adicionar..."
+                        autocomplete="off">
+                    <div id="frota-autocomplete" class="autocomplete-list" style="position: relative;"></div>
+                    <div class="table-responsive" id="box-table-equipamentos"
+                        style="margin-top: 0.8rem; display: none;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 55%;">Equipamento</th>
+                                    <th style="width: 35%;">C.C Equipamento</th>
+                                    <th style="width: 10%; text-align: center;">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="equipamentos-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="secao-insumos">
+                <div class="section-title">Insumos Aplicados</div>
+                <div class="table-responsive" style="overflow-x: visible;">
+                    <table id="produtos-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%">Cód. Insumo</th>
+                                <th style="width: 35%">Descrição</th>
+                                <th style="width: 10%">UN</th>
+                                <th style="width: 12%">Dosagem</th>
+                                <th style="width: 10%">Total</th>
+                                <th style="width: 3%"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="produtos-tbody"></tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn btn-outline" style="margin-top: 0.8rem;" id="btn-add-produto"
+                    onclick="adicionarLinhaProduto()">+ Adicionar Insumo</button>
+            </div>
+
+            <div class="section" style="border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                <div class="section-title">Informações Adicionais e Envio</div>
+                <div class="grid grid-2">
+                    <div class="form-group"><label>Observação da Operação (Opcional)</label><textarea id="observacao"
+                            rows="4" placeholder="Informações complementares do campo..."></textarea></div>
+                    <div class="form-group" style="gap: 1rem;">
+                        <div><label>Solicitante Logado</label><input type="text" id="solicitante-display" readonly
+                                style="font-weight: 700; color: var(--accent);"></div>
+                        <div><label>Data / Hora do Lançamento</label><input type="text" id="data-solicitacao-display"
+                                readonly style="font-weight: 700; color: var(--text-muted);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="box-actions-lancar" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary" style="flex: 1;"
+                    onclick="voltarAoMenu()">CANCELAR</button>
+                <button type="button" class="btn btn-primary" style="flex: 2;" onclick="enviarDados()"
+                    id="btn-submit">ENVIAR SOLICITAÇÃO</button>
+            </div>
+            <div id="box-actions-visualizar" style="display: none; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary"
+                    style="width: 100%; margin-bottom: 0.8rem; display: none;" id="btn-ver-pdf"
+                    onclick="baixarPDFdaOS()">📄 BAIXAR PDF DA OS</button>
+                <button type="button" class="btn btn-primary"
+                    style="width: 100%; margin-bottom: 0.8rem; background-color: #25D366;" id="btn-compartilhar"
+                    onclick="compartilharOSAberta()">📱 COMPARTILHAR NO WHATSAPP</button>
+                <button type="button" class="btn btn-primary" style="width: 100%;" id="btn-voltar-gestao"
+                    onclick="fecharVisualizacaoOS()">⬅️ VOLTAR PARA GESTÃO DE OS</button>
+            </div>
+            <div id="submit-loader" class="loader" style="margin-top: 1rem;"></div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js"></script>
-    <script type="module" src="js/main.js"></script>
+
+    <script>
+        const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQZWlJ8xGg-VqRLvWWPuowCQ2QUJg-CEXjW8oM_tEo7fqVsGOov2UZxU85snQtvyLp/exec';
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(() => console.log('Service Worker registrado com sucesso!'))
+                .catch(err => console.error('Erro ao registrar Service Worker:', err));
+        }
+
+        let deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        async function criarAtalhoApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    alert('✅ Atalho instalado com sucesso na sua tela inicial!');
+                }
+                deferredPrompt = null;
+            } else {
+                alert('📲 PARA SALVAR O ATALHO NO CELULAR:\n\n1. No Android / Chrome: Toque nos três pontinhos (⋮) no topo do navegador e selecione "Adicionar à tela inicial" ou "Instalar aplicativo".\n2. No iPhone / Safari: Toque no botão Compartilhar (⎘) e selecione "Adicionar à Tela de Início".');
+            }
+        }
+
+        let dbFazendas = [], dbInsumos = [], dbEquipamentos = [], dbOperacoes = [];
+        let solicitanteCracha = "", solicitanteNome = "", solicitanteLimpoDisplay = "";
+        let programacaoStatus = "SIM", carreadorTexto = "", equipamentosSelecionados = [], modoVisualizacao = false, listaOSCache = [];
+        let modoOperacaoSelecionado = "LANCAMENTO";
+        let isEditandoRejeitada = false;
+        let osOrigemObjeto = null;
+        let flatpickrInstancia = null;
+        let inputInsumoAtivo = null;
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const savedTheme = localStorage.getItem('app_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            flatpickrInstancia = flatpickr("#data-execucao", { mode: "range", dateFormat: "Y-m-d", locale: "pt" });
+
+            document.addEventListener('click', (e) => {
+                if (inputInsumoAtivo && e.target !== inputInsumoAtivo && !document.getElementById('global-autocomplete').contains(e.target)) {
+                    document.getElementById('global-autocomplete').style.display = 'none';
+                }
+            });
+
+            window.addEventListener('online', atualizarIndicadorRede);
+            window.addEventListener('offline', atualizarIndicadorRede);
+            atualizarIndicadorRede();
+
+            verificarSessaoSalva();
+            await carregarDadosIniciais();
+        });
+
+        function atualizarIndicadorRede() {
+            const pill = document.getElementById('net-indicator');
+            const dot = document.getElementById('net-dot');
+            const text = document.getElementById('net-text');
+            if (navigator.onLine) {
+                pill.className = 'net-status-pill net-online';
+                dot.innerText = '●';
+                text.innerText = 'ONLINE';
+                sincronizarFilaOffline();
+            } else {
+                pill.className = 'net-status-pill net-offline';
+                dot.innerText = '⚠️';
+                text.innerText = 'OFFLINE';
+            }
+        }
+
+        function alternarTema() {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('app_theme', next);
+        }
+
+        function abrirConfiguracoes() {
+            document.getElementById('settings-user-display').innerText = `${solicitanteCracha} - ${solicitanteLimpoDisplay}`;
+            atualizarDataOfflineDisplay();
+            document.getElementById('settings-modal').style.display = 'flex';
+        }
+        function fecharConfiguracoes() { document.getElementById('settings-modal').style.display = 'none'; }
+        function abrirModalAjuda() { document.getElementById('help-modal').style.display = 'flex'; }
+
+        function atualizarDataOfflineDisplay() {
+            const dt = localStorage.getItem('db_offline_timestamp');
+            document.getElementById('settings-offline-date').innerText = dt ? `Última atualização: ${dt}` : 'Última atualização: Não baixado';
+        }
+
+        function efetuarLogout() { localStorage.clear(); location.reload(); }
+
+        function gerarChaveUnicaTemp() {
+            const agora = new Date();
+            const d = String(agora.getDate()).padStart(2, '0');
+            const m = String(agora.getMonth() + 1).padStart(2, '0');
+            const y = agora.getFullYear();
+            const hh = String(agora.getHours()).padStart(2, '0');
+            const mm = String(agora.getMinutes()).padStart(2, '0');
+            const ss = String(agora.getSeconds()).padStart(2, '0');
+            return `${d}${m}${y}-${hh}${mm}${ss}`;
+        }
+
+        async function baixarEAtualizarDadosOffline(exibirAlerta = true) {
+            if (!navigator.onLine) {
+                if (exibirAlerta) alert("⚠️ Você está sem conexão com a internet no momento!");
+                return;
+            }
+            try {
+                if ('caches' in window) {
+                    const cache = await caches.open('clealco-os-v6');
+                    await cache.addAll([
+                        location.href, './', './index.html', './manifest.json',
+                        'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
+                        'https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css',
+                        'https://cdn.jsdelivr.net/npm/flatpickr',
+                        'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js'
+                    ]).catch(() => { });
+                }
+                const res = await (await fetch(`${APPSCRIPT_URL}?action=init`)).json();
+                if (res.success) {
+                    dbFazendas = res.dados.fazendas || [];
+                    dbInsumos = res.dados.insumos || [];
+                    dbEquipamentos = res.dados.equipamentos || [];
+                    dbOperacoes = res.dados.operacoes || [];
+                    localStorage.setItem('db_offline_master', JSON.stringify(res.dados));
+                    const dataStr = new Date().toLocaleString('pt-BR');
+                    localStorage.setItem('db_offline_timestamp', dataStr);
+                    popularCentrosDeCusto();
+                    atualizarDataOfflineDisplay();
+                    if (exibirAlerta) alert("✅ Aplicativo e Banco de Dados baixados e salvos com sucesso para uso 100% OFFLINE!");
+                }
+            } catch (e) {
+                if (exibirAlerta) alert("Erro ao sincronizar com o servidor.");
+            }
+        }
+
+        async function carregarDadosIniciais() {
+            const cached = localStorage.getItem('db_offline_master');
+            if (cached) {
+                try {
+                    const dados = JSON.parse(cached);
+                    dbFazendas = dados.fazendas || [];
+                    dbInsumos = dados.insumos || [];
+                    dbEquipamentos = dados.equipamentos || [];
+                    dbOperacoes = dados.operacoes || [];
+                    popularCentrosDeCusto();
+                } catch (e) { }
+            }
+            if (navigator.onLine) { await baixarEAtualizarDadosOffline(false); }
+        }
+
+        async function enviarReporte() {
+            const tipo = document.getElementById('reporte-tipo').value;
+            const desc = document.getElementById('reporte-descricao').value.trim();
+            if (!desc) { alert("Escreva a descrição."); return; }
+            try {
+                const res = await (await fetch(APPSCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'salvar_reporte', cracha: solicitanteCracha, nome: solicitanteLimpoDisplay, tipo: tipo, descricao: desc })
+                })).json();
+                if (res.success) {
+                    alert("Reporte enviado com sucesso!");
+                    document.getElementById('reporte-descricao').value = '';
+                    document.getElementById('help-modal').style.display = 'none';
+                }
+            } catch (e) { alert("Erro ao enviar reporte."); }
+        }
+
+        function abrirGestaoOS() {
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('gestao-app').style.display = 'block';
+            grupoEscolhido = '';   // abre no que precisa do líder (ou em "Em andamento")
+            carregarEExibirGestaoOS();
+        }
+
+        // Abre na hora com a lista guardada no celular e, por trás, busca a atualizada
+        async function carregarEExibirGestaoOS() {
+            const caixa = document.getElementById('gestao-lista');
+            const dono = localStorage.getItem('os_cache_gestao_dono');
+            const ehDele = !dono || dono === String(solicitanteCracha);   // lista guardada é deste líder?
+            const guardada = ehDele ? JSON.parse(localStorage.getItem('os_cache_gestao') || '[]') : [];
+
+            if (guardada.length) desenharGestao(guardada);
+            else caixa.innerHTML = '<p class="vazio-gestao">⏳ Carregando suas OS...</p>';
+
+            if (navigator.onLine) {
+                try {
+                    const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`, { signal: AbortSignal.timeout(20000) })).json();
+                    if (res.success && res.dados) {
+                        localStorage.setItem('os_cache_gestao', JSON.stringify(res.dados));
+                        localStorage.setItem('os_cache_gestao_dono', String(solicitanteCracha));
+                        desenharGestao(res.dados);
+                        return;
+                    }
+                } catch (e) { }
+            }
+            if (!guardada.length) desenharGestao([]);   // sem internet e sem nada guardado: mostra só a fila offline
+        }
+
+        // ================= GESTÃO DE OS: organizar, filtrar e desenhar =================
+        const LANCADA = 'OS Lançada', REJEITADA = 'Rejeitado', NAO_ENVIADA = '⚠️ OS NÃO SINCRONIZADA';
+        const CANCELADA_LIDER = 'Cancelado pelo líder', CANCELADA_CONTROLE = 'Cancelado pelo controle';
+        const cancelada = r => r.status_aprovacao === CANCELADA_LIDER || r.status_aprovacao === CANCELADA_CONTROLE;
+        const NOMES_DOS_TIPOS = { LANCAMENTO: 'Abertura', APONTAMENTO: 'Apontamento', ENCERRAMENTO: 'Encerramento' };
+        const apontamentosAbertos = new Set();   // OS com a lista de apontamentos aberta (o "+")
+        let grupoEscolhido = '';                 // o número do placar que está aberto ('' = o app escolhe)
+        let periodoPicker = null;                // calendário do "Escolher as datas..."
+
+        // Os 4 números do placar: o nome, o aviso de vazio e o cartão de cada grupo
+        const GRUPOS = {
+            atencao: { titulo: 'Precisa de você', vazio: '✓ Tudo certo, nada para corrigir.', cartao: cartaoAtencao },
+            andamento: { titulo: 'Em andamento', vazio: 'Nenhuma OS em andamento.', cartao: cartaoOS },
+            aguardando: { titulo: 'Aguardando análise', vazio: 'Nada aguardando análise.', cartao: cartaoAguardando },
+            encerradas: { titulo: 'Encerradas', vazio: 'Nenhuma OS encerrada.', cartao: cartaoOS }
+        };
+
+        // Recebe a lista do servidor (ou nada, quando só mudou a busca, o período ou o número escolhido) e redesenha
+        function desenharGestao(listaRemota) {
+            if (listaRemota) {
+                const filaOffline = JSON.parse(localStorage.getItem('os_fila_offline') || '[]');
+                const naFila = filaOffline.map(x => x.codigoTemp);
+                listaOSCache = [...filaOffline, ...listaRemota.filter(r => !naFila.includes(r.codigoTemp))];
+            }
+            const g = montarGrupos(listaOSCache);
+            for (const nome in g) g[nome] = g[nome].filter(passaNoFiltro);
+            const grupos = {
+                atencao: [...g.rejeitadas, ...g.canceladas],   // o que precisa do líder
+                andamento: g.andamento,
+                aguardando: g.aguardando,
+                encerradas: g.encerradas
+            };
+            if (!grupoEscolhido) grupoEscolhido = grupos.atencao.length ? 'atencao' : 'andamento';
+
+            const buscando = semAcentos(document.getElementById('busca-gestao').value) !== '';
+            desenharPlacar(grupos, buscando);
+            desenharResumoDoFiltro(grupos);
+
+            let html;
+            if (buscando) {   // buscando: mostra o que achou em todos os grupos, cada um com seu título
+                html = Object.keys(GRUPOS).filter(nome => grupos[nome].length)
+                    .map(nome => secao(GRUPOS[nome].titulo.toUpperCase(), grupos[nome].length) + grupos[nome].map(GRUPOS[nome].cartao).join(''))
+                    .join('') || '<p class="vazio-gestao">Nenhuma OS com essa busca.</p>';
+            } else {
+                const itens = grupos[grupoEscolhido];
+                html = itens.length ? itens.map(GRUPOS[grupoEscolhido].cartao).join('')
+                    : `<p class="vazio-gestao">${filtroAtivo() ? 'Nada nesse período.' : GRUPOS[grupoEscolhido].vazio}</p>`;
+            }
+            document.getElementById('gestao-lista').innerHTML = html;
+        }
+
+        // O placar: 4 números; tocar num deles mostra só aquele grupo
+        function desenharPlacar(grupos, buscando) {
+            document.getElementById('placar-gestao').innerHTML = Object.keys(GRUPOS).map(nome => {
+                const quantos = grupos[nome].length;
+                const nadaParaCorrigir = nome === 'atencao' && quantos === 0;
+                const classes = ['placa'];
+                if (nome === grupoEscolhido && !buscando) classes.push('ativa');
+                if (nome === 'atencao') classes.push(nadaParaCorrigir ? 'zerada' : 'perigo');
+                return `<button type="button" class="${classes.join(' ')}" onclick="escolherGrupo('${nome}')">
+                    <b>${nadaParaCorrigir ? '✓' : quantos}</b><span>${nadaParaCorrigir ? 'Nada para corrigir' : GRUPOS[nome].titulo}</span></button>`;
+            }).join('');
+        }
+
+        function escolherGrupo(nome) {
+            grupoEscolhido = nome;
+            document.getElementById('busca-gestao').value = '';   // tocou num número: sai da busca
+            desenharGestao();
+            document.getElementById('placar-gestao').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Separa a lista do líder em: em andamento, aguardando, rejeitadas e encerradas
+        function montarGrupos(lista) {
+            const filhosPorAbertura = new Map();
+            for (const r of lista) {
+                if (r.tipo_registro === 'LANCAMENTO' || !r.os_origem || cancelada(r)) continue;   // cancelado não entra na conta da OS
+                if (!filhosPorAbertura.has(r.os_origem)) filhosPorAbertura.set(r.os_origem, []);
+                filhosPorAbertura.get(r.os_origem).push(r);
+            }
+            const maeDe = r => lista.find(x => x.codigoTemp === r.os_origem);
+            const grupos = { andamento: [], aguardando: [], rejeitadas: [], canceladas: [], encerradas: [] };
+            const vistas = canceladasVistas();
+
+            for (const r of lista) {
+                if (r.status_aprovacao === CANCELADA_LIDER) continue;   // o próprio líder cancelou: sai da lista
+                if (r.status_aprovacao === CANCELADA_CONTROLE) {        // o controle cancelou: aparece até o líder tocar em "Entendi"
+                    if (!vistas.includes(r.codigoTemp)) grupos.canceladas.push({ registro: r, mae: maeDe(r), data: dataDe(r) });
+                    continue;
+                }
+                if (r.status_aprovacao === REJEITADA) { grupos.rejeitadas.push({ registro: r, mae: maeDe(r), data: dataDe(r) }); continue; }
+                if (r.status_aprovacao !== LANCADA) { grupos.aguardando.push({ registro: r, mae: maeDe(r), data: dataDe(r) }); continue; }
+                if (r.tipo_registro !== 'LANCAMENTO') continue;   // apontamento lançado aparece dentro da OS dele
+                const os = montarOS(r, filhosPorAbertura.get(r.codigoTemp) || []);
+                (os.encerrada ? grupos.encerradas : grupos.andamento).push(os);
+            }
+            for (const nome in grupos) grupos[nome].sort((a, b) => lerData(b.data) - lerData(a.data));   // mais novo primeiro
+            return grupos;
+        }
+
+        // Uma abertura lançada com os apontamentos dela: quanto foi feito, quanto está esperando, quanto falta
+        function montarOS(abertura, filhos) {
+            const ordenados = filhos.slice().sort((a, b) => lerData(dataDe(a)) - lerData(dataDe(b)));
+            const lancados = ordenados.filter(f => f.status_aprovacao === LANCADA);
+            const esperando = ordenados.filter(f => f.status_aprovacao !== LANCADA && f.status_aprovacao !== REJEITADA);
+            const somar = l => l.reduce((s, f) => s + (parseFloat(f.area_total) || 0), 0);   // o encerramento também tem área
+
+            const previsto = parseFloat(abertura.area_total) || 0;
+            const feito = somar(lancados), aguardando = somar(esperando);
+            const pctFeito = previsto > 0 ? Math.min(100, feito / previsto * 100) : 0;
+            const ultimo = ordenados[ordenados.length - 1];
+            return {
+                abertura, apontamentos: ordenados, previsto, feito, aguardando, pctFeito,
+                pctAguardando: previsto > 0 ? Math.min(100 - pctFeito, aguardando / previsto * 100) : 0,
+                encerrada: lancados.some(f => f.tipo_registro === 'ENCERRAMENTO'),
+                encerramentoPendente: esperando.some(f => f.tipo_registro === 'ENCERRAMENTO'),
+                data: ultimo ? dataDe(ultimo) : dataDe(abertura)   // última movimentação
+            };
+        }
+
+        // ---------- Busca e período ----------
+        function passaNoFiltro(item) {
+            const r = item.abertura || item.registro;
+            const termo = semAcentos(document.getElementById('busca-gestao').value);
+            if (termo && !semAcentos([numeroDaOS(r, item.mae), r.fa_codigo, r.descricao_fazenda, r.operacao].join(' ')).includes(termo)) return false;
+            const [inicio, fim] = periodoEscolhido();
+            if (!inicio) return true;
+            const quando = lerData(item.data) || Date.now();   // sem data = acabou de ser feito (fila offline)
+            return quando >= inicio && quando <= fim;
+        }
+
+        // [início, fim] em milissegundos; [0] quando é "Todo o período"
+        function periodoEscolhido() {
+            const valor = document.getElementById('periodo-gestao').value;
+            if (valor === 'datas') {
+                const datas = periodoPicker ? periodoPicker.selectedDates : [];
+                if (datas.length < 2) return [0];
+                return [new Date(datas[0]).setHours(0, 0, 0, 0), new Date(datas[1]).setHours(23, 59, 59, 999)];
+            }
+            const dias = Number(valor);
+            if (!dias) return [0];
+            const inicio = new Date();
+            inicio.setHours(0, 0, 0, 0);
+            inicio.setDate(inicio.getDate() - (dias - 1));   // "7 dias" = hoje e os 6 dias antes
+            return [inicio.getTime(), Infinity];
+        }
+
+        function filtroAtivo() {
+            return document.getElementById('busca-gestao').value.trim() !== '' || periodoEscolhido()[0] !== 0;
+        }
+
+        function desenharResumoDoFiltro(g) {
+            const total = Object.values(g).reduce((soma, lista) => soma + lista.length, 0);
+            const select = document.getElementById('periodo-gestao');
+            let periodo = select.options[select.selectedIndex].text.toLowerCase();
+            if (select.value === 'datas') {
+                const datas = periodoPicker ? periodoPicker.selectedDates : [];
+                periodo = datas.length === 2 ? `de ${datas[0].toLocaleDateString('pt-BR')} a ${datas[1].toLocaleDateString('pt-BR')}` : 'escolha as datas';
+            }
+            document.getElementById('resumo-filtro').textContent = `${total} ${total === 1 ? 'registro' : 'registros'} · ${periodo}`;
+            document.getElementById('limpar-filtros').style.display = filtroAtivo() ? 'inline' : 'none';
+        }
+
+        // ---------- Cartões ----------
+        function secao(titulo, quantos, classe = '') {
+            return `<div class="secao-gestao ${classe}">${titulo} <span class="conta">${quantos}</span></div>`;
+        }
+
+        function barraDaOS(o) {
+            return `<div class="barra-os"><span class="feito" style="width:${o.pctFeito}%"></span><span class="aguardando" style="width:${o.pctAguardando}%"></span></div>`;
+        }
+
+        // O bloco da esquerda dos cartões: título (nº da OS ou etiqueta), fazenda e operação
+        function identidade(titulo, r, detalhe) {
+            return `<div class="mos-id">${titulo}
+                <span class="mos-faz"><small>${esc(r.fa_codigo)} ·</small> ${esc(r.descricao_fazenda)}</span>
+                <span class="mos-op">${esc(r.operacao)}${detalhe ? ' · ' + detalhe : ''}</span></div>`;
+        }
+
+        // "Abertura de 30/10" ou "Apontamento · OS 11121"
+        function etiquetaDe(r, mae) {
+            return r.tipo_registro === 'LANCAMENTO' ? `Abertura de ${dataCurta(dataDe(r))}` : `${NOMES_DOS_TIPOS[r.tipo_registro]} · OS ${esc(numeroDaOS(r, mae))}`;
+        }
+
+        // OS lançada (em andamento ou encerrada). Tocar no cartão abre a OS, como antes.
+        function cartaoOS(o) {
+            const a = o.abertura;
+            const aberto = apontamentosAbertos.has(a.codigoTemp);
+            const linhas = o.apontamentos.map(f => {
+                const [cor, texto] = f.status_aprovacao === LANCADA ? ['var(--success)', '✓ Lançado']
+                    : f.status_aprovacao === REJEITADA ? ['var(--danger)', 'Rejeitado']
+                        : ['var(--warning)', f.status_aprovacao === NAO_ENVIADA ? 'Não enviado' : 'Em análise'];
+                const talhoes = talhoesDe(f.talhoes);
+                const oque = !talhoes && f.tipo_registro === 'ENCERRAMENTO' ? '🔒 Encerrada pelo controle'   // sem apontamento: 0 ha, sem talhão
+                    : (f.tipo_registro === 'ENCERRAMENTO' ? '🔒 Encerramento · ' : '')
+                    + `${talhoes.includes(',') ? 'Talhões' : 'Talhão'} ${esc(talhoes)} · ${ha(f.area_total)} ha`;
+                return `<div class="mos-ap" style="--cor: ${cor}" onclick="event.stopPropagation(); abrirOSParaVisualizacaoOuEdicao('${f.codigoTemp}')">
+                    <span class="mos-ap-data">${dataCurta(dataDe(f))}</span><span>${oque}</span><span class="mos-ap-st">${texto}</span></div>`;
+            }).join('');
+            const quantos = o.apontamentos.length;
+            const rejeitado = o.apontamentos.find(f => f.status_aprovacao === REJEITADA);
+            const numero = `<span class="mos-num">OS ${esc(numeroDaOS(a))}${a.pdf_url ? ' <span class="mos-pdf">PDF</span>' : ''}</span>`;
+            return `<div class="mos-cartao ${o.encerrada ? 'encerrada' : ''}" onclick="abrirOSParaVisualizacaoOuEdicao('${a.codigoTemp}')">
+                <div class="mos-topo">${identidade(numero, a)}
+                    ${o.encerrada ? '<span class="badge badge-lancada">✓ Encerrada</span>'
+                    : `<button type="button" class="btn btn-primary mos-apontar" onclick="event.stopPropagation(); apontarOS('${a.codigoTemp}')">⏱️ Apontar</button>`}</div>
+                <div class="mos-andamento">${barraDaOS(o)}<span class="mos-area"><strong>${ha(o.feito)}</strong> de ${ha(o.previsto)} ha · ${Math.round(o.pctFeito)}%</span></div>
+                ${rejeitado ? `<div class="mos-aviso perigo" onclick="event.stopPropagation(); escolherGrupo('atencao')">⚠️ ${NOMES_DOS_TIPOS[rejeitado.tipo_registro]} rejeitado · toque aqui para corrigir</div>` : ''}
+                ${o.aguardando ? `<div class="mos-aviso">⏳ ${ha(o.aguardando)} ha aguardando análise</div>` : ''}
+                ${o.encerramentoPendente ? '<div class="mos-aviso">⏳ Encerramento enviado, aguardando análise</div>' : ''}
+                ${quantos ? `<button type="button" class="mos-ver" onclick="alternarApontamentos(event, '${a.codigoTemp}')">${aberto ? 'Esconder' : 'Ver'} ${quantos} ${quantos === 1 ? 'apontamento' : 'apontamentos'} ${aberto ? '▴' : '▾'}</button>` : ''}
+                ${aberto && quantos ? `<div class="mos-aps">${linhas}</div>` : ''}
+            </div>`;
+        }
+
+        // Enviado e ainda não analisado (ou parado na fila do celular, sem internet)
+        function cartaoAguardando({ registro: r, mae }) {
+            const naoEnviada = r.status_aprovacao === NAO_ENVIADA;
+            const etiqueta = r.tipo_registro === 'LANCAMENTO' ? 'Abertura · aguardando nº da OS' : `${NOMES_DOS_TIPOS[r.tipo_registro]} · OS ${esc(numeroDaOS(r, mae))}`;
+            const detalhe = ha(r.area_total) + ' ha' + (r.tipo_registro === 'ENCERRAMENTO' ? ' · encerrar a OS' : '');
+            return `<div class="mos-cartao" onclick="abrirOSParaVisualizacaoOuEdicao('${r.codigoTemp}')">
+                <div class="mos-topo">${identidade(`<span class="mos-etiqueta">${etiqueta}</span>`, r, detalhe)}
+                    <span class="badge ${naoEnviada ? 'badge-pending-sync' : 'badge-analise'}">${naoEnviada ? 'Não enviada' : 'Em análise'}</span></div>
+                <div class="mos-area">${naoEnviada ? '📶 Vai ser enviada quando tiver internet' : 'Enviada ' + dataCurta(dataDe(r))}</div>
+            </div>`;
+        }
+
+        // "Precisa de você": a rejeitada (corrigir ou cancelar) ou a cancelada pelo controle (Entendi)
+        function cartaoAtencao(item) {
+            return item.registro.status_aprovacao === CANCELADA_CONTROLE ? cartaoCancelado(item) : cartaoRejeitado(item);
+        }
+
+        // Rejeitado pelo controle: o motivo e os botões para corrigir ou cancelar
+        function cartaoRejeitado({ registro: r, mae }) {
+            return `<div class="mos-cartao rejeitado">
+                <div class="mos-topo">${identidade(`<span class="mos-etiqueta">${etiquetaDe(r, mae)}</span>`, r, ha(r.area_total) + ' ha')}
+                    <span class="badge badge-rejeitado">Rejeitado</span></div>
+                <div class="mos-motivo"><b>Motivo</b>${esc(r.justificativa_controle || 'não informado')}</div>
+                <div class="mos-acoes">
+                    <button type="button" class="btn btn-danger principal" onclick="abrirOSParaVisualizacaoOuEdicao('${r.codigoTemp}')">✏️ Corrigir e reenviar</button>
+                    <button type="button" class="btn btn-secondary" onclick="cancelarSolicitacao('${r.codigoTemp}')">Cancelar</button>
+                </div>
+            </div>`;
+        }
+
+        // Cancelado pelo controle: o motivo e o "Entendi" (não tem o que corrigir)
+        function cartaoCancelado({ registro: r, mae }) {
+            return `<div class="mos-cartao cancelado">
+                <div class="mos-topo">${identidade(`<span class="mos-etiqueta">${etiquetaDe(r, mae)} · cancelada pelo controle</span>`, r, ha(r.area_total) + ' ha')}
+                    <span class="badge badge-cancelado">Cancelada</span></div>
+                <div class="mos-motivo cinza"><b>Motivo</b>${esc(r.justificativa_controle || 'não informado')}</div>
+                <div class="mos-acoes"><button type="button" class="btn btn-secondary" onclick="entendiCancelada('${r.codigoTemp}')">✓ Entendi</button></div>
+            </div>`;
+        }
+
+        // ---------- Botões dos cartões ----------
+        function alternarApontamentos(evento, codigoTemp) {
+            evento.stopPropagation();   // não deixa o clique chegar no cartão (que abriria a OS)
+            if (apontamentosAbertos.has(codigoTemp)) apontamentosAbertos.delete(codigoTemp);
+            else apontamentosAbertos.add(codigoTemp);
+            desenharGestao();
+        }
+
+        // ---------- Canceladas pelo controle: o "Entendi" fica guardado no celular (uma lista por crachá) ----------
+        function canceladasVistas() {
+            return JSON.parse(localStorage.getItem('canceladas_vistas_' + solicitanteCracha) || '[]');
+        }
+
+        function entendiCancelada(codigoTemp) {
+            const vistas = canceladasVistas();
+            if (!vistas.includes(codigoTemp)) localStorage.setItem('canceladas_vistas_' + solicitanteCracha, JSON.stringify([...vistas, codigoTemp]));
+            desenharGestao();
+        }
+
+        // O líder desiste de corrigir uma rejeitada: no servidor ela vira "Cancelado pelo líder" e sai da lista
+        async function cancelarSolicitacao(codigoTemp) {
+            if (!navigator.onLine) { alert('📶 Precisa de internet para cancelar.'); return; }
+            if (!confirm('Cancelar esta solicitação?\n\nEla sai da sua lista e não poderá mais ser corrigida.')) return;
+            try {
+                const res = await (await fetch(APPSCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'cancelar_solicitacao', codigoTemp, cracha: solicitanteCracha, nome: solicitanteNome })
+                })).json();
+                if (!res.success) throw new Error(res.error || 'Não consegui cancelar.');
+
+                // Muda na hora, no que está na tela e no que está guardado no celular
+                const marcar = lista => lista.forEach(r => { if (r.codigoTemp === codigoTemp) r.status_aprovacao = CANCELADA_LIDER; });
+                marcar(listaOSCache);
+                const guardada = JSON.parse(localStorage.getItem('os_cache_gestao') || '[]');
+                marcar(guardada);
+                localStorage.setItem('os_cache_gestao', JSON.stringify(guardada));
+                desenharGestao();
+            } catch (e) {
+                alert('❌ ' + e.message);
+                carregarEExibirGestaoOS();   // a lista pode estar velha: busca de novo
+            }
+        }
+
+        // "Apontar" do cartão: começa o apontamento desta OS, sem a janela de escolher
+        async function apontarOS(codigoTemp) {
+            modoOperacaoSelecionado = "APONTAMENTO";
+            isEditandoRejeitada = false;
+            prepararFormulario();
+            document.getElementById('observacao').value = '';
+            document.getElementById('gestao-app').style.display = 'none';
+            await avancarApontamentoOS(codigoTemp);
+        }
+
+        // ---------- Pequenas ajudas ----------
+        function dataDe(r) { return (r && (r.dataSincronizacao || r.data_solicitacao)) || ''; }   // a do servidor, ou a do celular (fila offline)
+        function lerData(texto) {   // "05/11/2026 07:10" → número (para ordenar e comparar)
+            const m = String(texto || '').match(/(\d{2})\/(\d{2})\/(\d{4})(?:\D+(\d{2}):(\d{2}))?/);
+            return m ? new Date(m[3], m[2] - 1, m[1], m[4] || 0, m[5] || 0).getTime() : 0;
+        }
+        function dataCurta(texto) { const m = String(texto || '').match(/(\d{2})\/(\d{2})/); return m ? `${m[1]}/${m[2]}` : ''; }
+        function ha(n) { return (Number(n) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+        function esc(t) { return String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+        function talhoesDe(t) { return String(t || '').split(',').map(x => x.split(':')[0].trim()).filter(Boolean).join(', '); }
+        function semAcentos(t) { return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
+        function numeroDaOS(r, mae) { return String(r.codigoOS || (mae && mae.codigoOS) || '').replace(/;/g, ' · '); }   // "11038;11052" → "11038 · 11052"
+
+        // ---------- Busca, período e "Limpar filtros" ----------
+        document.getElementById('busca-gestao').addEventListener('input', () => desenharGestao());
+
+        document.getElementById('periodo-gestao').addEventListener('change', evento => {
+            const escolherDatas = evento.target.value === 'datas';
+            document.getElementById('datas-gestao').style.display = escolherDatas ? 'block' : 'none';
+            if (escolherDatas) {
+                if (!periodoPicker) {   // o calendário só é criado na primeira vez
+                    periodoPicker = flatpickr('#periodo-datas', {
+                        mode: 'range', dateFormat: 'd/m/Y', locale: 'pt',
+                        onChange: datas => { if (datas.length !== 1) desenharGestao(); }   // espera escolher as duas datas
+                    });
+                }
+                periodoPicker.open();
+            }
+            desenharGestao();
+        });
+
+        document.getElementById('limpar-filtros').addEventListener('click', () => {
+            document.getElementById('busca-gestao').value = '';
+            document.getElementById('periodo-gestao').value = '0';
+            document.getElementById('datas-gestao').style.display = 'none';
+            if (periodoPicker) periodoPicker.clear();
+            desenharGestao();
+        });
+        function abrirOSParaVisualizacaoOuEdicao(codigoTemp) {
+            const osObj = listaOSCache.find(x => x.codigoTemp === codigoTemp);
+            if (!osObj) return;
+            carreadorAjustado = null;   // o carreador começa proporcional
+
+            document.getElementById('gestao-app').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+
+            const isRejeitada = (osObj.status_aprovacao === 'Rejeitado');
+            modoVisualizacao = !isRejeitada;
+            isEditandoRejeitada = isRejeitada;
+
+            modoOperacaoSelecionado = (osObj.tipo_registro === 'LANCAMENTO') ? 'LANCAMENTO' : 'APONTAMENTO';
+
+            document.getElementById('os-codigo-temp-atual').value = osObj.codigoTemp;
+            document.getElementById('os-origem-id').value = osObj.tipo_registro === 'LANCAMENTO' ? '' : (osObj.os_origem || '');   // abertura não tem OS de origem
+            document.getElementById('pea-input').value = osObj.pea || "";
+            marcarPEA(isRejeitada && modoOperacaoSelecionado === 'APONTAMENTO'
+                && apontamentosDaOS(osObj.os_origem, osObj.codigoTemp).length === 0);
+            document.getElementById('fundo-input').value = `${osObj.fa_codigo} - ${osObj.descricao_fazenda}`;
+            document.getElementById('tipo-fazenda').value = osObj.tipo_fazenda || "";
+            fazendaSelecionada = dbFazendas.find(f => String(f.codigo).trim() === String(osObj.fa_codigo).trim());
+
+            document.getElementById('centro-custo').value = osObj.centro_custo;
+            document.getElementById('operacao').innerHTML = `<option value="${osObj.operacao}">${osObj.operacao}</option>`;
+            atualizarSecaoInsumos();
+            document.getElementById('observacao').value = osObj.observacao || "";
+
+            if (osObj.data_prevista_inicio) {
+                flatpickrInstancia.setDate([osObj.data_prevista_inicio, osObj.data_prevista_fim || osObj.data_prevista_inicio]);
+            }
+
+            document.getElementById('talhoes-range-input').value = osObj.talhoes ? osObj.talhoes.split(',').map(t => t.split(':')[0].trim()).join(', ') : "";
+            processarEntradaTalhoes();
+
+            equipamentosSelecionados = [];
+            (osObj.equipamentos || "").split(',').forEach(eStr => {
+                const nomeLimpo = eStr.split('[')[0].trim();
+                const colBVal = eStr.includes('[') ? eStr.split('[')[1].replace(']', '').trim() : '';
+                const eq = dbEquipamentos.find(x => x.nome === nomeLimpo);
+                if (eq) equipamentosSelecionados.push(eq);
+                else if (nomeLimpo) equipamentosSelecionados.push({ nome: nomeLimpo, colB: colBVal, propriedade: 'PRÓPRIO' });
+            });
+            renderizerEquipamentos();
+
+            document.getElementById('produtos-tbody').innerHTML = '';
+            (osObj.produtos || []).forEach(p => { adicionarLinhaProdutoComDados(p.cod, p.desc, p.un, p.dose, p.total); });
+
+            document.querySelectorAll('.prod-dose').forEach(inp => inp.dispatchEvent(new Event('input')));
+            document.querySelectorAll('.prod-total').forEach(inp => inp.dispatchEvent(new Event('input')));
+
+            const banner = document.getElementById('view-mode-banner');
+            const boxLancar = document.getElementById('box-actions-lancar');
+            const boxVisualizar = document.getElementById('box-actions-visualizar');
+
+            if (isRejeitada) {
+                banner.style.display = 'block';
+                banner.style.background = 'rgba(239, 68, 68, 0.12)';
+                banner.style.border = '1px solid var(--danger)';
+                banner.style.color = 'var(--danger)';
+                banner.innerHTML = `⚠️ <strong>OS REJEITADA PELO CONTROLE AGRÍCOLA!</strong><br>Edite os campos necessários e reenvie a solicitação corrigida.`;
+                const motivo = document.createElement('div');
+                motivo.style.marginTop = '0.6rem';
+                motivo.textContent = `Motivo: ${osObj.justificativa_controle || 'não informado'}`;
+                banner.appendChild(motivo);
+                boxLancar.style.display = 'flex';
+                boxVisualizar.style.display = 'none';
+                setFormFieldsDisabled(false);
+                document.getElementById('btn-submit').innerText = "ENVIAR REVISÃO DA OS";
+            } else {
+                banner.style.display = 'block';
+                banner.style.background = 'rgba(6, 182, 212, 0.12)';
+                banner.style.border = '1px solid var(--accent)';
+                banner.style.color = 'var(--accent)';
+                banner.innerHTML = `🔍 <strong>MODO VISUALIZAÇÃO</strong> | OS: ${osObj.codigoOS || osObj.codigoTemp} | Status: ${osObj.status_aprovacao || 'Em análise'}`;
+                boxLancar.style.display = 'none';
+                boxVisualizar.style.display = 'block';
+                setFormFieldsDisabled(true);
+                document.getElementById('btn-ver-pdf').style.display = osObj.pdf_url ? 'block' : 'none';
+            }
+        }
+        async function baixarPDFdaOS() {
+            if (!navigator.onLine) { alert('📶 Precisa de internet para baixar o PDF.'); return; }
+            const codigoTemp = document.getElementById('os-codigo-temp-atual').value;
+            const botao = document.getElementById('btn-ver-pdf');
+            botao.disabled = true;
+            botao.innerText = '⏳ BAIXANDO PDF...';
+            try {
+                const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_pdf&codigoTemp=${encodeURIComponent(codigoTemp)}`)).json();
+                if (!res.success) throw new Error(res.error || 'Não consegui buscar o PDF.');
+                salvarPDF(res.base64, res.nome || 'OS.pdf');
+            } catch (e) {
+                alert('❌ ' + e.message);
+            } finally {
+                botao.disabled = false;
+                botao.innerText = '📄 BAIXAR PDF DA OS';
+            }
+        }
+        // Transforma o texto base64 que veio do servidor em arquivo e baixa no aparelho
+        function salvarPDF(base64, nome) {
+            const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+            const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = nome;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+        }
+
+        // ================= MEUS RELATÓRIOS =================
+        let meusRelatorios = [];   // [{ id, arquivo, enviado_em, enviado_por }], o mais novo primeiro
+
+        // Os relatórios que o líder já abriu ficam guardados no aparelho (uma lista por crachá)
+        function relatoriosVistos() {
+            return JSON.parse(localStorage.getItem('relatorios_vistos_' + solicitanteCracha) || '[]');
+        }
+        function marcarRelatorioVisto(id) {
+            const vistos = relatoriosVistos();
+            if (!vistos.includes(id)) localStorage.setItem('relatorios_vistos_' + solicitanteCracha, JSON.stringify([...vistos, id]));
+        }
+
+        async function buscarMeusRelatorios() {
+            const res = await (await fetch(`${APPSCRIPT_URL}?action=meus_relatorios&cracha=${encodeURIComponent(solicitanteCracha)}`, { signal: AbortSignal.timeout(20000) })).json();
+            if (!res.success) throw new Error(res.error || 'Não consegui buscar os relatórios.');
+            meusRelatorios = res.dados;
+        }
+
+        // A bolinha vermelha do menu: quantos ainda não foram abertos
+        function desenharBadgeRelatorios() {
+            const vistos = relatoriosVistos();
+            const novos = meusRelatorios.filter(r => !vistos.includes(r.id)).length;
+            const badge = document.getElementById('badge-relatorios');
+            badge.innerText = novos;
+            badge.style.display = novos > 0 ? 'inline-block' : 'none';
+        }
+        async function atualizarBadgeRelatorios() {
+            meusRelatorios = [];          // começa do zero: pode ser outro líder neste aparelho
+            desenharBadgeRelatorios();
+            if (!navigator.onLine || !solicitanteCracha) return;
+            try { await buscarMeusRelatorios(); } catch (e) { return; }   // internet ruim: fica sem bolinha
+            desenharBadgeRelatorios();
+        }
+
+        async function abrirMeusRelatorios() {
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('relatorios-modal').style.display = 'flex';
+            const lista = document.getElementById('relatorios-lista');
+            if (!navigator.onLine) { lista.innerHTML = '<p class="relatorios-vazio">📶 Precisa de internet para ver os relatórios.</p>'; return; }
+            lista.innerHTML = '<p class="relatorios-vazio">⏳ Carregando...</p>';
+            try {
+                await buscarMeusRelatorios();
+                desenharMeusRelatorios();
+            } catch (e) {
+                lista.innerHTML = `<p class="relatorios-vazio">❌ ${e.message}</p>`;
+            }
+        }
+
+        function fecharMeusRelatorios() {
+            document.getElementById('relatorios-modal').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'flex';
+            desenharBadgeRelatorios();
+        }
+
+        // "Relatório do líder - FULANO - 30.10.pdf" → "Relatório de 30/10"
+        function tituloDoRelatorio(r) {
+            const data = String(r.arquivo).match(/(\d{1,2})\.(\d{1,2})\s*\.pdf$/i);
+            return data ? `Relatório de ${data[1].padStart(2, '0')}/${data[2].padStart(2, '0')}` : String(r.arquivo).replace(/\.pdf$/i, '');
+        }
+
+        function desenharMeusRelatorios() {
+            const lista = document.getElementById('relatorios-lista');
+            if (meusRelatorios.length === 0) { lista.innerHTML = '<p class="relatorios-vazio">Nenhum relatório por enquanto.</p>'; return; }
+            const vistos = relatoriosVistos();
+            lista.innerHTML = meusRelatorios.map(r => {
+                const novo = !vistos.includes(r.id);
+                return `<button type="button" class="btn relatorio-item ${novo ? 'novo' : ''}" data-id="${r.id}" onclick="baixarRelatorio('${r.id}')">
+                    <span>
+                        <span class="relatorio-titulo">${tituloDoRelatorio(r)}${novo ? '<span class="relatorio-tag">NOVO</span>' : ''}</span>
+                        <span class="relatorio-sub">Enviado ${r.enviado_em.replace(/\/\d{4} /, ' às ')} por ${r.enviado_por.split(' ')[0]}</span>
+                    </span>
+                    <span class="relatorio-acao">📄 Baixar</span>
+                </button>`;
+            }).join('');
+        }
+
+        async function baixarRelatorio(id) {
+            if (!navigator.onLine) { alert('📶 Precisa de internet para baixar o relatório.'); return; }
+            const acao = document.querySelector(`.relatorio-item[data-id="${id}"] .relatorio-acao`);
+            acao.innerText = '⏳ Baixando...';
+            try {
+                const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_relatorio&id=${encodeURIComponent(id)}&cracha=${encodeURIComponent(solicitanteCracha)}`)).json();
+                if (!res.success) throw new Error(res.error || 'Não consegui baixar o relatório.');
+                salvarPDF(res.base64, res.nome);
+                marcarRelatorioVisto(id);
+                desenharMeusRelatorios();   // tira o "NOVO"
+            } catch (e) {
+                alert('❌ ' + e.message);
+                acao.innerText = '📄 Baixar';
+            }
+        }
+        function fecharVisualizacaoOS() {
+            setFormFieldsDisabled(false);
+            isEditandoRejeitada = false;
+            document.getElementById('view-mode-banner').style.display = 'none';
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('gestao-app').style.display = 'block';
+        }
+
+        // ---------- PEA: obrigatório no 1º apontamento da OS ----------
+        let peaObrigatorio = false;   // true quando é o 1º apontamento da OS
+
+        // Os outros apontamentos desta OS que valem (rejeitado e cancelado não contam; o que está sendo corrigido também não).
+        // Junta a fila offline: apontamento guardado no celular também conta.
+        function apontamentosDaOS(origem, codigoAtual) {
+            const fila = JSON.parse(localStorage.getItem('os_fila_offline') || '[]');
+            const naFila = fila.map(x => x.codigoTemp);
+            return [...fila, ...listaOSCache.filter(o => !naFila.includes(o.codigoTemp))].filter(o =>
+                o.tipo_registro !== 'LANCAMENTO' &&
+                o.os_origem === origem &&
+                o.codigoTemp !== codigoAtual &&
+                o.status_aprovacao !== REJEITADA &&
+                !cancelada(o)
+            );
+        }
+
+        // Liga ou desliga a obrigação e troca o texto do campo
+        function marcarPEA(obrigatorio) {
+            peaObrigatorio = obrigatorio;
+            document.getElementById('pea-label').innerText = obrigatorio
+                ? 'PEA (Permissão Entrada) - Obrigatório'
+                : 'PEA (Permissão Entrada) - Opcional';
+        }
+
+        // O PEA que já vem preenchido: o do último apontamento que tem PEA; se nenhum tem, o da abertura
+        function peaSugerido(abertura, anteriores) {
+            const comPEA = anteriores
+                .filter(o => String(o.pea || '').trim())
+                .sort((a, b) => lerData(dataDe(b)) - lerData(dataDe(a)));   // mais novo primeiro
+            return comPEA.length ? String(comPEA[0].pea).trim() : (abertura.pea || '');
+        }
+
+        function setFormFieldsDisabled(disabled) {
+            document.querySelectorAll('#os-form input, #os-form select, #os-form textarea, #os-form button:not(#btn-voltar-gestao):not(#btn-ver-pdf):not(#btn-compartilhar)').forEach(el => {
+                if (el.id !== 'solicitante-display' && el.id !== 'data-solicitacao-display') {
+                    el.disabled = disabled;
+                }
+            });
+        }
+
+        function prepararFormulario() {
+            modoVisualizacao = false;
+            carreadorAjustado = null;   // o carreador começa proporcional
+            marcarPEA(false);           // o PEA começa opcional (o apontamento decide depois)
+            setFormFieldsDisabled(false);
+            document.getElementById('view-mode-banner').style.display = 'none';
+            document.getElementById('box-actions-lancar').style.display = 'flex';
+            document.getElementById('box-actions-visualizar').style.display = 'none';
+            document.getElementById('btn-submit').innerText = 'ENVIAR SOLICITAÇÃO';
+        }
+
+        function iniciarAberturaOS() {
+            prepararFormulario();
+            modoOperacaoSelecionado = "LANCAMENTO";
+            isEditandoRejeitada = false;
+            document.getElementById('os-origem-id').value = "";
+            document.getElementById('os-codigo-temp-atual').value = "";
+            document.getElementById('view-mode-banner').style.display = 'none';
+            osOrigemObjeto = null;
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('prog-modal').style.display = 'flex';
+            document.getElementById('justificativa-box').style.display = 'none';
+            document.getElementById('prog-btns').style.display = 'flex';
+            document.getElementById('justificativa-texto').value = '';
+        }
+
+        let atualizacaoApontamento = null;   // busca da lista nova que ainda está em andamento
+
+        async function abrirModalApontamentoOS() {
+            prepararFormulario();
+            modoOperacaoSelecionado = "APONTAMENTO";
+            isEditandoRejeitada = false;
+            document.getElementById('view-mode-banner').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('select-os-modal').style.display = 'flex';
+
+            const select = document.getElementById('select-os-origem');
+            select.innerHTML = '';
+            const dono = localStorage.getItem('os_cache_gestao_dono');
+            const guardada = (!dono || dono === String(solicitanteCracha)) ? JSON.parse(localStorage.getItem('os_cache_gestao') || '[]') : [];
+            if (guardada.length) preencherSelectApontamento(guardada);    // mostra na hora o que já tem no celular
+            else select.innerHTML = '<option value="">Carregando Ordens de Serviço...</option>';
+
+            atualizacaoApontamento = null;
+            if (!navigator.onLine) { if (!guardada.length) preencherSelectApontamento([]); return; }
+
+            atualizacaoApontamento = (async () => {
+                try {
+                    const res = await (await fetch(`${APPSCRIPT_URL}?action=buscar_os&solicitante=${encodeURIComponent(solicitanteCracha)}`, { signal: AbortSignal.timeout(20000) })).json();
+                    if (res.success && res.dados) {
+                        localStorage.setItem('os_cache_gestao', JSON.stringify(res.dados));
+                        localStorage.setItem('os_cache_gestao_dono', String(solicitanteCracha));
+                        preencherSelectApontamento(res.dados);
+                        return;
+                    }
+                } catch (e) { }
+                if (!guardada.length) preencherSelectApontamento([]);
+            })();
+            await atualizacaoApontamento;
+            atualizacaoApontamento = null;
+        }
+
+        function preencherSelectApontamento(lista) {
+            const select = document.getElementById('select-os-origem');
+            const escolhida = select.value;   // se o líder já escolheu uma OS, mantém a escolha
+            listaOSCache = lista;
+            select.innerHTML = '<option value="">Selecione a OS Original...</option>';
+            montarGrupos(lista).andamento.map(item => item.abertura).forEach(o => {   // só OS lançadas e ainda abertas (as do "Em andamento")
+                const displayOS = o.codigoOS ? numeroDaOS(o) : o.codigoTemp;
+                select.innerHTML += `<option value="${o.codigoTemp}">${displayOS} - ${o.fa_codigo} (${o.operacao})</option>`;
+            });
+            if (escolhida) select.value = escolhida;
+        }
+
+        function fecharModalSelecaoOS() {
+            document.getElementById('select-os-modal').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'flex';
+        }
+
+        async function avancarApontamentoOS(codigo) {
+            const codTemp = codigo || document.getElementById('select-os-origem').value;
+            if (!codTemp) { alert("Selecione uma OS da lista."); return; }
+
+            // A lista nova ainda está chegando? Espera ela, para a trava dos talhões 100% usar os apontamentos atualizados
+            if (atualizacaoApontamento) {
+                const botao = document.getElementById('btn-confirmar-os');
+                botao.disabled = true;
+                botao.innerText = 'Atualizando...';
+                await atualizacaoApontamento;
+                botao.disabled = false;
+                botao.innerText = 'Confirmar';
+            }
+
+            document.getElementById('os-origem-id').value = codTemp;
+            osOrigemObjeto = listaOSCache.find(x => x.codigoTemp === codTemp);
+
+            if (osOrigemObjeto) {
+                const anteriores = apontamentosDaOS(codTemp, '');
+                document.getElementById('pea-input').value = peaSugerido(osOrigemObjeto, anteriores);
+                marcarPEA(anteriores.length === 0);   // nenhum apontamento antes: este é o 1º
+                document.getElementById('fundo-input').value = `${osOrigemObjeto.fa_codigo} - ${osOrigemObjeto.descricao_fazenda}`;
+                document.getElementById('tipo-fazenda').value = osOrigemObjeto.tipo_fazenda || "";
+                fazendaSelecionada = dbFazendas.find(f => String(f.codigo).trim() === String(osOrigemObjeto.fa_codigo).trim());
+
+                document.getElementById('centro-custo').value = osOrigemObjeto.centro_custo;
+                document.getElementById('operacao').innerHTML = `<option value="${osOrigemObjeto.operacao}">${osOrigemObjeto.operacao}</option>`;
+                atualizarSecaoInsumos();
+
+                document.getElementById('talhoes-range-input').value = osOrigemObjeto.talhoes ? osOrigemObjeto.talhoes.split(',').map(t => t.split(':')[0].trim()).join(', ') : "";
+                const jaFinalizados = processarEntradaTalhoes();
+
+                if (jaFinalizados.length > 0) {
+                    const restantes = talhoesAtivos.filter(t => t.num !== '6666 (Rateio)').map(t => t.num);
+                    if (modoRateioCarreador() && restantes.length > 0) restantes.push('6666');
+                    inputRangeTalhoes.value = restantes.join(', ');
+                    processarEntradaTalhoes();
+                    mostrarAvisoTalhoes(restantes.length > 0
+                        ? `ℹ️ Já 100% apontados nesta OS, retirados da lista: ${jaFinalizados.join(', ')}`
+                        : `✅ Todos os talhões desta OS já foram 100% apontados.`);
+                }
+
+                equipamentosSelecionados = [];
+                (osOrigemObjeto.equipamentos || "").split(',').forEach(eStr => {
+                    const nomeLimpo = eStr.split('[')[0].trim();
+                    const eq = dbEquipamentos.find(x => x.nome === nomeLimpo);
+                    if (eq) equipamentosSelecionados.push(eq);
+                    else if (nomeLimpo) equipamentosSelecionados.push({ nome: nomeLimpo, colB: '', propriedade: 'PRÓPRIO' });
+                });
+                renderizerEquipamentos();
+
+                document.getElementById('produtos-tbody').innerHTML = '';
+                (osOrigemObjeto.produtos || []).forEach(p => { adicionarLinhaProdutoComDados(p.cod, p.desc, p.un, p.dose, p.total); });
+
+                document.querySelectorAll('.prod-dose').forEach(inp => inp.dispatchEvent(new Event('input')));
+                document.querySelectorAll('.prod-total').forEach(inp => inp.dispatchEvent(new Event('input')));
+            }
+
+            programacaoStatus = "SIM"; carreadorTexto = "";
+            document.getElementById('select-os-modal').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+
+            document.getElementById('badge-tipo-operacao').innerText = `MODO: APONTAMENTO DE OS`;
+            document.getElementById('badge-tipo-operacao').className = 'badge badge-lancada';
+
+            document.getElementById('solicitante-display').value = solicitanteLimpoDisplay;
+            document.getElementById('data-solicitacao-display').value = new Date().toLocaleString('pt-BR');
+            flatpickrInstancia.clear();
+        }
+
+        function fecharModalProgramacao() {
+            document.getElementById('prog-modal').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'flex';
+        }
+
+        function mostrarJustificativa() {
+            document.getElementById('prog-btns').style.display = 'none';
+            document.getElementById('justificativa-box').style.display = 'block';
+        }
+
+        function respostaProgramacao(resp) {
+            if (resp === 'NÃO') {
+                const txt = document.getElementById('justificativa-texto').value.trim();
+                if (!txt) { alert("⚠️ JUSTIFICATIVA OBRIGATÓRIA!"); return; }
+                carreadorTexto = txt;
+            }
+            programacaoStatus = resp;
+            document.getElementById('prog-modal').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+
+            document.getElementById('badge-tipo-operacao').innerText = `MODO: ABERTURA DE OS`;
+            document.getElementById('badge-tipo-operacao').className = 'badge badge-analise';
+
+            document.getElementById('os-form').reset();
+            document.getElementById('produtos-tbody').innerHTML = '';
+            equipamentosSelecionados = []; renderizerEquipamentos();
+            talhoesAtivos = []; renderizerTalhoesSelecionados();
+            mostrarAvisoTalhoes('');
+            flatpickrInstancia.clear();
+            adicionarLinhaProduto();
+            atualizarSecaoInsumos();
+
+            document.getElementById('solicitante-display').value = solicitanteLimpoDisplay;
+            document.getElementById('data-solicitacao-display').value = new Date().toLocaleString('pt-BR');
+        }
+
+        function voltarAoMenu() {
+            document.getElementById('view-mode-banner').style.display = 'none';
+            isEditandoRejeitada = false;
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('gestao-app').style.display = 'none';
+            document.getElementById('receipt-modal').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'flex';
+        }
+
+        let fazendaSelecionada = null, talhoesAtivos = [];
+        let carreadorAjustado = null;    // área do 6666 que o líder digitou (null = usa a proporcional)
+        let carreadorJaApontado = 0;     // quanto do 6666 já foi apontado nesta OS (no apontamento)
+        const inputFundo = document.getElementById('fundo-input'), listFundo = document.getElementById('fundo-autocomplete');
+        const inputRangeTalhoes = document.getElementById('talhoes-range-input');
+
+        inputFundo.oninput = function () {
+            if (modoVisualizacao) return;
+            const val = this.value.toLowerCase(); listFundo.innerHTML = '';
+            if (!val) { listFundo.style.display = 'none'; return; }
+            dbFazendas.filter(f => f.descricao.toLowerCase().includes(val)).forEach(f => {
+                const div = document.createElement('div'); div.className = 'autocomplete-item';
+                div.innerHTML = `<strong>${f.codigo}</strong> - ${f.nome}`;
+                div.onclick = () => {
+                    fazendaSelecionada = f; inputFundo.value = f.descricao;
+                    document.getElementById('tipo-fazenda').value = (parseInt(f.codigo, 10) < 300000) ? "PRÓPRIA" : "FORNECEDORES";
+                    listFundo.style.display = 'none';
+                    processarEntradaTalhoes();
+                };
+                listFundo.appendChild(div);
+            });
+            listFundo.style.display = 'block';
+        };
+
+        inputRangeTalhoes.addEventListener('input', processarEntradaTalhoes);
+
+        function expandirIntervalos(texto) {
+            const resultado = new Set();
+            if (!texto) return Array.from(resultado);
+            texto.split(',').forEach(parte => {
+                const p = parte.trim();
+                if (p.includes('-')) {
+                    const limites = p.split('-').map(x => parseInt(x.trim(), 10));
+                    if (limites.length === 2 && !isNaN(limites[0]) && !isNaN(limites[1])) {
+                        const min = Math.min(limites[0], limites[1]);
+                        const max = Math.max(limites[0], limites[1]);
+                        for (let i = min; i <= max; i++) { resultado.add(i); }
+                    }
+                } else {
+                    const num = parseInt(p, 10);
+                    if (!isNaN(num)) { resultado.add(num); }
+                }
+            });
+            return Array.from(resultado);
+        }
+
+        function modoRateioCarreador() {
+            const nums = expandirIntervalos(inputRangeTalhoes.value);
+            return nums.includes(6666) && nums.some(n => n !== 6666);
+        }
+
+        function mostrarAvisoTalhoes(texto) {
+            const aviso = document.getElementById('aviso-talhoes');
+            aviso.textContent = texto;
+            aviso.style.display = texto ? 'block' : 'none';
+        }
+
+        function processarEntradaTalhoes() {
+            if (!fazendaSelecionada) return [];
+            const nums = expandirIntervalos(inputRangeTalhoes.value);
+            const carreadorChecked = modoRateioCarreador();
+
+            const areaJaApontadaPorTalhao = {};
+            if (modoOperacaoSelecionado === 'APONTAMENTO' && osOrigemObjeto) {
+                const apontamentosAnteriores = listaOSCache.filter(o =>
+                    o.tipo_registro !== 'LANCAMENTO' &&
+                    o.os_origem === osOrigemObjeto.codigoTemp &&
+                    o.status_aprovacao !== 'Rejeitado' &&
+                    !cancelada(o)
+                );
+                apontamentosAnteriores.forEach(ap => {
+                    if (ap.talhoes) {
+                        ap.talhoes.split(',').forEach(tStr => {
+                            const partes = tStr.trim().split(':');
+                            const numOnly = parseInt(partes[0].trim(), 10);
+                            const areaVal = parseFloat((partes[1] || '').replace('ha', '').replace(',', '.').trim()) || 0;
+                            if (!isNaN(numOnly)) {
+                                if (!areaJaApontadaPorTalhao[numOnly]) areaJaApontadaPorTalhao[numOnly] = 0;
+                                areaJaApontadaPorTalhao[numOnly] += areaVal;
+                            }
+                        });
+                    }
+                });
+            }
+
+            carreadorJaApontado = areaJaApontadaPorTalhao[6666] || 0;
+            let novosTalhoesAtivos = [];
+            let bloqueadosAnteriores = [];
+            let parciaisRestantes = [];
+
+            fazendaSelecionada.talhoes.forEach(t => {
+                const numT = parseInt(t.talhao, 10);
+                const areaMax = parseFloat(t.area) || 0;
+
+                if (nums.includes(numT)) {
+                    if (numT === 6666 && carreadorChecked) return;
+
+                    const jaApontada = areaJaApontadaPorTalhao[numT] || 0;
+                    const restante = areaMax - jaApontada;
+
+                    if (restante <= 0.001) {
+                        bloqueadosAnteriores.push(numT);
+                        return;
+                    }
+
+                    if (jaApontada > 0.001 && restante > 0.001) {
+                        parciaisRestantes.push(`${numT} (falta ${restante.toFixed(2)} ha)`);
+                    }
+
+                    const existente = talhoesAtivos.find(x => x.num === String(numT));
+                    if (existente) {
+                        existente.maxArea = restante;
+                        if (existente.areaParcial > restante) existente.areaParcial = restante;
+                        novosTalhoesAtivos.push(existente);
+                    } else {
+                        novosTalhoesAtivos.push({
+                            num: String(numT),
+                            maxArea: restante,
+                            areaParcial: restante,
+                            isParcial: false
+                        });
+                    }
+                }
+            });
+
+            if (bloqueadosAnteriores.length > 0) {
+                mostrarAvisoTalhoes(`⚠️ Já 100% apontados nesta OS, serão ignorados: ${bloqueadosAnteriores.join(', ')}`);
+            } else {
+                mostrarAvisoTalhoes('');
+            }
+
+            talhoesAtivos = novosTalhoesAtivos;
+            recalcularAreasE6666();
+            return bloqueadosAnteriores;
+        }
+
+        function toggleParcial(num) {
+            const t = talhoesAtivos.find(x => x.num === String(num));
+            if (t) {
+                t.isParcial = !t.isParcial;
+                if (!t.isParcial) { t.areaParcial = t.maxArea; }
+                recalcularAreasE6666();
+            }
+        }
+
+        function alterarAreaParcial(num, val) {
+            const t = talhoesAtivos.find(x => x.num === String(num));
+            if (t) {
+                let v = parseFloat(val) || 0;
+                if (v > t.maxArea) {
+                    alert(`🚨 A área parcial (${v} ha) não pode exceder a área restante do talhão (${t.maxArea} ha)!`);
+                    v = t.maxArea;
+                }
+                if (v < 0) v = 0;
+                t.areaParcial = v;
+                recalcularAreasE6666();
+            }
+        }
+
+        // Carreador (6666): "Ajustar" guarda a área proporcional como ponto de partida; "Usar proporcional" volta ao cálculo
+        function alternarAjusteCarreador() {
+            const t = talhoesAtivos.find(x => x.num === '6666 (Rateio)');
+            carreadorAjustado = (carreadorAjustado === null && t) ? Number(t.areaParcial.toFixed(2)) : null;
+            recalcularAreasE6666();
+        }
+
+        function alterarAreaCarreador(valor) {
+            const t = talhoesAtivos.find(x => x.num === '6666 (Rateio)');
+            let v = parseFloat(String(valor).replace(',', '.')) || 0;
+            if (t && v > t.maxArea) {
+                alert(`🚨 A área do carreador (${v} ha) não pode passar do que o talhão 6666 tem disponível (${t.maxArea.toFixed(2)} ha)!`);
+                v = t.maxArea;
+            }
+            if (v < 0) v = 0;
+            carreadorAjustado = v;
+            recalcularAreasE6666();
+        }
+
+        function recalcularAreasE6666() {
+            let sumAreaSelecionada = 0;
+            let sumAreaTotalFazendaSem6666 = 0;
+            let area6666Base = 0;
+
+            if (fazendaSelecionada && fazendaSelecionada.talhoes) {
+                fazendaSelecionada.talhoes.forEach(t => {
+                    const numT = parseInt(t.talhao, 10);
+                    const area = parseFloat(t.area) || 0;
+                    if (numT === 6666) area6666Base = area;
+                    else sumAreaTotalFazendaSem6666 += area;
+                });
+            }
+
+            const carreadorChecked = modoRateioCarreador();
+
+            if (carreadorChecked) {
+                talhoesAtivos = talhoesAtivos.filter(x => x.num !== '6666 (Rateio)' && x.num !== '6666');
+            }
+
+            if (!carreadorChecked) carreadorAjustado = null;   // tirou o 6666: na próxima vez volta proporcional
+
+            talhoesAtivos.forEach(t => { sumAreaSelecionada += t.areaParcial; });
+
+            if (carreadorChecked && area6666Base > 0 && sumAreaSelecionada > 0 && sumAreaTotalFazendaSem6666 > 0) {
+                const proporcao = sumAreaSelecionada / sumAreaTotalFazendaSem6666;
+                const disponivel = Math.max(0, area6666Base - carreadorJaApontado);   // o que sobra do carreador nesta OS
+                const area6666Rateada = Math.min(area6666Base * proporcao, disponivel);
+                const ajustada = carreadorAjustado !== null;
+                talhoesAtivos.push({
+                    num: '6666 (Rateio)',
+                    maxArea: disponivel,
+                    proporcional: area6666Rateada,
+                    areaParcial: ajustada ? Math.min(carreadorAjustado, disponivel) : area6666Rateada,
+                    isParcial: ajustada
+                });
+            }
+
+            renderizerTalhoesSelecionados();
+        }
+
+        function renderizerTalhoesSelecionados() {
+            const container = document.getElementById('talhoes-container'); container.innerHTML = '';
+            let tot = 0;
+
+            talhoesAtivos.forEach(t => {
+                tot += t.areaParcial;
+                const isCarreadorRateio = t.num.includes('Rateio');
+
+                const div = document.createElement('div');
+                div.className = `talhao-card ${t.isParcial ? 'parcial-active' : ''}`;
+
+                let inputHtml = '';
+                if (t.isParcial && !isCarreadorRateio) {
+                    inputHtml = `<input type="number" step="0.01" max="${t.maxArea}" value="${t.areaParcial}"
+                        style="width: 100px; padding: 2px 6px; font-size: 0.85rem;"
+                        onchange="alterarAreaParcial('${t.num}', this.value)">`;
+                } else if (t.isParcial && isCarreadorRateio) {
+                    inputHtml = `<input type="number" step="0.01" min="0" max="${t.maxArea.toFixed(2)}" value="${t.areaParcial.toFixed(2)}"
+                        style="width: 100px; padding: 2px 6px; font-size: 0.85rem;"
+                        onchange="alterarAreaCarreador(this.value)">`;
+                }
+
+
+                let btnParcialHtml = '';
+                if (!isCarreadorRateio) {
+                    btnParcialHtml = `<button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.75rem;"
+                        onclick="toggleParcial('${t.num}')">${t.isParcial ? 'Restaurar Total' : 'Parcial'}</button>`;
+                } else {
+                    btnParcialHtml = `<button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.75rem;"
+                        onclick="alternarAjusteCarreador()">${t.isParcial ? 'Usar proporcional' : 'Ajustar'}</button>`;
+                }
+
+                div.innerHTML = `
+                    <div>
+                        <strong>Talhão ${t.num}</strong>
+                        <span style="color:var(--text-muted); font-size:0.8rem; margin-left: 6px;">(${isCarreadorRateio ? `Proporcional: ${t.proporcional.toFixed(2)} ha · ` : ''}Disp: ${t.maxArea.toFixed(2)} ha)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap: 8px;">
+                        ${inputHtml}
+                        <strong style="color: var(--accent);">${t.areaParcial.toFixed(2)} ha</strong>
+                        ${btnParcialHtml}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('area-total').value = tot.toFixed(2);
+            document.querySelectorAll('.prod-dose').forEach(inp => { inp.dispatchEvent(new Event('input')); });
+            document.querySelectorAll('.prod-total').forEach(inp => { inp.dispatchEvent(new Event('input')); });
+        }
+
+        const inputFrota = document.getElementById('frota-input'), listFrota = document.getElementById('frota-autocomplete');
+        inputFrota.oninput = function () {
+            if (modoVisualizacao) return;
+            const val = this.value.toLowerCase(); listFrota.innerHTML = '';
+            if (!val) { listFrota.style.display = 'none'; return; }
+            dbEquipamentos.filter(e => e.nome.toLowerCase().includes(val)).forEach(e => {
+                const div = document.createElement('div'); div.className = 'autocomplete-item';
+                div.innerHTML = `<strong>${e.nome}</strong> | C.C: ${e.colB || '-'}`;
+                div.onclick = () => {
+                    if (!equipamentosSelecionados.some(x => x.nome === e.nome)) equipamentosSelecionados.push(e);
+                    renderizerEquipamentos(); inputFrota.value = ''; listFrota.style.display = 'none';
+                };
+                listFrota.appendChild(div);
+            });
+            listFrota.style.display = 'block';
+        };
+
+        function renderizerEquipamentos() {
+            const container = document.getElementById('box-table-equipamentos');
+            const tbody = document.getElementById('equipamentos-tbody');
+            tbody.innerHTML = '';
+            if (equipamentosSelecionados.length === 0) { container.style.display = 'none'; return; }
+            container.style.display = 'block';
+            equipamentosSelecionados.forEach((e, i) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${e.nome}</strong> (${e.propriedade || 'PRÓPRIO'})</td>
+                    <td data-label="C.C Equipamento"><span style="color: var(--accent); font-weight: 600;">${e.colB || '-'}</span></td>
+                    <td style="text-align: center;">
+                        <button type="button" class="btn btn-danger" style="padding: 2px 8px;" onclick="equipamentosSelecionados.splice(${i},1);renderizerEquipamentos();">×</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function adicionarLinhaProduto() { adicionarLinhaProdutoComDados("", "", "", "", ""); }
+
+        function adicionarLinhaProdutoComDados(cod, desc, un, dose, total) {
+            const isApontamento = (modoOperacaoSelecionado === 'APONTAMENTO');
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td data-label="Cód. Insumo"><input type="text" class="prod-cod" value="${cod}" placeholder="Cód/Nome..." autocomplete="off"></td>
+                <td data-label="Descrição"><input type="text" class="prod-desc" value="${desc}" readonly></td>
+                <td data-label="UN"><input type="text" class="prod-un" value="${un}" readonly style="width: 45px; padding:0.5rem; text-align:center;"></td>
+                <td data-label="Dosagem" style="position: relative;">
+                    <input type="number" step="0.001" class="prod-dose" value="${dose}" placeholder="0.00" ${isApontamento ? 'readonly' : ''}>
+                    <span class="dose-warning" style="color: var(--danger); font-size: 0.65rem; font-weight: bold; position: absolute; bottom: -12px; left: 0;"></span>
+                </td>
+                <td data-label="Total"><input type="number" step="0.01" class="prod-total" value="${total}" placeholder="0.00" ${isApontamento ? '' : 'readonly'}></td>
+                <td style="text-align: center;"><button type="button" class="btn btn-danger" style="padding: 2px 8px;" onclick="this.closest('tr').remove();">×</button></td>
+            `;
+
+            const inCod = tr.querySelector('.prod-cod');
+            const inDose = tr.querySelector('.prod-dose');
+            const inTotal = tr.querySelector('.prod-total');
+            const warnDose = tr.querySelector('.dose-warning');
+
+            inCod.oninput = function () {
+                const val = this.value.toLowerCase();
+                const globalList = document.getElementById('global-autocomplete');
+                globalList.innerHTML = '';
+                if (!val) { globalList.style.display = 'none'; inputInsumoAtivo = null; return; }
+                inputInsumoAtivo = this;
+
+                const rect = this.getBoundingClientRect();
+                globalList.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+                globalList.style.left = (rect.left + window.scrollX) + 'px';
+                globalList.style.width = rect.width + 'px';
+
+                dbInsumos.filter(p => p.full.toLowerCase().includes(val)).forEach(p => {
+                    const div = document.createElement('div'); div.className = 'autocomplete-item';
+                    div.innerHTML = `<strong>${p.cod}</strong> - ${p.desc}`;
+                    div.onclick = () => {
+                        const jaExiste = Array.from(document.querySelectorAll('#produtos-tbody .prod-cod'))
+                            .some(inp => inp !== inCod && inp.value.trim() === p.cod);
+                        if (jaExiste) {
+                            alert(`❌ O insumo [${p.cod} - ${p.desc}] já foi adicionado nesta Ordem de Serviço!`);
+                            return;
+                        }
+                        tr.querySelector('.prod-cod').value = p.cod;
+                        tr.querySelector('.prod-desc').value = p.desc;
+                        tr.querySelector('.prod-un').value = p.un;
+
+                        inDose.value = '';
+                        inTotal.value = '';
+                        inDose.dispatchEvent(new Event('input'));
+                        inTotal.dispatchEvent(new Event('input'));
+
+                        globalList.style.display = 'none';
+                        inputInsumoAtivo = null;
+                    };
+                    globalList.appendChild(div);
+                });
+                globalList.style.display = 'block';
+            };
+
+            const validarDoseRange = () => {
+                const cCode = tr.querySelector('.prod-cod').value;
+                const vDose = parseFloat(inDose.value) || 0;
+                const ref = dbInsumos.find(i => i.cod === cCode);
+                warnDose.innerText = '';
+                if (ref && vDose > 0) {
+                    if (ref.min > 0 && vDose < ref.min) warnDose.innerText = `Min: ${ref.min}`;
+                    if (ref.max > 0 && vDose > ref.max) warnDose.innerText = `Máx: ${ref.max}`;
+                }
+            };
+
+            inDose.oninput = function () {
+                const area = parseFloat(document.getElementById('area-total').value) || 0;
+                const vDose = parseFloat(this.value) || 0;
+
+                if (!isApontamento) {
+                    inTotal.value = (vDose * area).toFixed(2);
+                }
+                validarDoseRange();
+            };
+
+            inTotal.oninput = function () {
+                const area = parseFloat(document.getElementById('area-total').value) || 0;
+                const vTotal = parseFloat(this.value) || 0;
+
+                if (isApontamento) {
+                    const novaDose = area > 0 ? (vTotal / area) : 0;
+                    inDose.value = novaDose.toFixed(3);
+                }
+                validarDoseRange();
+            };
+
+            document.getElementById('produtos-tbody').appendChild(tr);
+        }
+
+        // ---------- Encerrar a OS? (pergunta no Enviar do apontamento) ----------
+        let respostaEncerramento = null;   // quem está esperando a resposta (o enviarDados)
+
+        // Mostra a pergunta e espera: true = encerrar, false = continua aberta, null = voltar sem enviar
+        function perguntarEncerramento() {
+            const origem = document.getElementById('os-origem-id').value;
+            const abertura = listaOSCache.find(o => o.codigoTemp === origem) || osOrigemObjeto;
+            const atual = isEditandoRejeitada ? document.getElementById('os-codigo-temp-atual').value : '';
+
+            // Quanto já foi apontado nesta OS (lançado, em análise e guardado no celular) e com quanto fica
+            const ja = apontamentosDaOS(origem, atual).reduce((s, o) => s + (parseFloat(o.area_total) || 0), 0);
+            const este = parseFloat(document.getElementById('area-total').value) || 0;
+            const previsto = abertura ? (parseFloat(abertura.area_total) || 0) : 0;
+
+            document.getElementById('enc-os').innerHTML = abertura
+                ? `OS ${esc(numeroDaOS(abertura))} · ${esc(abertura.descricao_fazenda)}<br>${esc(abertura.operacao)}` : '';
+            const caixaArea = document.getElementById('enc-area');
+            caixaArea.style.display = previsto > 0 ? 'block' : 'none';
+            caixaArea.innerHTML =
+                `<div><span>Já apontado</span><strong>${ha(ja)} de ${ha(previsto)} ha</strong></div>` +
+                `<div><span>Somando este</span><strong>${ha(ja + este)} ha · ${Math.round((ja + este) / previsto * 100)}%</strong></div>`;
+
+            // Corrigindo uma rejeitada: lembra o que tinha sido escolhido
+            const rejeitada = atual ? listaOSCache.find(o => o.codigoTemp === atual) : null;
+            const lembrete = document.getElementById('enc-antes');
+            lembrete.style.display = rejeitada ? 'block' : 'none';
+            if (rejeitada) {
+                lembrete.innerText = rejeitada.tipo_registro === 'ENCERRAMENTO'
+                    ? 'Na que foi rejeitada, você tinha escolhido ENCERRAR a OS.'
+                    : 'Na que foi rejeitada, a OS continuava aberta.';
+            }
+
+            document.getElementById('encerrar-modal').style.display = 'flex';
+            return new Promise(resolve => { respostaEncerramento = resolve; });
+        }
+
+        // Os 3 botões da pergunta
+        function responderEncerramento(resposta) {
+            document.getElementById('encerrar-modal').style.display = 'none';
+            if (respostaEncerramento) respostaEncerramento(resposta);
+            respostaEncerramento = null;
+        }
+
+        async function enviarDados() {
+            if (modoVisualizacao) return;
+
+            const pea = document.getElementById('pea-input').value.trim();
+            if (peaObrigatorio && !pea) {
+                alert("⚠️ FALTAM DADOS: É o 1º apontamento desta OS. Digite o número do PEA.");
+                document.getElementById('pea-input').focus();
+                return;
+            }
+
+            if (!fazendaSelecionada) { alert("⚠️ FALTAM DADOS: Selecione a Fazenda/Fundo Agrícola."); return; }
+            if (talhoesAtivos.length === 0) { alert("⚠️ FALTAM DADOS: Digite os Talhões."); return; }
+
+            const selectedDates = flatpickrInstancia.selectedDates;
+            if (selectedDates.length === 0) { alert("⚠️ FALTAM DADOS: Selecione a Data de Execução."); return; }
+
+            const ccVal = document.getElementById('centro-custo').value, opVal = document.getElementById('operacao').value;
+            if (!ccVal || !opVal) { alert("⚠️ FALTAM DADOS: Selecione o Centro de Custo e Operação."); return; }
+            if (equipamentosSelecionados.length === 0) { alert("⚠️ FALTAM DADOS: Adicione ao menos um Equipamento."); return; }
+
+            const usaInsumo = operacaoUsaInsumo();
+            let temInsumo = false;
+            let produtosEnvio = [];
+            if (usaInsumo) document.querySelectorAll('#produtos-tbody tr').forEach(tr => {
+                const cod = tr.querySelector('.prod-cod').value;
+                if (cod) {
+                    temInsumo = true;
+                    produtosEnvio.push({
+                        cod: cod, desc: tr.querySelector('.prod-desc').value,
+                        un: tr.querySelector('.prod-un').value,
+                        dose: tr.querySelector('.prod-dose').value,
+                        total: tr.querySelector('.prod-total').value
+                    });
+                }
+            });
+            if (usaInsumo && !temInsumo) { alert("⚠️ FALTAM DADOS: Adicione ao menos 1 insumo."); return; }
+
+            const stringEquipamentosFormatados = equipamentosSelecionados.map(e => e.colB ? `${e.nome} [${e.colB}]` : e.nome).join(', ');
+            const dtStart = selectedDates[0] ? selectedDates[0].toISOString().split('T')[0] : "";
+            const dtEnd = selectedDates[1] ? selectedDates[1].toISOString().split('T')[0] : dtStart;
+
+            // Apontamento: pergunta se a OS termina com ele (Voltar = não envia nada)
+            let modoEfetivo = modoOperacaoSelecionado;
+            if (modoOperacaoSelecionado === 'APONTAMENTO') {
+                const encerrar = await perguntarEncerramento();
+                if (encerrar === null) return;
+                if (encerrar) modoEfetivo = 'ENCERRAMENTO';
+            }
+
+            const chaveTempEnvio = isEditandoRejeitada
+                ? document.getElementById('os-codigo-temp-atual').value
+                : gerarChaveUnicaTemp();
+
+            const codigoOSHerdada = (osOrigemObjeto && (modoOperacaoSelecionado === 'APONTAMENTO' || modoEfetivo === 'ENCERRAMENTO'))
+                ? (osOrigemObjeto.codigoOS || '')
+                : '';
+
+            const payload = {
+                action: isEditandoRejeitada ? 'editar_rejeitada' : 'salvar_os',
+                codigoTemp: chaveTempEnvio,
+                codigoOS: codigoOSHerdada,
+                status_aprovacao: 'Em análise',
+                tipo_registro: modoEfetivo,
+                os_origem: document.getElementById('os-origem-id').value,
+                programacao: programacaoStatus, carreador: carreadorTexto,
+                data_solicitacao: document.getElementById('data-solicitacao-display').value,
+                solicitante_cracha: solicitanteCracha, solicitante_nome: solicitanteNome,
+                tipo_fazenda: document.getElementById('tipo-fazenda').value,
+                fa_codigo: fazendaSelecionada.codigo, descricao_fazenda: fazendaSelecionada.nome,
+                centro_custo: ccVal, operacao: opVal,
+                data_prevista_inicio: dtStart, data_prevista_fim: dtEnd,
+                observacao: document.getElementById('observacao').value,
+                pea: pea,
+                area_total: document.getElementById('area-total').value,
+                talhoes: talhoesAtivos.map(t => `${t.num}:${t.areaParcial.toFixed(2)}ha`).join(', '),
+                frota: stringEquipamentosFormatados,
+                produtos: produtosEnvio
+            };
+
+            const btn = document.getElementById('btn-submit'), loader = document.getElementById('submit-loader');
+
+            if (!navigator.onLine) { salvarFilaOffline(payload); return; }
+
+            btn.style.display = 'none'; loader.style.display = 'block';
+
+            try {
+                const res = await (await fetch(APPSCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })).json();
+                btn.style.display = 'inline-flex'; loader.style.display = 'none';
+                if (res.success) {
+                    document.getElementById('view-mode-banner').style.display = 'none';
+                    isEditandoRejeitada = false;
+                    gerarComprovanteWhatsApp(payload, res.codigoTemp || payload.codigoTemp);
+                } else { alert("Falha na nuvem: " + res.error); }
+            } catch (err) {
+                btn.style.display = 'inline-flex'; loader.style.display = 'none';
+                salvarFilaOffline(payload);
+            }
+        }
+
+        function salvarFilaOffline(payload) {
+            let fila = JSON.parse(localStorage.getItem('os_fila_offline') || '[]');
+            payload.status_aprovacao = '⚠️ OS NÃO SINCRONIZADA';
+            const existingIdx = fila.findIndex(x => x.codigoTemp === payload.codigoTemp);
+            if (existingIdx >= 0) fila[existingIdx] = payload;
+            else fila.push(payload);
+            localStorage.setItem('os_fila_offline', JSON.stringify(fila));
+            document.getElementById('btn-submit').style.display = 'inline-flex';
+            document.getElementById('submit-loader').style.display = 'none';
+            alert("📶 Sem conexão no momento!\n\nA OS foi SALVA OFFLINE na memória do celular. Assim que conectar à internet, ela será enviada e entrará EM ANÁLISE automaticamente.");
+            gerarComprovanteWhatsApp(payload, payload.codigoTemp);
+        }
+
+        async function sincronizarFilaOffline() {
+            let fila = JSON.parse(localStorage.getItem('os_fila_offline') || '[]');
+            if (fila.length === 0) return;
+            let novaFila = [];
+            const recusadas = [];
+            for (let item of fila) {
+                item.status_aprovacao = 'Em análise';
+                try {
+                    const res = await (await fetch(APPSCRIPT_URL, { method: 'POST', body: JSON.stringify(item) })).json();
+                    if (res.recusada) {
+                        // O servidor recusou de vez (ex.: OS encerrada): tentar de novo não adianta, então sai da fila
+                        recusadas.push(`• ${item.fa_codigo} - ${item.descricao_fazenda} (${item.operacao}): ${res.error}`);
+                    } else if (!res.success) {
+                        item.status_aprovacao = '⚠️ OS NÃO SINCRONIZADA';
+                        novaFila.push(item);
+                    }
+                } catch (e) {
+                    item.status_aprovacao = '⚠️ OS NÃO SINCRONIZADA';
+                    novaFila.push(item);
+                }
+            }
+            localStorage.setItem('os_fila_offline', JSON.stringify(novaFila));
+            if (recusadas.length) alert('⚠️ Não foi possível enviar o que estava guardado no celular:\n\n' + recusadas.join('\n'));
+            if (document.getElementById('gestao-app').style.display === 'block') {
+                carregarEExibirGestaoOS();
+            }
+        }
+
+        let linkWhatsApp = "";
+
+
+
+        // Monta o texto do WhatsApp (usado no comprovante e no botão Compartilhar da Gestão)
+        function montarTextoWhatsApp(p, codTemp) {
+            const TITULOS = {
+                '⚠️ OS NÃO SINCRONIZADA': '*SALVA NO CELULAR*\n_Vai ser enviada quando tiver internet_',
+                'Em análise': '*ENVIADA PARA ANÁLISE*',
+                'OS Lançada': '*OS LANÇADA*',
+                'Rejeitado': '*REJEITADA PELO CONTROLE*'
+            };
+            const TIPOS = { LANCAMENTO: 'Abertura de OS', APONTAMENTO: 'Apontamento', ENCERRAMENTO: 'Encerramento da OS' };
+            const numero = p.codigoOS ? `OS ${String(p.codigoOS).replace(/;/g, ' · ')}` : `aguardando nº da OS (${codTemp})`;
+
+            const linhas = [
+                TITULOS[p.status_aprovacao] || '*ORDEM DE SERVIÇO*',
+                `_${TIPOS[p.tipo_registro] || p.tipo_registro} · ${numero}_`,
+                '',
+                `*${p.fa_codigo} · ${p.descricao_fazenda}*`,
+                `*Área:* ${numeroBR(p.area_total, 2)} ha`,
+                `*Talhões:* ${talhoesLegiveis(p.talhoes)}`,
+                '',
+                `*Operação:* ${p.operacao}`
+            ];
+
+            const insumos = (p.produtos || []).filter(prod => prod.cod && prod.cod !== '-');
+            if (insumos.length) {
+                linhas.push('*Insumos:*');
+                insumos.forEach(prod => linhas.push(`• ${prod.cod} - ${prod.desc}`, `   Dose ${numeroBR(prod.dose, 3)} ${prod.un}/ha · Total ${numeroBR(prod.total, 2)} ${prod.un}`));
+            }
+
+            const quando = String(p.data_solicitacao || '').replace(',', '').slice(0, 16);   // "11/11/2026 08:42"
+            linhas.push('', `*Solicitante:* ${solicitanteLimpoDisplay}${quando ? ' · ' + quando : ''}`);
+            return linhas.join('\n');
+        }
+
+        // Número: "20.24" → "20,24"
+        function numeroBR(valor, casas) {
+            const n = parseFloat(String(valor).replace(',', '.'));
+            return isNaN(n) ? '-' : n.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas });
+        }
+
+        // "1:20.24ha, 6666 (Rateio):1.04ha" → "1 (20,24 ha), carreador 6666 (1,04 ha)"
+        function talhoesLegiveis(texto) {
+            return String(texto || '').split(',').map(t => t.trim()).filter(Boolean).map(t => {
+                const [num, area] = t.split(':');
+                const nome = num.includes('6666') ? 'carreador 6666' : num.trim();
+                return area ? `${nome} (${numeroBR(area, 2)} ha)` : nome;
+            }).join(', ');
+        }
+
+        // "2026-11-05" e "2026-11-06" → "05/11 a 06/11" (mesmo dia: só "05/11")
+        function periodoLegivel(inicio, fim) {
+            const curta = d => { const m = String(d || '').match(/(\d{4})-(\d{2})-(\d{2})/); return m ? `${m[3]}/${m[2]}` : ''; };
+            const a = curta(inicio), b = curta(fim);
+            return a && b && a !== b ? `${a} a ${b}` : a;
+        }
+
+        // O comprovante na tela: *negrito* e _itálico_ do WhatsApp viram negrito e itálico de verdade
+        function textoWhatsAppEmHTML(texto) {
+            return esc(texto).replace(/\*(.+?)\*/g, '<b>$1</b>').replace(/_(.+?)_/g, '<i>$1</i>');
+        }
+
+        function gerarComprovanteWhatsApp(p, codTemp) {
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('receipt-modal').style.display = 'flex';
+            const texto = montarTextoWhatsApp(p, codTemp);
+            document.getElementById('receipt-content').innerHTML = textoWhatsAppEmHTML(texto);
+            linkWhatsApp = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+        }
+        function enviarWhatsApp() { window.open(linkWhatsApp, '_blank'); }
+
+        // Botão "Compartilhar" da tela de visualização: manda a OS aberta para o WhatsApp a qualquer hora
+        function compartilharOSAberta() {
+            const codigoTemp = document.getElementById('os-codigo-temp-atual').value;
+            const os = listaOSCache.find(x => x.codigoTemp === codigoTemp);
+            if (!os) return;
+            // Apontamento ainda sem número: usa o número da OS mãe
+            const mae = listaOSCache.find(x => x.codigoTemp === os.os_origem);
+            const dados = { ...os, codigoOS: os.codigoOS || (mae && mae.codigoOS) || '' };
+            const texto = montarTextoWhatsApp(dados, os.codigoTemp);
+            window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+        }
+
+        let loginPendente = null;
+
+        function mostrarErroSenha(msg) {
+            const el = document.getElementById('senha-error');
+            el.innerText = msg;
+            el.style.display = 'block';
+        }
+
+        async function salvarNovaSenha() {
+            const nova = document.getElementById('nova-senha').value.trim();
+            const conf = document.getElementById('confirma-senha').value.trim();
+            document.getElementById('senha-error').style.display = 'none';
+
+            if (!loginPendente) { location.reload(); return; }
+            if (!nova) { mostrarErroSenha('Digite a nova senha.'); return; }
+            if (nova !== conf) { mostrarErroSenha('As senhas não conferem.'); return; }
+            if (!navigator.onLine) { mostrarErroSenha('Conecte-se à internet para alterar a senha.'); return; }
+
+            const btn = document.getElementById('btn-salvar-senha');
+            const loader = document.getElementById('senha-loader');
+            btn.disabled = true;
+            loader.style.display = 'block';
+
+            try {
+                const res = await (await fetch(APPSCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'alterar_senha',
+                        user: loginPendente.cracha,
+                        senhaAtual: loginPendente.senhaAtual,
+                        novaSenha: nova
+                    })
+                })).json();
+
+                if (res.success) {
+                    alert('✅ Senha alterada com sucesso!');
+                    document.getElementById('primeiro-acesso-modal').style.display = 'none';
+                    document.getElementById('nova-senha').value = '';
+                    document.getElementById('confirma-senha').value = '';
+                    localStorage.setItem('permanecer_logado', 'true');
+                    efetuarLoginSucesso(loginPendente.cracha, loginPendente.nome);
+                    loginPendente = null;
+                } else {
+                    mostrarErroSenha(res.error);
+                }
+            } catch (e) {
+                mostrarErroSenha('Erro de conexão. Tente novamente.');
+            } finally {
+                btn.disabled = false;
+                loader.style.display = 'none';
+            }
+        }
+
+        async function executarLogin() {
+            const u = document.getElementById('login-user').value.trim(), p = document.getElementById('login-pass').value.trim();
+            if (!u || !p) return;
+            if (!navigator.onLine && localStorage.getItem('logged_cracha')) {
+                efetuarLoginSucesso(localStorage.getItem('logged_cracha'), localStorage.getItem('logged_nome'));
+                return;
+            }
+            document.getElementById('login-loader').style.display = 'block';
+            try {
+                const res = await (await fetch(`${APPSCRIPT_URL}?action=validar_login&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`)).json();
+                if (res.success) {
+                    if (res.primeiroAcesso) {
+                        loginPendente = { cracha: res.cracha, nome: res.solicitante, senhaAtual: p };
+                        document.getElementById('login-screen').style.display = 'none';
+                        document.getElementById('primeiro-acesso-modal').style.display = 'flex';
+                        return;
+                    }
+                    localStorage.setItem('permanecer_logado', 'true');
+                    efetuarLoginSucesso(res.cracha, res.solicitante);
+                }
+                else { document.getElementById('login-error').innerText = res.error; document.getElementById('login-error').style.display = 'block'; }
+            } catch (e) {
+                if (localStorage.getItem('logged_cracha')) {
+                    efetuarLoginSucesso(localStorage.getItem('logged_cracha'), localStorage.getItem('logged_nome'));
+                } else {
+                    document.getElementById('login-error').innerText = "Sem conexão para primeiro login.";
+                    document.getElementById('login-error').style.display = 'block';
+                }
+            } finally { document.getElementById('login-loader').style.display = 'none'; }
+        }
+
+        // ===================== NOTIFICAÇÕES (PUSH) =====================
+        const FIREBASE_CONFIG = {
+            apiKey: 'AIzaSyD7D6yXV2YlCFX7iotnXUKlqUF9SCveOVc',
+            authDomain: 'os-clealco.firebaseapp.com',
+            projectId: 'os-clealco',
+            storageBucket: 'os-clealco.firebasestorage.app',
+            messagingSenderId: '175045739560',
+            appId: '1:175045739560:web:14ac6b6e379e6ca9c7e11d'
+        };
+        const VAPID_KEY = 'BNgL56x4goAPaj2ccdRrr14bT_tEbfDDRvVkHk5qJo22Nt-cluGi4UohM_9LTncyCRDPeJYytVrEelv7M9Uisvc';
+
+        let firebasePronto = false;
+        try { firebase.initializeApp(FIREBASE_CONFIG); firebasePronto = true; }
+        catch (e) { console.warn('Firebase não carregou (sem internet?):', e); }
+
+        function pushSuportado() {
+            return firebasePronto && 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
+        }
+
+        function atualizarBotaoNotificacoes() {
+            const ativo = pushSuportado() && Notification.permission === 'granted' && localStorage.getItem('push_token_' + solicitanteCracha);
+            document.getElementById('btn-notificacoes').style.display = ativo ? 'none' : 'block';
+        }
+
+        async function registrarTokenPush() {
+            const registro = await navigator.serviceWorker.ready;
+            const token = await firebase.messaging().getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: registro });
+            if (!token) throw new Error('O Firebase não devolveu o endereço deste celular.');
+            if (localStorage.getItem('push_token_' + solicitanteCracha) === token) return;   // já está salvo
+            const res = await (await fetch(APPSCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'salvar_token', cracha: solicitanteCracha, token: token, aparelho: navigator.userAgent.slice(0, 150) })
+            })).json();
+            if (!res.success) throw new Error(res.error || 'Não consegui salvar.');
+            localStorage.setItem('push_token_' + solicitanteCracha, token);
+        }
+
+        async function ativarNotificacoes() {
+            if (!pushSuportado()) {
+                alert(/iPhone|iPad/.test(navigator.userAgent)
+                    ? '📱 No iPhone: toque em Compartilhar → "Adicionar à Tela de Início", abra o app pelo ícone e tente de novo.'
+                    : '⚠️ Este navegador não aceita notificações. Use o Chrome.');
+                return;
+            }
+            if (!navigator.onLine) { alert('📶 Precisa de internet para ativar.'); return; }
+            const permissao = await Notification.requestPermission();
+            if (permissao !== 'granted') {
+                alert('🔕 As notificações estão bloqueadas. Para liberar: toque no cadeado ao lado do endereço → Permissões → Notificações → Permitir.');
+                return;
+            }
+            try {
+                await registrarTokenPush();
+                alert('🔔 Pronto! Você vai ser avisado quando o PDF da sua OS chegar.');
+            } catch (e) {
+                alert('❌ Não consegui ativar: ' + e.message);
+            }
+            atualizarBotaoNotificacoes();
+
+        }
+
+        // Com o app aberto na tela, o Firebase não mostra a notificação sozinho: mostramos nós
+        if (pushSuportado()) {
+            try {
+                firebase.messaging().onMessage(p => {
+                    navigator.serviceWorker.ready.then(reg => reg.showNotification(p.notification.title, { body: p.notification.body, icon: 'logo.png' }));
+                    atualizarBadgeRelatorios();   // se foi um relatório novo, a bolinha já aparece
+                });
+            } catch (e) { }
+        }
+
+        function efetuarLoginSucesso(cracha, nome) {
+            solicitanteCracha = cracha; solicitanteNome = nome;
+            solicitanteLimpoDisplay = (nome || cracha).replace(new RegExp('^' + cracha + '\\s*-\\s*', 'i'), '').trim();
+            localStorage.setItem('logged_cracha', cracha); localStorage.setItem('logged_nome', nome);
+            document.getElementById('menu-user-name').innerText = `Olá, ${solicitanteLimpoDisplay}`;
+            document.getElementById('login-screen').style.display = 'none'; document.getElementById('menu-screen').style.display = 'flex';
+            atualizarBotaoNotificacoes();
+            atualizarBadgeRelatorios();
+            if (pushSuportado() && Notification.permission === 'granted' && navigator.onLine) registrarTokenPush().catch(() => { });
+        }
+        function verificarSessaoSalva() {
+            if (localStorage.getItem('logged_cracha') && localStorage.getItem('logged_nome') && localStorage.getItem('permanecer_logado') === 'true') {
+                efetuarLoginSucesso(localStorage.getItem('logged_cracha'), localStorage.getItem('logged_nome'));
+            }
+        }
+        const ordenarTexto = (a, b) => String(a).localeCompare(String(b), 'pt-BR', { numeric: true, sensitivity: 'base' });
+
+        function operacaoUsaInsumo() {
+            const cc = document.getElementById('centro-custo').value;
+            const op = document.getElementById('operacao').value;
+            const reg = dbOperacoes.find(o => o.centroCusto === cc && o.operacao === op);
+            const origem = String((reg && reg.origem) || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().trim();
+            return origem !== 'PRODUCAO';
+        }
+
+        function atualizarSecaoInsumos() {
+            document.getElementById('secao-insumos').style.display = operacaoUsaInsumo() ? 'block' : 'none';
+        }
+
+        function popularCentrosDeCusto() {
+            const s = document.getElementById('centro-custo'); s.innerHTML = '<option value="">Selecione...</option>';
+            [...new Set(dbOperacoes.map(o => o.centroCusto))].filter(Boolean).sort(ordenarTexto).forEach(cc => s.innerHTML += `<option value="${cc}">${cc}</option>`);
+            s.onchange = function () {
+                const s2 = document.getElementById('operacao'); s2.innerHTML = '<option value="">Selecione...</option>';
+                [...new Set(dbOperacoes.filter(o => o.centroCusto === this.value).map(o => o.operacao))].filter(Boolean).sort(ordenarTexto).forEach(op => s2.innerHTML += `<option value="${op}">${op}</option>`);
+                atualizarSecaoInsumos();
+            };
+            document.getElementById('operacao').onchange = atualizarSecaoInsumos;
+        }
+    </script>
+    <script src="admin.js"></script>
 </body>
 
 </html>
